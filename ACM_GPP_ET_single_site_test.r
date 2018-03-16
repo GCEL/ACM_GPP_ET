@@ -66,7 +66,7 @@ closest2d <- function (id,lat,long,lat_in,long_in,nos_dim) {
 ## Create needed ACM_GPP_ET shared object
 
 # set to the working directory that this script should be called from
-setwd("/home/lsmallma/WORK/R/Scripts/ACM_GPP_ET/") ; wkdir = getwd()
+setwd("/Users/lsmallma/WORK/R/PDRA/Scripts/ACM_GPP_ET/") ; wkdir = getwd()
 # compile the shared object containing ACM_GPP and ACM_ET
 system("gfortran ./src/ACM_GPP_ET.f90 ./src/ACM_GPP_ET_R_interface.f90 -o ./src/acm_gpp_et.so -fPIC -shared")
 system("mv ./src/acm_gpp_et.so .")
@@ -74,51 +74,59 @@ system("mv ./src/acm_gpp_et.so .")
 ###
 ## Borrow met data from an existing CARDAMOM analysis
 
-drivers = read.csv("/home/lsmallma/WORK/R/Scripts/weather_generator/acm_recal_with_spa_200pixels_continuous_timeseries_obs_iWUE_trunk_nowater.csv")
+drivers = read.csv("./forest_drivers.csv")
+
+###
+## Define our output variables based on the grid of the CARDAMOM analysis we are borrowing
+
+mean_lai = array(NA, dim=c(dim(drivers)[1]))
+mean_gpp = array(NA, dim=c(dim(drivers)[1]))
+mean_transpiration = array(NA, dim=c(dim(drivers)[1]))
+mean_wetcanopyevap = array(NA, dim=c(dim(drivers)[1]))
+mean_soilevaporation = array(NA, dim=c(dim(drivers)[1]))
+mean_rootwatermm = array(NA, dim=c(dim(drivers)[1]))
+mean_WUE = array(NA, dim=c(dim(drivers)[1]))
+mean_wSWP = array(NA, dim=c(dim(drivers)[1]))
 
 ###
 ## Some ACM_GPP_ET parameters
 
-output_dim=7 ; nofluxes = 4 ; nopools = 1 ; nopars = 5 ; nos_iter = 500
-mean_soilevaporation = array(NA, dim=c(dim(drivers)[1],nos_iter))
-soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
+output_dim=7 ; nofluxes = 4 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
+#soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
 
-# iterative process through the years...
-for (n in seq(1,dim(drivers)[1])) {
-
+n=1
      if (n%%1000 == 0){print(paste("...beginning site:",n," of ",dim(drivers)[1], sep=""))}
 
      # met note that the dimension here are different to that of drivers$met
-     met=array(-9999,dim=c(1,12))
-     met[,1] = 1  # day of analysis
-     met[,2] = drivers$sat_min[n]  # min temperature (oC)
-     met[,3] = drivers$sat_max[n]  # max temperature (oC)
-     met[,4] = drivers$swrad_avg[n]*(24*60*60*1e-6)  # SW Radiation (MJ.m-2.day-1)
-     met[,5] = drivers$co2_avg[n]  # CO2 ppm 
-     met[,6] = drivers$doy[n]  # day of year
-     met[,7] = drivers$ppt_avg[n]  # rainfall (kg.m-2.s-1) 
-     met[,8] = drivers$sat_avg[n] # avg temperature (oC)
-     met[,9] = drivers$wind_avg[n] # avg wind speed (m.s-1)
-     met[,10]= drivers$vpd_avg[n] # avg VPD (Pa)
+     met=array(-9999,dim=c(length(drivers$MINT_oC),12))
+     met[,1] = 1:length(drivers$MINT_oC)  # day of analysis
+     met[,2] = drivers$MINT_oC  # min temperature (oC)
+     met[,3] = drivers$MAXT_oC  # max temperature (oC)
+     met[,4] = drivers$RAD_MJ_DAY  # SW Radiation (MJ.m-2.day-1)
+     met[,5] = 400  # CO2 ppm
+     met[,6] = drivers$DOY  # day of year
+     met[,7] = 0.1/(24*60*60)  # rainfall (kg.m-2.day-1 -> kg.m-2.s-1)
+     met[,8] = 0.5*(drivers$MAXT_oC+drivers$MINT_oC) # avg temperature (oC)
+     met[,9] = 3.23 # avg wind speed (m.s-1)
+     met[,10]= 2000 # avg VPD (kPa->Pa)
      # ecosystem state drivers now rather than meteorology
-     met[,11]= drivers$lai[n] # LAI
-     met[,12]= drivers$lai[n]*80 #100  # root C stocks
+     met[,11]= 2.5#drivers$lai[n] # LAI
+     met[,12]= 100#drivers$lai[n]*80 #100  # root C stocks
      # parameters
      parameters = array(NA, dim=c(nopars,nos_iter))
-     parameters[1,] = drivers$avgN[n]  # foliar N (gN.m-2)
+     parameters[1,] = 1.89  # foliar N (gN.m-2)
      parameters[2,] = -9999 # min leaf water potential (MPa)
      parameters[3,] = 100   # root biomass needed to reach 50 % depth
      parameters[4,] = 2   # max root depth (m)
-     parameters[5,] = seq(0.1,1.0,length.out=500)
 
      # other inputs
-     lat = drivers$lat[n]
+     lat = 49
      # search location of soils data
-     i1=unlist(closest2d(1,soils_data$lat_wanted,soils_data$long_wanted,drivers$lat[n],drivers$long[n],1))[1]
-     soil_info=c(pmax(1,soils_data$sand_top[i1]),pmax(1,soils_data$sand_bot[i1]),pmax(1,soils_data$clay_top[i1]),pmax(1,soils_data$clay_bot[i1]) )
-     if (soil_info[2] == 1) {soil_info[2] = soil_info[1]}
-     if (soil_info[4] == 1) {soil_info[4] = soil_info[3]}
-     if (length(which(met[,11] > 0)) > 0) {
+#     i1=unlist(closest2d(1,soils_data$lat_wanted,soils_data$long_wanted,drivers$lat[n],drivers$long[n],1))[1]
+#     soil_info=c(pmax(1,soils_data$sand_top[i1]),pmax(1,soils_data$sand_bot[i1]),pmax(1,soils_data$clay_top[i1]),pmax(1,soils_data$clay_bot[i1]) )
+#     if (soil_info[2] == 1) {soil_info[2] = soil_info[1]}
+#     if (soil_info[4] == 1) {soil_info[4] = soil_info[3]}
+     soil_info=c(40,40,15,15)
         if (is.loaded("racmgppet") == FALSE) { dyn.load("./acm_gpp_et.so") }
         tmp=.Fortran("racmgppet",output_dim=as.integer(output_dim),met=as.double(t(met)),pars=as.double(parameters)
                                 ,out_var=as.double(array(0,dim=c(nos_iter,(dim(met)[1]),output_dim)))
@@ -126,23 +134,42 @@ for (n in seq(1,dim(drivers)[1])) {
                                 ,nofluxes=as.integer(nofluxes),nopools=as.integer(nopools)
                                 ,nodays=as.integer(dim(met)[1])
                                 ,deltat=as.double(array(0,dim=c(as.integer(dim(met)[1])))),nos_iter=as.integer(nos_iter)
-                                ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[4]),dim=c(3)))
-                                ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[2]),dim=c(3))) )
+                                ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[4],soil_info[4]),dim=c(3)))
+                                ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[2],soil_info[2]),dim=c(3))) )
         output=tmp$out_var ; output=array(output, dim=c(nos_iter,(dim(met)[1]),output_dim))
         if (n == dim(drivers)[1]) {dyn.unload("./acm_gpp_et.so")}
         rm(tmp) ; gc()
-     }
 
      # assign outputs to out final grids
-     mean_soilevaporation[n,] = abs(output[,,5]-drivers$soilevap[n]) # soil evaporation (kg.m-2.day-1)
+     mean_lai = (output[1,,1]) # lai
+     mean_gpp = (output[1,,2]) # GPP (gC.m-2.day-1)
+     mean_transpiration = (output[1,,3])   # transpiration (kg.m-2.day-1)
+     mean_wetcanopyevap = (output[1,,4])   # wetcanopy evaporation (kg.m-2.day-1)
+     mean_soilevaporation = (output[1,,5]) # soil evaporation (kg.m-2.day-1)
+     mean_wSWP = (output[1,,6])            # weighted soil water potential (MPa)
+     mean_WUE = mean_gpp/mean_transpiration # water use efficiency (gC/kgH2O)
+     mean_rootwatermm = (output[1,,7])     # water in rooting zone (mm)
 
-} # site loop
 
-mean_residual = apply(mean_soilevaporation,2,mean,na.rm=TRUE)
-optimum_soil_radiation_absorption = (seq(0.1,1.0,length.out=500)[which(mean_residual == min(mean_residual,na.rm=TRUE))])
-print(paste("optimum_soil_radiation_absorption = ",optimum_soil_radiation_absorption,sep=""))
 fig_height=4000 ; fig_width=7200
-jpeg(file="./FIGURES/figure_3.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-plot(mean_residual ~ seq(0.1,1.0,length.out=500), main=paste("Optimum soil radiation absorption = ",optimum_soil_radiation_absorption,sep=""))
+jpeg(file="./FIGURES/figure_4.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+par(mfrow=c(2,3), mar=c(5.4,5.2, 6.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
+plot(mean_gpp~mean_wSWP,main="", ylab="GPP", xlab="wSWP",pch=16)
+plot(mean_gpp~mean_soilevaporation,main="", ylab="GPP", xlab="Rtot",pch=16)
+plot(mean_gpp~mean_rootwatermm,main="", ylab="GPP", xlab="Root water",pch=16)
+plot(mean_wSWP~mean_soilevaporation, main="", ylab="wSWP", xlab="Rtot", pch=16)
+plot(mean_rootwatermm~mean_soilevaporation,main="", ylab="Rootwater", xlab="Rtot",pch=16)
+plot(0.5*(drivers$MAXT_oC+drivers$MINT_oC)~mean_soilevaporation, main="", ylab="meant", xlab="Rtot", pch=16)
 dev.off()
 
+jpeg(file="./FIGURES/figure_5.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+par(mfrow=c(2,3), mar=c(5.4,5.2, 6.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
+plot(mean_gpp,main="GPP", ylab="", xlab="",pch=16)
+plot(mean_soilevaporation,main="Rtot", ylab="", xlab="",pch=16)
+plot(mean_rootwatermm,main="Root water", ylab="", xlab="",pch=16)
+plot(mean_wSWP,main="wSWP", ylab="", xlab="",pch=16)
+plot(mean_transpiration, main="Transpiration", ylab="",xlab="", pch=16)
+plot(mean_gpp~mean_transpiration,main="", ylab="GPP", xlab="Transpiration",pch=16)
+dev.off()
+
+print(round(mean(mean_gpp/mean_transpiration),digits=2))

@@ -74,7 +74,7 @@ system("mv ./src/acm_gpp_et.so .")
 ###
 ## Borrow met data from an existing CARDAMOM analysis
 
-drivers = read.csv("/home/lsmallma/WORK/R/Scripts/weather_generator/acm_recal_with_spa_200pixels_continuous_timeseries_obs_iWUE_trunk_nowater.csv")
+drivers = read.csv("/home/lsmallma/WORK/R/Scripts/weather_generator/acm_recal_with_spa_200pixels_continuous_timeseries_obs_iWUE_trunk_nowater_copy.csv")
 
 ###
 ## Define our output variables based on the grid of the CARDAMOM analysis we are borrowing
@@ -92,7 +92,7 @@ mean_wSWP = array(NA, dim=c(dim(drivers)[1]))
 ## Some ACM_GPP_ET parameters
 
 output_dim=7 ; nofluxes = 4 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
-soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
+#soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
 
 # iterative process through the years...
 for (n in seq(1,dim(drivers)[1])) {
@@ -107,10 +107,10 @@ for (n in seq(1,dim(drivers)[1])) {
      met[,4] = drivers$swrad_avg[n]*(24*60*60*1e-6)  # SW Radiation (MJ.m-2.day-1)
      met[,5] = drivers$co2_avg[n]  # CO2 ppm 
      met[,6] = drivers$doy[n]  # day of year
-     met[,7] = drivers$ppt_avg[n]  # rainfall (kg.m-2.s-1) 
+     met[,7] = drivers$ppt_avg[n]/(24*60*60)  # rainfall (kg.m-2.day-1 -> kg.m-2.s-1) 
      met[,8] = drivers$sat_avg[n] # avg temperature (oC)
      met[,9] = drivers$wind_avg[n] # avg wind speed (m.s-1)
-     met[,10]= drivers$vpd_avg[n] # avg VPD (Pa)
+     met[,10]= drivers$vpd_avg[n]*1000 # avg VPD (kPa->Pa)
      # ecosystem state drivers now rather than meteorology
      met[,11]= drivers$lai[n] # LAI
      met[,12]= drivers$lai[n]*80 #100  # root C stocks
@@ -124,11 +124,11 @@ for (n in seq(1,dim(drivers)[1])) {
      # other inputs
      lat = drivers$lat[n]
      # search location of soils data
-     i1=unlist(closest2d(1,soils_data$lat_wanted,soils_data$long_wanted,drivers$lat[n],drivers$long[n],1))[1]
-     soil_info=c(pmax(1,soils_data$sand_top[i1]),pmax(1,soils_data$sand_bot[i1]),pmax(1,soils_data$clay_top[i1]),pmax(1,soils_data$clay_bot[i1]) )
-     if (soil_info[2] == 1) {soil_info[2] = soil_info[1]}
-     if (soil_info[4] == 1) {soil_info[4] = soil_info[3]}
-     if (length(which(met[,11] > 0)) > 0) {
+#     i1=unlist(closest2d(1,soils_data$lat_wanted,soils_data$long_wanted,drivers$lat[n],drivers$long[n],1))[1]
+#     soil_info=c(pmax(1,soils_data$sand_top[i1]),pmax(1,soils_data$sand_bot[i1]),pmax(1,soils_data$clay_top[i1]),pmax(1,soils_data$clay_bot[i1]) )
+#     if (soil_info[2] == 1) {soil_info[2] = soil_info[1]}
+#     if (soil_info[4] == 1) {soil_info[4] = soil_info[3]}
+     soil_info=c(drivers$sand_top[n],drivers$sand_bot[n],drivers$clay_top[n],drivers$clay_bot[n]) 
         if (is.loaded("racmgppet") == FALSE) { dyn.load("./acm_gpp_et.so") }
         tmp=.Fortran("racmgppet",output_dim=as.integer(output_dim),met=as.double(t(met)),pars=as.double(parameters)
                                 ,out_var=as.double(array(0,dim=c(nos_iter,(dim(met)[1]),output_dim)))
@@ -136,12 +136,11 @@ for (n in seq(1,dim(drivers)[1])) {
                                 ,nofluxes=as.integer(nofluxes),nopools=as.integer(nopools)
                                 ,nodays=as.integer(dim(met)[1])
                                 ,deltat=as.double(array(0,dim=c(as.integer(dim(met)[1])))),nos_iter=as.integer(nos_iter)
-                                ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[4]),dim=c(3)))
-                                ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[2]),dim=c(3))) )
+                                ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[4],soil_info[4]),dim=c(3)))
+                                ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[2],soil_info[2]),dim=c(3))) )
         output=tmp$out_var ; output=array(output, dim=c(nos_iter,(dim(met)[1]),output_dim))
         if (n == dim(drivers)[1]) {dyn.unload("./acm_gpp_et.so")}
         rm(tmp) ; gc()
-     }
 
      # assign outputs to out final grids
      mean_lai[n] = mean(output[,,1]) # lai
@@ -159,15 +158,23 @@ fig_height=4000 ; fig_width=7200
 jpeg(file="./FIGURES/figure_2.jpg", height=fig_height, width=fig_width, res=400, quality=100)
 par(mfrow=c(2,3), mar=c(1.4, 1.2, 2.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
 plot(drivers$GPP~mean_gpp,main="GPP", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
-plot((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration,main="Transpiration", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
+#plot(drivers$Evap~(mean_transpiration+mean_soilevaporation+mean_wetcanopyevap),main="Evapotranspiration", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
 plot(drivers$soilevap~mean_soilevaporation,main="Soil evaporation", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
 plot(drivers$wetevap~mean_wetcanopyevap,main="Wet canopy evaporation", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
-WUE_ACM = mean_gpp / mean_transpiration
-WUE_SPA = drivers$GPP / (drivers$Evap-drivers$soilevap-drivers$wetevap)
 plot((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration,main="Transpiration", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
 plot(mean_wSWP)
 dev.off()
 
+fig_height=4000 ; fig_width=7200
+jpeg(file="./FIGURES/figure_3.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+par(mfrow=c(2,3), mar=c(1.4, 1.2, 2.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
+plot((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration,main="Transpiration", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
+plot(((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)~drivers$sat_max,main="", ylab="Residual (ACM-SPA)", xlab="Temperature",pch=16) ; abline(0,1,col="red",lwd=3)
+plot(((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)~drivers$swrad_avg,main="", ylab="Residual (ACM-SPA)", xlab="Short-Wave radiation",pch=16) ; abline(0,1,col="red",lwd=3)
+plot(((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)~drivers$vpd_avg,main="", ylab="Residual (ACM-SPA)", xlab="VPD",pch=16) ; abline(0,1,col="red",lwd=3)
+plot(((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)~drivers$wind_avg,main="", ylab="Residual (ACM-SPA)", xlab="Wind",pch=16) ; abline(0,1,col="red",lwd=3)
+plot(((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)~drivers$ppt_avg,main="", ylab="Residual (ACM-SPA)", xlab="Rain",pch=16) ; abline(0,1,col="red",lwd=3)
+dev.off()
 
 # R2
 summary(lm(drivers$GPP~mean_gpp))

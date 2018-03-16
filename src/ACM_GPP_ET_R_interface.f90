@@ -45,7 +45,7 @@ subroutine racmgppet(output_dim,met,pars,out_var,lat  &
 
   ! update soil parameters
   soil_frac_clay=soil_frac_clay_in
-  soil_frac_sand=soil_frac_clay_in
+  soil_frac_sand=soil_frac_sand_in
 
   ! generate deltat step from input data
   deltat(1) = met(1,1)
@@ -75,7 +75,8 @@ subroutine racmgppet(output_dim,met,pars,out_var,lat  &
      out_var(i,1:nodays,4)  = FLUXES(1:nodays,3) ! wet canopy evaporation (kg.m-2.day-1)
      out_var(i,1:nodays,5)  = FLUXES(1:nodays,4) ! soil evaporation (kg.m-2.day-1)
      out_var(i,1:nodays,6)  = wSWP_time(1:nodays)! weighted soil water potential (MPa)
-     out_var(i,1:nodays,7)  = POOLS(1:nodays,1) ! Water in rooting zone (mm)
+     out_var(i,1:nodays,7)  = POOLS(1:nodays,1)  ! Water in rooting zone (mm)
+
   end do ! nos_iter loop
 
   ! return back to the subroutine then
