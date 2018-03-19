@@ -447,6 +447,10 @@ contains
       ! store soil water content of the rooting zone (mm)
       POOLS(n,1) = 1d3*sum(soil_waterfrac(1:nos_root_layers)*layer_thickness(1:nos_root_layers))
 
+      ! pass soil surface runoff and underflow (drainage) from soil column kg/m2/day
+      FLUXES(n,5) = runoff
+      FLUXES(n,6) = underflow
+
       !!!!!!!!!!
       ! Bug checking
       !!!!!!!!!!
