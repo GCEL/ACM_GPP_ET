@@ -2,7 +2,7 @@
 ## Create needed ACM_GPP_ET shared object
 
 # set to the working directory that this script should be called from
-setwd("/home/lsmallma/WORK/R/Scripts/ACM_GPP_ET/") ; wkdir = getwd()
+setwd("/home/lsmallma/WORK/GREENHOUSE/models/ACM_GPP_ET/") ; wkdir = getwd()
 # compile the shared object containing ACM_GPP and ACM_ET
 system("gfortran ./src/ACM_GPP_ET.f90 ./src/ACM_GPP_ET_R_interface.f90 -o ./src/acm_gpp_et.so -fPIC -shared")
 system("mv ./src/acm_gpp_et.so .")
@@ -116,7 +116,7 @@ for (n in seq(1,PROJECT$nosites)) {
 	       lat = drivers$lat
 	       soil_info=c(drivers$top_sand,drivers$bot_sand,drivers$top_clay,drivers$bot_clay)
 	       if (length(which(met[,11] > 0)) > 0) {
-             # If the shared object has not been loaded yet do so...
+               # If the shared object has not been loaded yet do so...
 	           if (is.loaded("racmgppet") == FALSE) { dyn.load("./acm_gpp_et.so") }
 	           tmp=.Fortran("racmgppet",output_dim=as.integer(output_dim),met=as.double(t(met)),pars=as.double(parameters)
                                      ,out_var=as.double(array(0,dim=c(nos_iter,(dim(met)[1]),output_dim)))
@@ -125,39 +125,39 @@ for (n in seq(1,PROJECT$nosites)) {
                                      ,deltat=as.double(array(0,dim=c(as.integer(dim(met)[1])))),nos_iter=as.integer(nos_iter)
                                      ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[4],soil_info[4]),dim=c(3)))
                                      ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[2],soil_info[2]),dim=c(3))) )
-             # extract output from the analysis
-             output=tmp$out_var ; output=array(output, dim=c(nos_iter,(dim(met)[1]),output_dim))
-             # If this is the last site in the list best un-load the shared onject now
-             if (n == PROJECT$sites[length(PROJECT$sites)]) {dyn.unload("./acm_gpp_et.so")}
-             rm(tmp) ; gc()
+                   # extract output from the analysis
+                   output=tmp$out_var ; output=array(output, dim=c(nos_iter,(dim(met)[1]),output_dim))
+                   # If this is the last site in the list best un-load the shared onject now
+                   if (n == PROJECT$sites[length(PROJECT$sites)]) {dyn.unload("./acm_gpp_et.so")}
+                   rm(tmp) ; gc()
 	       } # If have LAI data
 
 	       # assign time series to grid
 	       timeseries_lai[slot_i,slot_j,] = (output[,1:dim(met)[1],1])             # lai (m2/m2)
-         timeseries_root[slot_i,slot_j,] = root[n,]                              # root (gC/m2)
+               timeseries_root[slot_i,slot_j,] = root[n,]                              # root (gC/m2)
 	       timeseries_gpp[slot_i,slot_j,] = (output[,1:dim(met)[1],2])             # GPP (gC.m-2.day-1)
 	       timeseries_transpiration[slot_i,slot_j,] = (output[,1:dim(met)[1],3])   # transpiration (kg.m-2.day-1)
 	       timeseries_wetcanopyevap[slot_i,slot_j,] = (output[,1:dim(met)[1],4])   # wetcanopy evaporation (kg.m-2.day-1)
 	       timeseries_soilevaporation[slot_i,slot_j,] = (output[,1:dim(met)[1],5]) # soil evaporation (kg.m-2.day-1)
 	       timeseries_wSWP[slot_i,slot_j,] = (output[,1:dim(met)[1],6])            # weighted soil water potential (MPa)
 	       timeseries_rootwatermm[slot_i,slot_j,] = (output[,1:dim(met)[1],7])     # water in rooting zone (mm)
-         timeseries_runoffmm[slot_i,slot_j,] = (output[,1:dim(met)[1],8])        # surface runoff (mm)
-         timeseries_drainagemm[slot_i,slot_j,] = (output[,1:dim(met)[1],9])      # drainage / underflow from bottom of soil column (mm)
+               timeseries_runoffmm[slot_i,slot_j,] = (output[,1:dim(met)[1],8])        # surface runoff (mm)
+               timeseries_drainagemm[slot_i,slot_j,] = (output[,1:dim(met)[1],9])      # drainage / underflow from bottom of soil column (mm)
 
 	       # assign timeseries mean values to grid
 	       mean_lai[slot_i,slot_j] = mean(output[,1:dim(met)[1],1])             # lai (m2/m2)
-         mean_root[slot_i,slot_j,] = mean(root[n,])                           # root (gC/m2)
+               mean_root[slot_i,slot_j] = mean(root[n,])                            # root (gC/m2)
 	       sd_lai[slot_i,slot_j] = sd(output[,1:dim(met)[1],1])                 # lai (m2/m2)
-         sd_root[slot_i,slot_j,] = sd(root[n,])                               # root (gC/m2)
+               sd_root[slot_i,slot_j] = sd(root[n,])                                # root (gC/m2)
 	       mean_gpp[slot_i,slot_j] = mean(output[,1:dim(met)[1],2])             # GPP (gC.m-2.day-1)
 	       mean_transpiration[slot_i,slot_j] = mean(output[,1:dim(met)[1],3])   # transpiration (kg.m-2.day-1)
 	       mean_wetcanopyevap[slot_i,slot_j] = mean(output[,1:dim(met)[1],4])   # wetcanopy evaporation (kg.m-2.day-1)
 	       mean_soilevaporation[slot_i,slot_j] = mean(output[,1:dim(met)[1],5]) # soil evaporation (kg.m-2.day-1)
 	       mean_wSWP[slot_i,slot_j] = mean(output[,1:dim(met)[1],6])            # weighted soil water potential (MPa)
-         min_wSWP[slot_i,slot_j] = min(output[,1:dim(met)[1],6])              # weighted soil water potential (MPa)
+               min_wSWP[slot_i,slot_j] = min(output[,1:dim(met)[1],6])              # weighted soil water potential (MPa)
 	       mean_rootwatermm[slot_i,slot_j] = mean(output[,1:dim(met)[1],7])     # water in rooting zone (mm)
-         mean_runoffmm[slot_i,slot_j] = mean(output[,1:dim(met)[1],8])        # surface runoff (mm)
-         mean_drainagemm[slot_i,slot_j] = mean(output[,1:dim(met)[1],9])      # drainage / underflow from bottom of soil column (mm)
+               mean_runoffmm[slot_i,slot_j] = mean(output[,1:dim(met)[1],8])        # surface runoff (mm)
+               mean_drainagemm[slot_i,slot_j] = mean(output[,1:dim(met)[1],9])      # drainage / underflow from bottom of soil column (mm)
 
      } # have got LAI and root infromation
 
@@ -201,6 +201,7 @@ global_mean_annual_root = mean(mean_root,na.rm=TRUE)
 jpeg(file="./FIGURES/Cal_val_paper_figure_3.jpg", height=fig_height, width=fig_width, res=400, quality=100)
 par(mfrow=c(2,2), mar=c(1.4, 1.2, 2.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
 # Mean status of biophysical inputs
+colour_choices_upper = colorRampPalette((brewer.pal(11,"Spectral")))
 var1=(mean_lai) ; colour_choices=colour_choices_upper(length(var1))
 zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
 image.plot(var1, main=expression(paste("LAI"," (",m^2,"/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))

@@ -66,7 +66,7 @@ closest2d <- function (id,lat,long,lat_in,long_in,nos_dim) {
 ## Create needed ACM_GPP_ET shared object
 
 # set to the working directory that this script should be called from
-setwd("/home/lsmallma/WORK/R/Scripts/ACM_GPP_ET/") ; wkdir = getwd()
+setwd("/home/lsmallma/WORK/GREENHOUSE/models/ACM_GPP_ET/") ; wkdir = getwd()
 # compile the shared object containing ACM_GPP and ACM_ET
 system("gfortran ./src/ACM_GPP_ET.f90 ./src/ACM_GPP_ET_R_interface.f90 -o ./src/acm_gpp_et.so -fPIC -shared")
 system("mv ./src/acm_gpp_et.so .")
@@ -163,10 +163,10 @@ for (n in seq(1,dim(drivers)[1])) {
 ###
 
 # R2
-gpp_r2 = summary(lm(drivers$GPP~mean_gpp))
-transpiration_r2 = summary(lm((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration))
-soilevaporation_r2 = summary(lm(drivers$soilevap~mean_soilevaporation))
-wetcanopyevaporation_r2 = summary(lm(drivers$wetevap~mean_wetcanopyevap))
+gpp_r2 = summary(lm(drivers$GPP~mean_gpp))$adj.r.squared
+transpiration_r2 = summary(lm((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration))$adj.r.squared
+soilevaporation_r2 = summary(lm(drivers$soilevap~mean_soilevaporation))$adj.r.squared
+wetcanopyevap_r2 = summary(lm(drivers$wetevap~mean_wetcanopyevap))$adj.r.squared
 
 # bias
 gpp_bias = mean(drivers$GPP-mean_gpp)
@@ -196,10 +196,10 @@ print(wetcanopyevap_r2) ; print(wetcanopyevap_bias) ; print(wetcanopyevap_rmse)
 fig_height=4000 ; fig_width=7200
 jpeg(file="./FIGURES/Cal_val_paper_figure_2.jpg", height=fig_height, width=fig_width, res=400, quality=100)
 par(mfrow=c(2,2), mar=c(1.4, 1.2, 2.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
-plot(drivers$GPP~mean_gpp,main="GPP", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
-plot(drivers$soilevap~mean_soilevaporation,main="Soil evaporation", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
-plot(drivers$wetevap~mean_wetcanopyevap,main="Wet canopy evaporation", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
-plot((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration,main="Transpiration", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
+plot(drivers$GPP~mean_gpp,main="GPP", ylab="SPA", xlab="ACM_GPP_ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+plot((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration,main="Transpiration", ylab="SPA", xlab="ACM_GPP_ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+plot(drivers$soilevap~mean_soilevaporation,main="Soil evaporation", ylab="SPA", xlab="ACM_GPP_ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+plot(drivers$wetevap~mean_wetcanopyevap,main="Wet canopy evaporation", ylab="SPA", xlab="ACM_GPP_ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
 dev.off()
 
 fig_height=4000 ; fig_width=7200
@@ -258,3 +258,6 @@ calibration_output = list(units = units,
                 mean_drainagemm = mean_drainagemm)
 # Now save the file
 save(calibration_output, file="./outputs/calibration_output.RData")
+
+
+

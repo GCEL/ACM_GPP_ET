@@ -66,7 +66,7 @@ closest2d <- function (id,lat,long,lat_in,long_in,nos_dim) {
 ## Create needed ACM_GPP_ET shared object
 
 # set to the working directory that this script should be called from
-setwd("/Users/lsmallma/WORK/R/PDRA/Scripts/ACM_GPP_ET/") ; wkdir = getwd()
+setwd("/home/lsmallma/WORK/GREENHOUSE/models/ACM_GPP_ET/") ; wkdir = getwd()
 # compile the shared object containing ACM_GPP and ACM_ET
 system("gfortran ./src/ACM_GPP_ET.f90 ./src/ACM_GPP_ET_R_interface.f90 -o ./src/acm_gpp_et.so -fPIC -shared")
 system("mv ./src/acm_gpp_et.so .")
