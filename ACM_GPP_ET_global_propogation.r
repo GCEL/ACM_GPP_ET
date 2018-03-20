@@ -310,7 +310,7 @@ print(paste("Global Transpiration = ",round(global_mean_annual_transpiration,dig
 print(paste("Global Soil Evaporation = ",round(global_mean_annual_soilevaporation,digits=1)," PgH2O",sep=""))
 print(paste("Global Wet Canopy Evaporation = ",round(global_mean_annual_wetcanopyevap,digits=1)," PgH2O",sep=""))
 print(paste("Global ET = ",round(global_mean_annual_et,digits=1)," PgH2O",sep=""))
-print(paste("Global WUE = ",round(mean_wue,digits=2)," gC/kgH2O",sep=""))
+print(paste("Global WUE = ",round(global_mean_annual_wue,digits=2)," gC/kgH2O",sep=""))
 print(paste("Global wSWP = ",round(global_mean_annual_wSWP,digits=1)," MPa",sep=""))
 print(paste("Global Water in root zone = ",round(global_mean_annual_rootwatermm,digits=1),sep=""))
 
