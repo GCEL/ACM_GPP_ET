@@ -71,13 +71,13 @@ subroutine racmgppet(output_dim,met,pars,out_var,lat  &
      ! now allocate the output the our 'output' variable
      out_var(i,1:nodays,1)  = met(11,1:nodays)   ! LAI output for consistency check
      out_var(i,1:nodays,2)  = FLUXES(1:nodays,1) ! GPP (gC.m-2.day-1)
-     out_var(i,1:nodays,3)  = FLUXES(1:nodays,2) ! transpiration (kg.m-2.day-1)
-     out_var(i,1:nodays,4)  = FLUXES(1:nodays,3) ! wet canopy evaporation (kg.m-2.day-1)
-     out_var(i,1:nodays,5)  = FLUXES(1:nodays,4) ! soil evaporation (kg.m-2.day-1)
+     out_var(i,1:nodays,3)  = FLUXES(1:nodays,2) ! transpiration (kgH2O.m-2.day-1)
+     out_var(i,1:nodays,4)  = FLUXES(1:nodays,3) ! wet canopy evaporation (kgH2O.m-2.day-1)
+     out_var(i,1:nodays,5)  = FLUXES(1:nodays,4) ! soil evaporation (kgH2O.m-2.day-1)
      out_var(i,1:nodays,6)  = wSWP_time(1:nodays)! weighted soil water potential (MPa)
      out_var(i,1:nodays,7)  = POOLS(1:nodays,1)  ! Water in rooting zone (mm)
-     out_var(i,1:nodays,8)  = FLUXES(1:nodays,5) ! runoff (kg.m-2.day-1)
-     out_var(i,1:nodays,9)  = FLUXES(1:nodays,6) ! drainage / underflow (kg.m-2.day-1)
+     out_var(i,1:nodays,8)  = FLUXES(1:nodays,5) ! runoff (kgH2O.m-2.day-1)
+     out_var(i,1:nodays,9)  = FLUXES(1:nodays,6) ! drainage / underflow (kgH2O.m-2.day-1)
 
   end do ! nos_iter loop
 

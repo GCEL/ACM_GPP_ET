@@ -126,8 +126,8 @@ double precision :: root_reach, root_biomass, &
                  max_depth, & ! maximum possible root depth (m)
                     root_k, & ! biomass to reach half max_depth
    liquid,drainlayer,unsat, & ! variables used in drainage (m)
-                    runoff, & ! runoff (kg.m-2.day-1)
-                 underflow, & ! drainage from the bottom of soil column (kg.m-2.day-1)
+                    runoff, & ! runoff (kgH2O.m-2.day-1)
+                 underflow, & ! drainage from the bottom of soil column (kgH2O.m-2.day-1)
   new_depth,previous_depth, & ! depth of bottom of soil profile
                canopy_wind, & ! wind speed (m.s-1) at canopy top
                      ustar, & ! friction velocity (m.s-1)
@@ -1102,7 +1102,7 @@ contains
   subroutine canopy_interception_and_storage(potential_evaporation)
 
     ! Simple daily time step integration of canopy rainfall interception, runoff
-    ! and rainfall (kg.m-2.s-1). NOTE: it is possible for intercepted rainfall to be
+    ! and rainfall (kgH2O.m-2.s-1). NOTE: it is possible for intercepted rainfall to be
     ! negative if stored water running off into the soil is greater than
     ! rainfall (i.e. when leaves have died between steps)
 
@@ -1121,26 +1121,15 @@ contains
     ! maximum canopy storage (mm); minimum is applied to prevent errors in
     ! drainage calculation. Assume minimum capacity due to wood
     max_storage=max(min_storage,0.1d0*lai) ; max_storage_1 = max_storage**(-dble_one)
-    ! potential intercepted rainfall (kg.m-2.s-1)
+    ! potential intercepted rainfall (kgH2O.m-2.s-1)
     intercepted_rainfall = rainfall * (dble_one - through_fall)
-    ! average rainfall intercepted by canopy (kg.m-2.day-1)
+    ! average rainfall intercepted by canopy (kgH2O.m-2.day-1)
     daily_addition = intercepted_rainfall * seconds_per_day
 
-    ! is the intercepted rainfall greater or less than the potential
-    ! evaporation?
-!    if (potential_evaporation > daily_addition) then
+    tmp = dble_zero ; through_fall = dble_zero ; wetcanopy_evaporation = dble_zero
+    ! if we have rainfall or canopy water currently stored
+    if (intercepted_rainfall > dble_zero .or. canopy_storage > dble_zero) then
 
-        ! if the potential evaporation is greater than intercepted rainfall
-        ! ,true in most cases, we simply assume it is all evaporated
-        ! Wet canopy evaporation (kgH2O/m2/day)
-!        potential_evaporation = daily_addition
-
-        ! Note that intercepted rainfall is already calculated an in correct
-        ! units to combine with "rainfall" variable (kgH2O/m2/s)
-
-!    else
-
-        tmp = dble_zero ; through_fall = dble_zero ; wetcanopy_evaporation = dble_zero
         ! intergrate over canopy for each day
         do i = 1, int(days_per_step)
 
@@ -1161,7 +1150,7 @@ contains
            ! now remove from canopy
            canopy_storage = canopy_storage - tmp
 
-           ! in case of due formation do overflow calculation again
+           ! in case of dew formation do overflow calculation again
            ! how much is over and above the max_storage capacity?
            tmp = max(dble_zero, canopy_storage - max_storage)
            ! add this back to the through fall
@@ -1181,9 +1170,9 @@ contains
            stop
         endif
 
-        ! average fluxes to daily rates
+        ! average evaporative flux to daily rate (kgH2O/m2/day)
         potential_evaporation = wetcanopy_evaporation * days_per_step_1
-        ! correct intercepted rainfall rate to kg.m-2.s-1
+        ! correct intercepted rainfall rate to kgH2O.m-2.s-1
         intercepted_rainfall = intercepted_rainfall - ((through_fall * days_per_step_1) * seconds_per_day_1)
 
         ! sanity check
@@ -1192,7 +1181,7 @@ contains
             print*,"rainfall", rainfall, "through_fall", (through_fall * days_per_step_1 * seconds_per_day_1)
         endif
 
-!    endif ! potential_evaporation > daily_addition
+    end if ! we have some rainfall
 
   end subroutine canopy_interception_and_storage
   !
@@ -1213,7 +1202,7 @@ contains
     double precision    :: add   & ! surface water available for infiltration (m)
                           ,wdiff   ! available space in a given soil layer for water to fill (m)
 
-    ! convert rainfall water from mm -> m (or kg.m-2.step-1 -> Mg.m-2.step-1)
+    ! convert rainfall water from mm -> m (or kgH2O.m-2.step-1 -> MgH2O.m-2.step-1)
     add = rainfall_in * 1d-3
 
     do i = 1 , nos_soil_layers
@@ -1240,7 +1229,7 @@ contains
     end do
 
     ! if after all of this we have some water left assume it is runoff
-    ! converted to kg.m-2.day-1
+    ! converted to kgH2O.m-2.day-1
     runoff = add * 1d3 * days_per_step_1
 
   end subroutine infiltrate
@@ -1298,7 +1287,7 @@ contains
 
     end do ! soil layers
 
-    ! estimate drainage from bottom of soil column (kg/m2/day)
+    ! estimate drainage from bottom of soil column (kgH2O/m2/day)
     underflow = waterloss(nos_soil_layers) * 1d3 * days_per_step_1
 
   end subroutine gravitational_drainage
@@ -1708,6 +1697,9 @@ contains
    !!!!!!!!!!
    ! Rainfal infiltration drainage
    !!!!!!!!!!
+
+   ! Reset runoff variable before assignment 
+   runoff = dble_zero
 
    ! determine infiltration from rainfall,
    ! if rainfall is probably liquid / soil surface is probably not frozen

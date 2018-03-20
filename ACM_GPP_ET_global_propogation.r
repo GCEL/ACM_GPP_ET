@@ -198,23 +198,42 @@ global_mean_annual_root = mean(mean_root,na.rm=TRUE)
 ## Generate figures
 ###
 
+##
+# extract the lat / long information for the calibration sites
+data = read.csv("/home/lsmallma/gcel/data_for_ACM_era_200pixels_continuous.csv",header=TRUE)
+latitude = data$Lat ; longitude = data$Lon
+latlong = paste(latitude,longitude)
+latlong = unique(latlong)
+latlong = unlist(strsplit(latlong," "))
+latitude = as.numeric(latlong[seq(1,length(latlong),2)])
+longitude = as.numeric(latlong[seq(2,length(latlong),2)])
+# Adjust latitude from -90->90 to 0->180
+latitude = latitude + 90
+# Adjust longitude from -180->180 to 0->360
+longitude = longitude + 180 
+
+fig_height=4000 ; fig_width=7200
 jpeg(file="./FIGURES/Cal_val_paper_figure_3.jpg", height=fig_height, width=fig_width, res=400, quality=100)
 par(mfrow=c(2,2), mar=c(1.4, 1.2, 2.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
 # Mean status of biophysical inputs
 colour_choices_upper = colorRampPalette((brewer.pal(11,"Spectral")))
 var1=(mean_lai) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("LAI"," (",m^2,"/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("Mean LAI"," (",m^2,"/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+par(new=TRUE) ; plot(longitude,latitude, pch=16,cex=1.0,xaxt = "n", yaxt = "n",ylim=c(0.5,179.5),xlim=c(0.5,359.5))
 var1=(mean_root) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("Fine Root"," (gC/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("Mean Fine Root"," (gC/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+par(new=TRUE) ; plot(longitude,latitude, pch=16,cex=1.0,xaxt = "n", yaxt = "n",ylim=c(0.5,179.5),xlim=c(0.5,359.5))
 # Standard deviation of biophysical inputs
 var1=(sd_lai) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("LAI"," (",m^2,"/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("Standard Deviation LAI"," (",m^2,"/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+par(new=TRUE) ; plot(longitude,latitude, pch=16,cex=1.0,xaxt = "n", yaxt = "n",ylim=c(0.5,179.5),xlim=c(0.5,359.5))
 var1=(sd_root) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("Fine Root"," (gC/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("Standard Deviation Fine Root"," (gC/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+par(new=TRUE) ; plot(longitude,latitude, pch=16,cex=1.0,xaxt = "n", yaxt = "n",ylim=c(0.5,179.5),xlim=c(0.5,359.5))
 dev.off()
 
 fig_height=4000 ; fig_width=7200
@@ -223,34 +242,52 @@ par(mfrow=c(3,3), mar=c(1.4, 1.2, 2.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
 # Summary figures GPP, ET, WUE
 colour_choices_upper = colorRampPalette((brewer.pal(11,"Spectral")))
 var1=(mean_gpp*365.25) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("GPP"," (gC ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("GPP"," (gC ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
 var1=(mean_transpiration+mean_wetcanopyevap+mean_soilevaporation)*365.25 ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("ET"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("ET"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
 var1=mean_wue ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("WUE (gC/kgH2O)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("WUE (gC/kgH2O)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
 # ET component figures transpiration, wetcanopy evaporation, soil evaporation
 var1=(mean_transpiration*365.25) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("Transpiration"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("Transpiration"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
 var1=(mean_wetcanopyevap*365.25) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("Wet canopy evaporation"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("Wet canopy evaporation"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
 var1=(mean_soilevaporation*365.25) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("Soil evaporation"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("Soil evaporation"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
 # Soil runoff / drainage and status
 var1=(mean_runoffmm*365.25) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("Soil run-off"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("Soil run-off"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
 var1=(mean_drainagemm*365.25) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("Soil drainage"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("Soil drainage"," (kgH2O ",m^-2," y",r^-1,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
 var1=(mean_rootwatermm) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=c(min(var1,na.rm=TRUE),max(var1,na.rm=TRUE))
-image.plot(var1, main=expression(paste("Water in rooting zone"," (",kg,"/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.6,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
+image.plot(var1, main=expression(paste("Water in rooting zone"," (",kg,"/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+dev.off()
+
+fig_height=4500 ; fig_width=3000
+jpeg(file="./FIGURES/Cal_val_paper_figure_5.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+par(mfrow=c(3,1), mar=c(1.2, 1.2, 1.8, 1.5), omi=c(0.1, 0.1, 0.1, 0.20))
+# Summary figures GPP, ET, WUE
+colour_choices_upper = colorRampPalette((brewer.pal(11,"Spectral")))
+# ET component figures transpiration, wetcanopy evaporation, soil evaporation
+mean_ET = mean_transpiration+mean_wetcanopyevap+mean_soilevaporation
+var1=(mean_transpiration/mean_ET) ; colour_choices=colour_choices_upper(length(var1))
+zaxis=c(0,1)
+image.plot(var1, main="Transpiration / ET",zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.2,legend.width=2.0,cex=1.8,axis.args=list(cex.axis=2.2,hadj=0.1))
+var1=(mean_wetcanopyevap/mean_ET) ; colour_choices=colour_choices_upper(length(var1))
+zaxis=c(0,1)
+image.plot(var1, main="Wet canopy evaporation / ET",zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.2,legend.width=2.0,cex=1.8,axis.args=list(cex.axis=2.2,hadj=0.1))
+var1=(mean_soilevaporation/mean_ET) ; colour_choices=colour_choices_upper(length(var1))
+zaxis=c(0,1)
+image.plot(var1, main="Soil evaporation / ET",zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.2,legend.width=2.0,cex=1.8,axis.args=list(cex.axis=2.2,hadj=0.1))
 dev.off()
 
 ###
@@ -314,6 +351,4 @@ print(paste("Global WUE = ",round(global_mean_annual_wue,digits=2)," gC/kgH2O",s
 print(paste("Global wSWP = ",round(global_mean_annual_wSWP,digits=1)," MPa",sep=""))
 print(paste("Global Water in root zone = ",round(global_mean_annual_rootwatermm,digits=1),sep=""))
 
-###
-## Save output to file for later analysis
-###
+

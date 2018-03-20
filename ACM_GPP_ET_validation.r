@@ -109,7 +109,7 @@ for (n in seq(1,dim(drivers)[1])) {
      met[,4] = drivers$swrad_avg[n]*(24*60*60*1e-6)  # SW Radiation (MJ.m-2.day-1)
      met[,5] = drivers$co2_avg[n]  # CO2 ppm
      met[,6] = drivers$doy[n]  # day of year
-     met[,7] = drivers$ppt_avg[n]/(24*60*60)  # rainfall (kg.m-2.day-1 -> kg.m-2.s-1)
+     met[,7] = drivers$ppt_avg[n]/(60*60)  # rainfall (kgH2O.m-2.hr-1 -> kg.m-2.s-1)
      met[,8] = drivers$sat_avg[n] # avg temperature (oC)
      met[,9] = drivers$wind_avg[n] # avg wind speed (m.s-1)
      met[,10]= drivers$vpd_avg[n]*1000 # avg VPD (kPa->Pa)
@@ -193,18 +193,18 @@ print(wetcanopyevap_r2) ; print(wetcanopyevap_bias) ; print(wetcanopyevap_rmse)
 ## Begin output of figures
 ###
 
-fig_height=4000 ; fig_width=7200
+fig_height=4000 ; fig_width=6000
 jpeg(file="./FIGURES/Cal_val_paper_figure_2.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-par(mfrow=c(2,2), mar=c(1.4, 1.2, 2.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
-plot(drivers$GPP~mean_gpp,main="GPP", ylab="SPA", xlab="ACM_GPP_ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
-plot((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration,main="Transpiration", ylab="SPA", xlab="ACM_GPP_ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
-plot(drivers$soilevap~mean_soilevaporation,main="Soil evaporation", ylab="SPA", xlab="ACM_GPP_ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
-plot(drivers$wetevap~mean_wetcanopyevap,main="Wet canopy evaporation", ylab="SPA", xlab="ACM_GPP_ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+par(mfrow=c(2,2), mar=c(4.4, 4.2, 4.4, 1.5), omi=c(0.2, 0.2, 0.2, 0.40))
+plot(drivers$GPP~mean_gpp,main="GPP", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+plot((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration,main="Transpiration", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+plot(drivers$soilevap~mean_soilevaporation,main="Soil evaporation", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+plot(drivers$wetevap~mean_wetcanopyevap,main="Wet canopy evaporation", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
 dev.off()
 
 fig_height=4000 ; fig_width=7200
 jpeg(file="./FIGURES/figure_2.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-par(mfrow=c(2,3), mar=c(1.4, 1.2, 2.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
+par(mfrow=c(2,3), mar=c(4.4, 4.2, 4.4, 2.5), omi=c(0.2, 0.2, 0.2, 0.40))
 plot(drivers$GPP~mean_gpp,main="GPP", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
 #plot(drivers$Evap~(mean_transpiration+mean_soilevaporation+mean_wetcanopyevap),main="Evapotranspiration", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
 plot(drivers$soilevap~mean_soilevaporation,main="Soil evaporation", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
@@ -215,7 +215,7 @@ dev.off()
 
 fig_height=4000 ; fig_width=7200
 jpeg(file="./FIGURES/figure_3.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-par(mfrow=c(2,3), mar=c(1.4, 1.2, 2.4, 6.5), omi=c(0.2, 0.2, 0.2, 0.40))
+par(mfrow=c(2,3), mar=c(4.4, 4.2, 4.4, 2.5), omi=c(0.2, 0.2, 0.2, 0.40))
 plot((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration,main="Transpiration", ylab="SPA", xlab="ACM_GPP_ET",pch=16) ; abline(0,1,col="red",lwd=3)
 plot(((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)~drivers$sat_max,main="", ylab="Residual (ACM-SPA)", xlab="Temperature",pch=16) ; abline(0,1,col="red",lwd=3)
 plot(((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)~drivers$swrad_avg,main="", ylab="Residual (ACM-SPA)", xlab="Short-Wave radiation",pch=16) ; abline(0,1,col="red",lwd=3)

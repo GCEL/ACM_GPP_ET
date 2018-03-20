@@ -91,7 +91,7 @@ mean_wSWP = array(NA, dim=c(dim(drivers)[1]))
 ###
 ## Some ACM_GPP_ET parameters
 
-output_dim=7 ; nofluxes = 4 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
+output_dim=9 ; nofluxes = 6 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
 #soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
 
 n=1
@@ -105,7 +105,7 @@ n=1
      met[,4] = drivers$RAD_MJ_DAY  # SW Radiation (MJ.m-2.day-1)
      met[,5] = 400  # CO2 ppm
      met[,6] = drivers$DOY  # day of year
-     met[,7] = 0.1/(24*60*60)  # rainfall (kg.m-2.day-1 -> kg.m-2.s-1)
+     met[,7] = 1/(24*60*60)  # rainfall (kg.m-2.day-1 -> kg.m-2.s-1)
      met[,8] = 0.5*(drivers$MAXT_oC+drivers$MINT_oC) # avg temperature (oC)
      met[,9] = 3.23 # avg wind speed (m.s-1)
      met[,10]= 2000 # avg VPD (kPa->Pa)
