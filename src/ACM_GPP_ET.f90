@@ -1127,8 +1127,9 @@ contains
     daily_addition = intercepted_rainfall * seconds_per_day
 
     tmp = dble_zero ; through_fall = dble_zero ; wetcanopy_evaporation = dble_zero
-    ! if we have rainfall or canopy water currently stored
-    if (intercepted_rainfall > dble_zero .or. canopy_storage > dble_zero) then
+    ! if we have more rainfall than storage, canopy water currently stored or
+    ! less potential than we have rain coming in
+    if (daily_addition > max_storage .or. canopy_storage > dble_zero .or. potential_evaporation < daily_addition) then
 
         ! intergrate over canopy for each day
         do i = 1, int(days_per_step)
@@ -1180,6 +1181,25 @@ contains
             print*,"Canopy intercepted rainfall cannot be greater than rainfall!!"
             print*,"rainfall", rainfall, "through_fall", (through_fall * days_per_step_1 * seconds_per_day_1)
         endif
+
+    else if (daily_addition > dble_zero .and. daily_addition <= max_storage .and. potential_evaporation >= daily_addition) then
+
+        ! there is rain but not more than overfills the canopy and we do not
+        ! current have any water stored on the canopy we will assume that all
+        ! the water will be evaporated under potential evaporation
+        
+        ! evaporative flux (kgH2O/m2/day)
+        potential_evaporation = daily_addition
+        ! intercepted rainfall (kgH2O/m2/s)
+        intercepted_rainfall = intercepted_rainfall
+        ! reset canopy storage
+        canopy_storage = dble_zero
+        
+    else ! no rain to intercept
+
+        ! set intercepted rain and potential to zero
+        potential_evaporation = dble_zero
+        intercepted_rainfall = dble_zero
 
     end if ! we have some rainfall
 
