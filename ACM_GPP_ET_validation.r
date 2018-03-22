@@ -65,6 +65,8 @@ closest2d <- function (id,lat,long,lat_in,long_in,nos_dim) {
 ###
 ## Create needed ACM_GPP_ET shared object
 
+# Packages
+library(hexbin) ; library(RColorBrewer)
 # set to the working directory that this script should be called from
 setwd("/home/lsmallma/WORK/GREENHOUSE/models/ACM_GPP_ET/") ; wkdir = getwd()
 # compile the shared object containing ACM_GPP and ACM_ET
@@ -200,6 +202,16 @@ plot(drivers$GPP~mean_gpp,main="GPP", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.a
 plot((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration,main="Transpiration", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
 plot(drivers$soilevap~mean_soilevaporation,main="Soil evaporation", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
 plot(drivers$wetevap~mean_wetcanopyevap,main="Wet canopy evaporation", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+dev.off()	
+
+my_colours=colorRampPalette(c("white","blue","green","yellow","red")) 
+fig_height=4000 ; fig_width=6000
+jpeg(file="./FIGURES/Cal_val_paper_figure_2_heat_map.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+par(mfrow=c(2,2), mar=c(4.4, 4.2, 4.4, 1.5), omi=c(0.2, 0.2, 0.2, 0.40))
+smoothScatter(drivers$GPP~mean_gpp,nrpoints=0,colramp=my_colours,main="GPP", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+smoothScatter((drivers$Evap-drivers$soilevap-drivers$wetevap)~mean_transpiration,nrpoints=0,colramp=my_colours,main="Transpiration", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+smoothScatter(drivers$soilevap~mean_soilevaporation,nrpoints=0,colramp=my_colours,main="Soil evaporation", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
+smoothScatter(drivers$wetevap~mean_wetcanopyevap,nrpoints=0,colramp=my_colours,main="Wet canopy evaporation", ylab="SPA", xlab="ACM-GPP-ET",pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6) ; abline(0,1,col="red",lwd=3)
 dev.off()
 
 fig_height=4000 ; fig_width=7200
