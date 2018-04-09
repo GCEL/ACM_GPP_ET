@@ -76,7 +76,8 @@ system("mv ./src/acm_gpp_et.so .")
 ###
 ## Borrow met data from an existing CARDAMOM analysis
 
-drivers = read.csv("/home/lsmallma/WORK/R/Scripts/weather_generator/acm_recal_with_spa_200pixels_continuous_timeseries_obs_iWUE_trunk_nowater_copy.csv")
+#drivers = read.csv("/home/lsmallma/WORK/R/Scripts/weather_generator/acm_recal_with_spa_200pixels_continuous_timeseries_obs_iWUE_trunk_nowater_copy.csv")
+drivers = read.csv("/home/lsmallma/gcel/acm_recal_with_spa_200pixels_continuous_timeseries_obs_whole_unfiltered_iWUE_trunk_water_copy.csv")
 
 ###
 ## Define our output variables based on the grid of the CARDAMOM analysis we are borrowing
@@ -97,42 +98,44 @@ mean_wSWP = array(NA, dim=c(dim(drivers)[1]))
 
 output_dim=9 ; nofluxes = 6 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
 #soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
+simulated_pixels=paste(drivers$lat,drivers$long,sep="")
+simulated_pixels=unique(simulated_pixels)
+combined_var=paste(drivers$lat,drivers$long,sep="")
+for (i in seq(1, length(simulated_pixels))){
 
-# iterative process through the years...
-for (n in seq(1,dim(drivers)[1])) {
-
-     if (n%%1000 == 0){print(paste("...beginning site:",n," of ",dim(drivers)[1], sep=""))}
+     if (i%%1 == 0) {print(paste(i," of ",length(simulated_pixels),sep=""))}
+     how_many=which(combined_var == simulated_pixels[i])
 
      # met note that the dimension here are different to that of drivers$met
-     met=array(-9999,dim=c(1,12))
-     met[,1] = 1  # day of analysis
-     met[,2] = drivers$sat_min[n]  # min temperature (oC)
-     met[,3] = drivers$sat_max[n]  # max temperature (oC)
-     met[,4] = drivers$swrad_avg[n]*(24*60*60*1e-6)  # SW Radiation (MJ.m-2.day-1)
-     met[,5] = drivers$co2_avg[n]  # CO2 ppm
-     met[,6] = drivers$doy[n]  # day of year
-     met[,7] = drivers$ppt_avg[n]/(60*60)  # rainfall (kgH2O.m-2.hr-1 -> kg.m-2.s-1)
-     met[,8] = drivers$sat_avg[n] # avg temperature (oC)
-     met[,9] = drivers$wind_avg[n] # avg wind speed (m.s-1)
-     met[,10]= drivers$vpd_avg[n]*1000 # avg VPD (kPa->Pa)
+     met=array(-9999,dim=c(length(how_many),12))
+     met[,1] = 1:length(how_many)  # day of analysis
+     met[,2] = drivers$sat_min[how_many]  # min temperature (oC)
+     met[,3] = drivers$sat_max[how_many]  # max temperature (oC)
+     met[,4] = drivers$swrad_avg[how_many]*(24*60*60*1e-6)  # SW Radiation (MJ.m-2.day-1)
+     met[,5] = drivers$co2_avg[how_many]  # CO2 ppm
+     met[,6] = drivers$doy[how_many]  # day of year
+     met[,7] = drivers$ppt_avg[how_many]/(60*60)  # rainfall (kgH2O.m-2.hr-1 -> kg.m-2.s-1)
+     met[,8] = drivers$sat_avg[how_many] # avg temperature (oC)
+     met[,9] = drivers$wind_avg[how_many] # avg wind speed (m.s-1)
+     met[,10]= drivers$vpd_avg[how_many]*1000 # avg VPD (kPa->Pa)
      # ecosystem state drivers now rather than meteorology
-     met[,11]= drivers$lai[n] # LAI
-     met[,12]= drivers$lai[n]*80 #100  # root C stocks
+     met[,11]= drivers$lai[how_many] # LAI
+     met[,12]= drivers$lai[how_many]*80 #100  # root C stocks
      # parameters
      parameters = array(NA, dim=c(nopars,nos_iter))
-     parameters[1,] = drivers$avgN[n]  # foliar N (gN.m-2)
+     parameters[1,] = drivers$avgN[how_many[1]]  # foliar N (gN.m-2)
      parameters[2,] = -9999 # min leaf water potential (MPa)
      parameters[3,] = 100   # root biomass needed to reach 50 % depth
      parameters[4,] = 2   # max root depth (m)
 
      # other inputs
-     lat = drivers$lat[n]
+     lat = drivers$lat[how_many[1]]
      # search location of soils data
 #     i1=unlist(closest2d(1,soils_data$lat_wanted,soils_data$long_wanted,drivers$lat[n],drivers$long[n],1))[1]
 #     soil_info=c(pmax(1,soils_data$sand_top[i1]),pmax(1,soils_data$sand_bot[i1]),pmax(1,soils_data$clay_top[i1]),pmax(1,soils_data$clay_bot[i1]) )
 #     if (soil_info[2] == 1) {soil_info[2] = soil_info[1]}
 #     if (soil_info[4] == 1) {soil_info[4] = soil_info[3]}
-     soil_info=c(drivers$sand_top[n],drivers$sand_bot[n],drivers$clay_top[n],drivers$clay_bot[n])
+     soil_info=c(drivers$sand_top[how_many[1]],drivers$sand_bot[how_many[1]],drivers$clay_top[how_many[1]],drivers$clay_bot[how_many[1]])
         if (is.loaded("racmgppet") == FALSE) { dyn.load("./acm_gpp_et.so") }
         tmp=.Fortran("racmgppet",output_dim=as.integer(output_dim),met=as.double(t(met)),pars=as.double(parameters)
                                 ,out_var=as.double(array(0,dim=c(nos_iter,(dim(met)[1]),output_dim)))
@@ -143,20 +146,20 @@ for (n in seq(1,dim(drivers)[1])) {
                                 ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[4],soil_info[4]),dim=c(3)))
                                 ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[2],soil_info[2]),dim=c(3))) )
         output=tmp$out_var ; output=array(output, dim=c(nos_iter,(dim(met)[1]),output_dim))
-        if (n == dim(drivers)[1]) {dyn.unload("./acm_gpp_et.so")}
+        if (i == length(simulated_pixels)) {dyn.unload("./acm_gpp_et.so")}
         rm(tmp) ; gc()
 
      # assign outputs to out final grids
-     mean_lai[n] = mean(output[,,1]) # lai
-     mean_gpp[n] = mean(output[,,2]) # GPP (gC.m-2.day-1)
-     mean_transpiration[n] = mean(output[,,3])   # transpiration (kg.m-2.day-1)
-     mean_wetcanopyevap[n] = mean(output[,,4])   # wetcanopy evaporation (kg.m-2.day-1)
-     mean_soilevaporation[n] = mean(output[,,5]) # soil evaporation (kg.m-2.day-1)
-     mean_wSWP[n] = mean(output[,,6])            # weighted soil water potential (MPa)
-     mean_WUE[n] = mean_gpp[n]/mean_transpiration[n] # water use efficiency (gC/kgH2O)
-     mean_rootwatermm[n] = mean(output[,,7])     # water in rooting zone (mm)
-     mean_runoffmm[n] = mean(output[,,8])        # surface runoff (mm)
-     mean_drainagemm[n] = mean(output[,,9])      # drainage from soil column (mm)
+     mean_lai[how_many] = (output[,,1]) # lai
+     mean_gpp[how_many] = (output[,,2]) # GPP (gC.m-2.day-1)
+     mean_transpiration[how_many] = (output[,,3])   # transpiration (kg.m-2.day-1)
+     mean_wetcanopyevap[how_many] = (output[,,4])   # wetcanopy evaporation (kg.m-2.day-1)
+     mean_soilevaporation[how_many] = (output[,,5]) # soil evaporation (kg.m-2.day-1)
+     mean_wSWP[how_many] = (output[,,6])            # weighted soil water potential (MPa)
+     mean_WUE[how_many] = mean_gpp[how_many]/mean_transpiration[how_many] # water use efficiency (gC/kgH2O)
+     mean_rootwatermm[how_many] = (output[,,7])     # water in rooting zone (mm)
+     mean_runoffmm[how_many] = (output[,,8])        # surface runoff (mm)
+     mean_drainagemm[how_many] = (output[,,9])      # drainage from soil column (mm)
 
 } # site loop
 
@@ -200,7 +203,7 @@ units=c("mean_lai = m2/m2","mean_gpp = gC/m2/day"
        ,"mean_wSWP = MPa","mean_WUE = gC/kgH2O","mean_rootwatermm = kgH2O/m2"
        ,"mean_runoffmm = kgH2O/m2/day","mean_drainagemm = kgH2O/m2/day")
 # Save output for later use
-calibration_output = list(drivers = drivers,
+validation_water_output = list(drivers = drivers,
 			  units = units,
                          gpp_r2 = gpp_r2,
                        gpp_bias = gpp_bias,
@@ -225,7 +228,7 @@ calibration_output = list(drivers = drivers,
                   mean_runoffmm = mean_runoffmm,
                 mean_drainagemm = mean_drainagemm)
 # Now save the file
-save(calibration_output, file="./outputs/calibration_output.RData")
+save(validation_water_output, file="./outputs/validation_water_output.RData")
 
 
 

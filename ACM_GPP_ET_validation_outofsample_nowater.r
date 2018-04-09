@@ -76,7 +76,8 @@ system("mv ./src/acm_gpp_et.so .")
 ###
 ## Borrow met data from an existing CARDAMOM analysis
 
-drivers = read.csv("/home/lsmallma/WORK/R/Scripts/weather_generator/acm_recal_with_spa_200pixels_continuous_timeseries_obs_iWUE_trunk_nowater_copy.csv")
+#drivers = read.csv("/home/lsmallma/WORK/R/Scripts/weather_generator/acm_recal_with_spa_200pixels_continuous_timeseries_obs_iWUE_trunk_nowater_copy.csv")
+drivers = read.csv("/home/lsmallma/gcel/acm_recal_with_spa_200pixels_continuous_timeseries_obs_whole_unfiltered_iWUE_trunk_nowater_copy.csv")
 
 ###
 ## Define our output variables based on the grid of the CARDAMOM analysis we are borrowing
@@ -200,7 +201,7 @@ units=c("mean_lai = m2/m2","mean_gpp = gC/m2/day"
        ,"mean_wSWP = MPa","mean_WUE = gC/kgH2O","mean_rootwatermm = kgH2O/m2"
        ,"mean_runoffmm = kgH2O/m2/day","mean_drainagemm = kgH2O/m2/day")
 # Save output for later use
-calibration_output = list(drivers = drivers,
+validation_nowater_output = list(drivers = drivers,
 			  units = units,
                          gpp_r2 = gpp_r2,
                        gpp_bias = gpp_bias,
@@ -225,7 +226,7 @@ calibration_output = list(drivers = drivers,
                   mean_runoffmm = mean_runoffmm,
                 mean_drainagemm = mean_drainagemm)
 # Now save the file
-save(calibration_output, file="./outputs/calibration_output.RData")
+save(validation_nowater_output, file="./outputs/validation_nowater_output.RData")
 
 
 

@@ -40,7 +40,7 @@ mean_wSWP = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
 min_wSWP = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
 mean_runoffmm = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
 mean_drainagemm = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
-# save some mean statistics 
+# save some mean statistics
 mean_temperature = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
 mean_radiation = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
 mean_precipitation = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
@@ -117,13 +117,13 @@ for (n in seq(1,PROJECT$nosites)) {
      if (mean(met[,7]) > 0.0001584404) {met[,7] = met[,7] / (mean(met[,7])/0.0001584404) }
      # Restrict LAI to realistic range
      met[which(met[,11] > 8.5),11] = 8.5
-
+# 
      # Assuming I have not LAI and root information we will run the analysis
      if (length(which(is.na(met[,11]) == TRUE)) == 0 & length(which(is.na(met[,12]) == TRUE)) == 0) {
 
 	       # parameters
 	       parameters = array(NA, dim=c(nopars,nos_iter))
-	       parameters[1,] = 1.89  # foliar N (gN.m-2)
+	       parameters[1,] = 1.89*0.5  # foliar N (gN.m-2)
 	       parameters[2,] = -9999 # min leaf water potential (MPa)
 	       parameters[3,] = 100   # root biomass needed to reach 50 % depth
 	       parameters[4,] = 2.0   # max root depth (m)
@@ -234,54 +234,54 @@ units=c("LAI = m2/m2","Roots = gC/m2","Water use efficiency (WUE) = gC/kgH2O"
        ,"All water fluxes = kgH2O/m2/day except global_mean* = PgH2O"
        ,"mean_rootwatermm = kg/m2","All soil water potentials (SWP) = MPa")
 # Save output for later use
-global_output = list(        units = units,
-                              area = area,
-                  mean_temperature = mean_temperature,
-                    mean_radiation = mean_radiation,
-                mean_precipitation = mean_precipitation,
-                          mean_vpd = mean_vpd,
-           mean_annual_temperature = mean_annual_temperature,
-             mean_annual_radiation = mean_annual_radiation,
-         mean_annual_precipitation = mean_annual_precipitation,
-                   mean_annual_vpd = mean_annual_vpd,
-            global_mean_annual_gpp = global_mean_annual_gpp,
-  global_mean_annual_transpiration = global_mean_annual_transpiration,
-global_mean_annual_soilevaporation = global_mean_annual_soilevaporation,
-  global_mean_annual_wetcanopyevap = global_mean_annual_wetcanopyevap,
-             global_mean_annual_et = global_mean_annual_et,
-            global_mean_annual_wue = global_mean_annual_wue,
-           global_mean_annual_wSWP = global_mean_annual_wSWP,
-    global_mean_annual_rootwatermm = global_mean_annual_rootwatermm,
-            global_mean_annual_lai = global_mean_annual_lai,
-           global_mean_annual_root = global_mean_annual_root,
-                          mean_lai = mean_lai,
-                         mean_root = mean_root,
-                            sd_lai = sd_lai,
-                           sd_root = sd_root,
-                          mean_gpp = mean_gpp,
-                mean_transpiration = mean_transpiration,
-                mean_wetcanopyevap = mean_wetcanopyevap,
-              mean_soilevaporation = mean_soilevaporation,
-                  mean_rootwatermm = mean_rootwatermm,
-                          mean_wue = mean_wue,
-                         mean_wSWP = mean_wSWP,
-                          min_wSWP = min_wSWP,
-                     mean_runoffmm = mean_runoffmm,
-                   mean_drainagemm = mean_drainagemm,
-                    timeseries_lai = timeseries_lai,
-                   timeseries_root = timeseries_root,
-                    timeseries_gpp = timeseries_gpp,
-          timeseries_transpiration = timeseries_transpiration,
-          timeseries_wetcanopyevap = timeseries_wetcanopyevap,
-        timeseries_soilevaporation = timeseries_soilevaporation,
-            timeseries_rootwatermm = timeseries_rootwatermm,
-                    timeseries_WUE = timeseries_WUE,
-                   timeseries_wSWP = timeseries_wSWP,
-               timeseries_runoffmm = timeseries_runoffmm,
-             timeseries_drainagemm = timeseries_drainagemm)
+global_output_NUE_half = list(        units = units,
+                                       area = area,
+                           mean_temperature = mean_temperature,
+                             mean_radiation = mean_radiation,
+                         mean_precipitation = mean_precipitation,
+                                   mean_vpd = mean_vpd,
+                    mean_annual_temperature = mean_annual_temperature,
+                      mean_annual_radiation = mean_annual_radiation,
+                  mean_annual_precipitation = mean_annual_precipitation,
+                            mean_annual_vpd = mean_annual_vpd,
+                     global_mean_annual_gpp = global_mean_annual_gpp,
+           global_mean_annual_transpiration = global_mean_annual_transpiration,
+         global_mean_annual_soilevaporation = global_mean_annual_soilevaporation,
+           global_mean_annual_wetcanopyevap = global_mean_annual_wetcanopyevap,
+                      global_mean_annual_et = global_mean_annual_et,
+                     global_mean_annual_wue = global_mean_annual_wue,
+                    global_mean_annual_wSWP = global_mean_annual_wSWP,
+             global_mean_annual_rootwatermm = global_mean_annual_rootwatermm,
+                     global_mean_annual_lai = global_mean_annual_lai,
+                    global_mean_annual_root = global_mean_annual_root,
+                                   mean_lai = mean_lai,
+                                  mean_root = mean_root,
+                                     sd_lai = sd_lai,
+                                    sd_root = sd_root,
+                                   mean_gpp = mean_gpp,
+                         mean_transpiration = mean_transpiration,
+                         mean_wetcanopyevap = mean_wetcanopyevap,
+                       mean_soilevaporation = mean_soilevaporation,
+                           mean_rootwatermm = mean_rootwatermm,
+                                   mean_wue = mean_wue,
+                                  mean_wSWP = mean_wSWP,
+                                   min_wSWP = min_wSWP,
+                              mean_runoffmm = mean_runoffmm,
+                            mean_drainagemm = mean_drainagemm,
+                             timeseries_lai = timeseries_lai,
+                            timeseries_root = timeseries_root,
+                             timeseries_gpp = timeseries_gpp,
+                   timeseries_transpiration = timeseries_transpiration,
+                   timeseries_wetcanopyevap = timeseries_wetcanopyevap,
+                 timeseries_soilevaporation = timeseries_soilevaporation,
+                     timeseries_rootwatermm = timeseries_rootwatermm,
+                             timeseries_WUE = timeseries_WUE,
+                            timeseries_wSWP = timeseries_wSWP,
+                        timeseries_runoffmm = timeseries_runoffmm,
+                      timeseries_drainagemm = timeseries_drainagemm)
 
 # Now save the file
-save(global_output, file="./outputs/global_1x1_degree_2001_2015.RData")
+save(global_output_NUE_half, file="./outputs/global_1x1_degree_2001_2015_NUE_half.RData")
 
 ###
 ## Print some default information to the user
