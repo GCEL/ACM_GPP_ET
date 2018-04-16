@@ -26,7 +26,7 @@ setwd("/home/lsmallma/WORK/GREENHOUSE/models/ACM_GPP_ET/")
 
 ## ACM-GPP-ET runs
 load("./outputs/calibration_output.RData")
-#load("./outputs/validation_nowater_output.RData")
+load("./outputs/validation_nowater_output.RData")
 load("./outputs/validation_water_output.RData")
 load("./outputs/global_1x1_degree_2001_2015.RData")
 load("./outputs/global_1x1_degree_2001_2015_co2_plus100.RData")
