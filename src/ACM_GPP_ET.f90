@@ -1189,14 +1189,14 @@ contains
         ! there is rain but not more than overfills the canopy and we do not
         ! current have any water stored on the canopy we will assume that all
         ! the water will be evaporated under potential evaporation
-        
+
         ! evaporative flux (kgH2O/m2/day)
         potential_evaporation = daily_addition
         ! intercepted rainfall (kgH2O/m2/s)
         intercepted_rainfall = intercepted_rainfall
         ! reset canopy storage
         canopy_storage = dble_zero
-        
+
     else ! no rain to intercept
 
         ! set intercepted rain and potential to zero
@@ -1720,7 +1720,7 @@ contains
    ! Rainfal infiltration drainage
    !!!!!!!!!!
 
-   ! Reset runoff variable before assignment 
+   ! Reset runoff variable before assignment
    runoff = dble_zero
 
    ! determine infiltration from rainfall,
