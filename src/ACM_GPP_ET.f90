@@ -286,32 +286,32 @@ contains
     ! infinity check requirement
     infi = 0d0
     ! load ACM-GPP-ET parameters
-    NUE                       = 1.850535d+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
+    NUE                       = 2.36541035069e+01 !1.850535d+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
                                               ! ,unlimited by CO2, light and
                                               ! photoperiod
                                               ! (gC/gN/m2leaf/day)
-    pn_max_temp               = 6.982614d+01  ! Maximum temperature for photosynthesis (oC)
-    pn_opt_temp               = 3.798068d+01  ! Optimum temperature for photosynthesis (oC)
-    pn_kurtosis               = 1.723531d-01  ! Kurtosis of photosynthesis temperature response
-    e0                        = 4.489652d+00  ! Quantum yield gC/MJ/m2/day PAR
-    max_lai_lwrad_absorption  = 9.282892d-01  ! Max fraction of LW from sky absorbed by canopy
-    lai_half_lwrad_absorption = 5.941333d-01  ! LAI at which canopy LW absorption = 50 %
-    max_lai_nir_absorption    = 8.333743d-01  ! Max fraction of NIR absorbed by canopy
-    lai_half_nir_absorption   = 2.148633d+00  ! LAI at which canopy NIR absorption = 50 %
-    minlwp                    = -1.990154d+00 ! minimum leaf water potential (MPa)
-    max_lai_par_absorption    = 8.737539d-01  ! Max fraction of PAR absorbed by canopy
-    lai_half_par_absorption   = 1.804925d+00  ! LAI at which canopy PAR absorption = 50 %
-    lai_half_lwrad_to_sky     = 2.489314d+00  ! LAI at which 50 % LW is reflected back to sky
-    iWUE                      = 1.722579d-02  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
-    soil_swrad_absorption     = 7.375071d-01  ! Fraction of SW rad absorbed by soil
-    max_lai_swrad_reflected   = 2.796492d-01  ! Max fraction of SW reflected back to sky
+    pn_max_temp               = 5.19014181055e+01 !6.982614d+01  ! Maximum temperature for photosynthesis (oC)
+    pn_opt_temp               = 3.97261895228e+01 !3.798068d+01  ! Optimum temperature for photosynthesis (oC)
+    pn_kurtosis               = 1.13699236239e-01!1.723531d-01  ! Kurtosis of photosynthesis temperature response
+    e0                        = 5.63067976105e+00!4.489652d+00  ! Quantum yield gC/MJ/m2/day PAR
+    max_lai_lwrad_absorption  = 9.51312185437e-01!9.282892d-01  ! Max fraction of LW from sky absorbed by canopy
+    lai_half_lwrad_absorption = 5.20986924822e-01!5.941333d-01  ! LAI at which canopy LW absorption = 50 %
+    max_lai_nir_absorption    = 5.57000881765e-01!8.333743d-01  ! Max fraction of NIR absorbed by canopy
+    lai_half_nir_absorption   = 1.08094247547e+00!2.148633d+00  ! LAI at which canopy NIR absorption = 50 %
+    minlwp                    = -1.99728034169e+00!-1.990154d+00 ! minimum leaf water potential (MPa)
+    max_lai_par_absorption    = 6.53197566084e-01!8.737539d-01  ! Max fraction of PAR absorbed by canopy
+    lai_half_par_absorption   = 1.35986868154e+00 !1.804925d+00  ! LAI at which canopy PAR absorption = 50 %
+    lai_half_lwrad_to_sky     = 1.44161929602e+00!2.489314d+00  ! LAI at which 50 % LW is reflected back to sky
+    iWUE                      = 8.25845096832e-03!1.722579d-02  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
+    soil_swrad_absorption     = 8.26173021819e-01!7.375071d-01  ! Fraction of SW rad absorbed by soil
+    max_lai_swrad_reflected   = 7.70158671479e-02!2.796492d-01  ! Max fraction of SW reflected back to sky
     lai_half_swrad_reflected  = (lai_half_nir_absorption+lai_half_par_absorption) * 0.5d0
-    max_lai_lwrad_release     = 2.481599d-01  ! Max fraction of LW emitted from canopy to be released
-    lai_half_lwrad_release    = 5.020443d-01  ! LAI at which LW emitted from canopy to be released at 50 %
-    soilevap_rad_intercept    = 1.122969d-02  ! Intercept (kgH2O/m2/day) on linear adjustment to soil evaporation
+    max_lai_lwrad_release     = 2.04579713675e-01!2.481599d-01  ! Max fraction of LW emitted from canopy to be released
+    lai_half_lwrad_release    = 6.19050308211e-01!5.020443d-01  ! LAI at which LW emitted from canopy to be released at 50 %
+    soilevap_rad_intercept    = 1.21920035124e-02!1.122969d-02  ! Intercept (kgH2O/m2/day) on linear adjustment to soil evaporation
                                               ! to account for non-calculation
                                               ! of energy balance
-    soilevap_rad_coef         = 1.748044d+00  ! Coefficient on linear adjustment to
+    soilevap_rad_coef         = 1.74747849804e+00!1.748044d+00  ! Coefficient on linear adjustment to
                                               ! soil evaporation to account for
                                               ! non-calculation of energy
                                               ! balance
@@ -610,7 +610,8 @@ contains
     double precision, intent(out) :: wetcanopy_evap, transpiration, soilevap ! kgH2O.m-2.day-1
 
     ! local variables
-    double precision :: &
+    integer :: step
+    double precision :: local_water, local_drythick, local_SWP, soilevap_tmp, &
               canopy_radiation, soil_radiation & ! isothermal net radiation (W/m2)
                               ,water_diffusion & ! Diffusion of water through soil matrix (m.s-1)
                                  ,water_supply & ! Potential water supply to canopy from soil (kgH2O.m-2.day-1)
@@ -666,18 +667,19 @@ contains
 
     ! Estimate water diffusion rate (m2.s-1) Jones (2014) appendix 2
     water_diffusion = 24.2d-6 * ( (maxt+freeze) / 293.2d0 )**1.75d0
+
+
     ! Soil conductance to water vapour diffusion (m s-1)...
     gws = porosity(1) * water_diffusion / (tortuosity*drythick)
     ! apply potential flow restriction at this stage
     gws = min(gws,(soil_waterfrac(1)*top_soil_depth*1d3)/dayl_seconds)
-
     ! calculate saturated vapour pressure (kPa), function of temperature.
     esat = 0.1d0 * exp( 1.80956664d0 + ( 17.2693882d0 * (maxt+freeze) - 4717.306081d0 ) / ( maxt+freeze - 35.86d0 ) )
     ! vapour pressure of air (kPa)
     ea = esat - (vpd_pa * 1d-3)
     ! vapour pressure in soil airspace (kPa), dependent on soil water potential
     ! - Jones p.110. partial_molar_vol_water
-    esurf = esat * exp( 1d6 * SWP(1) * partial_molar_vol_water / ( Rcon * (maxt+freeze) ) )
+    esurf = esat * exp( 1d6 * local_SWP * partial_molar_vol_water / ( Rcon * (maxt+freeze) ) )
     ! calculate VPD of the soil surface (kPa)
     esurf = esat - esurf
     ! now difference in VPD between soil air space and canopy
@@ -1465,7 +1467,7 @@ contains
     ! parameters
     double precision, parameter :: foliage_drag = 0.2d0, & ! foliage drag coefficient
                                    beta_max = 1d0, beta_min = 0.2d0, &
-                                   min_lai = 1d0, &
+                                   min_lai = 1.5d0, &
                                    most_soil = 1d0 ! Monin-Obukov similarity theory stability correction.
                                                    ! As no sensible heat flux
                                                    ! calculated,
@@ -1550,7 +1552,7 @@ contains
 !                          ustar_Uh_max = 0.3,   & ! Maximum observed ratio of
                                                    ! (friction velocity / canopy top wind speed) (m.s-1)
                           ustar_Uh_max = 1d0, ustar_Uh_min = 0.2d0, &
-                               min_lai = 1d0,   & ! Minimum LAI parameter as height does not vary with growth
+                               min_lai = 1.5d0,   & ! Minimum LAI parameter as height does not vary with growth
                                     Cw = 2d0      ! Characterises roughness sublayer depth (m)
 
     ! assign new value to min_lai to avoid max min calls
