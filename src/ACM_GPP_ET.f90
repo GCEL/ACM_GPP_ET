@@ -26,7 +26,7 @@ double precision, parameter :: xacc = 1d-4        & ! accuracy parameter for zbr
 
 integer, parameter :: nos_root_layers = 3, nos_soil_layers = nos_root_layers + 1
 double precision, parameter :: pi = 3.1415927d0,  &
-                             pi_1 = pi**(-dble_one),   &
+                             pi_1 = pi**(-dble_one), &
                               pi2 = pi**2,        &
                            two_pi = pi*2d0,       &
                        deg_to_rad = pi/180d0,     &
@@ -68,12 +68,12 @@ double precision, parameter :: &
                       root_radius = 0.00029d0,    & ! root radius (m) Bonen et al 2014 = 0.00029
                                                     ! Williams et al 1996 = 0.0001
                     root_radius_1 = root_radius**(-dble_one), &
-              root_cross_sec_area = 3.141593d-08, & ! root cross sectional area (m2)
-                                                    ! = pi * root_radius * root_radius
+              root_cross_sec_area = pi * root_radius**2, & ! root cross sectional area (m2)
+                                                           ! = pi * root_radius * root_radius
                      root_density = 0.31d6,       & ! root density (g biomass m-3 root)
                                                     ! 0.5e6 Williams et al 1996
                                                     ! 0.31e6 Bonan et al 2014
-          root_mass_length_coef_1 = (root_cross_sec_area * root_density)**(-1d0), &
+          root_mass_length_coef_1 = (root_cross_sec_area * root_density)**(-dble_one), &
                const_sfc_pressure = 101325d0,     & ! (Pa)  Atmospheric surface pressure
                              head = 0.009807d0,   & ! head of pressure (MPa/m)
                            head_1 = 101.968d0       ! inverse head of pressure (m/MPa)
@@ -139,7 +139,7 @@ double precision :: root_reach, root_biomass, &
                 max_supply, & ! maximum water supply (mmolH2O/m2/day)
                      meant, & ! mean air temperature (oC)
                    meant_K, & ! mean air temperature (K)
-          mean_annual_temp, & 
+          mean_annual_temp, &
         canopy_swrad_MJday, & ! canopy_absorbed shortwave radiation (MJ.m-2.day-1)
           canopy_par_MJday, & ! canopy_absorbed PAR radiation (MJ.m-2.day-1)
           soil_swrad_MJday, & ! soil absorbed shortwave radiation (MJ.m-2.day-1)
@@ -378,10 +378,10 @@ contains
     maxt = met(3,1)  ! maximum temperature (oC)
     if (met(8,1) /= -9999d0) then
         meant = met(8,1)  ! mean air temperature (oC)
-        mean_annual_temp = sum(met(8,:)) / dble(nodays)
+        mean_annual_temp = sum(met(8,1:nodays)) / dble(nodays)
     else
         meant = (met(3,1)+met(2,1))*0.5d0
-        mean_annual_temp = sum((met(3,:)+met(2,:))*0.5d0) / dble(nodays)
+        mean_annual_temp = sum((met(3,1:nodays)+met(2,1:nodays))*0.5d0) / dble(nodays)
     endif
     meant_K = meant + freeze
     lai = met(11,1) ! leaf area index (m2/m2)
@@ -648,11 +648,11 @@ contains
 
     ! local variables
     integer :: step
-    double precision ::       canopy_radiation & 
+    double precision ::       canopy_radiation &
                                ,soil_radiation & ! isothermal net radiation (W/m2)
                               ,water_diffusion & ! Diffusion of water through soil matrix (m.s-1)
                                  ,water_supply & ! Potential water supply to canopy from soil (kgH2O.m-2.day-1)
-                                  ,lambda_soil & 
+                                  ,lambda_soil &
                                     ,soil_temp & ! Soil surface temperature (oC)
                                     ,Jm3kPaK_1 &
                                         ,esurf & ! see code below
@@ -706,11 +706,11 @@ contains
 
     !!!!!!!!!!
     ! Calculate soil evaporative fluxes (kgH2O/m2/day)
-    !!!!!!!!!!    
+    !!!!!!!!!!
 
     ! solve soil surface energy balance for soil temperature (oC) and thus soil
     ! evaporation (below)
-    soil_temp = zbrent('acm_et:soil_energy_balance',soil_energy_balance,meant-50d0,meant+50d0,0.01d0) 
+    soil_temp = zbrent('acm_et:soil_energy_balance',soil_energy_balance,meant-50d0,meant+50d0,0.01d0)
     lambda_soil = 2501000d0-2364d0*soil_temp
     soil_radiation = soil_radiation - 4d0 * emiss_boltz * ( meant+freeze ) ** 3 * ( soil_temp - meant )
     soil_temp = soil_temp + freeze
@@ -892,7 +892,7 @@ contains
     ! This will then be reduced based on CO2 limits for diffusion based
     ! photosynthesis
     denom = slope * ((canopy_swrad_MJday * 1d6 * seconds_per_day_1) + canopy_lwrad_Wm2) &
-            + (air_density_kg*cpair*vpd_pa*1d-3*aerodynamic_conductance)
+            + (air_density_kg * cpair * vpd_pa * 1d-3 * aerodynamic_conductance)
     denom = (denom / (lambda * max_supply * mmol_to_kg_water * seconds_per_day_1)) - slope
     denom = denom / psych
     stomatal_conductance = aerodynamic_conductance / denom
@@ -1061,7 +1061,7 @@ contains
                                                    ,soilRT_local &
                                                    ,root_length  &
                                                    ,ratio
-    double precision, parameter :: root_depth_frac_50 = 0.25d0 ! fractional soil depth above which 50 % 
+    double precision, parameter :: root_depth_frac_50 = 0.25d0 ! fractional soil depth above which 50 %
                                                                ! of the root mass is assumed to be located
 
     ! reset water flux
@@ -1090,7 +1090,7 @@ contains
         ! soil layer
 
         ! Start by assigning all 50 % of root biomass to the top soil layer
-        root_mass(1) = root_biomass * 0.5d0 
+        root_mass(1) = root_biomass * 0.5d0
         ! Then quantify how much additional root is found in the top soil layer
         ! assuming that the top 25 % depth is found somewhere within the top
         ! layer
@@ -1124,13 +1124,13 @@ contains
         root_mass(2) = root_biomass * 0.5d0 * (layer_thickness(2)/root_depth_50)
         root_mass(3) = root_biomass - sum(root_mass(1:2))
     endif
-    ! now convert root mass into lengths 
+    ! now convert root mass into lengths
     root_length = root_mass * root_mass_length_coef_1
 !    root_length = root_mass / (root_density * root_cross_sec_area)
 
     !!!!!!!!!!!
     ! Calculate hydraulic properties and each rooted layer
-    !!!!!!!!!!!    
+    !!!!!!!!!!!
 
     ! soil conductivity converted from m.s-1 -> m2.s-1.MPa-1 by head
     root_reach_local = min(root_reach,layer_thickness(1))
@@ -1169,7 +1169,7 @@ contains
 
     ! if freezing then assume soil surface is frozen
     if (meant < dble_one) then
-        water_flux(1) = dble_zero 
+        water_flux(1) = dble_zero
         ratio(1) = dble_zero
         ratio(2:nos_root_layers) = layer_thickness(2:nos_root_layers) / sum(layer_thickness(2:nos_root_layers))
     endif
@@ -1962,7 +1962,7 @@ contains
     ! from roughness length and displacement height components
     soil_thermal_resistance = radiative_conductance + gb * 0.93d0
 !    ! include term for energy loss into the soil via ground heat flux
-!    soil_thermal_resistance = soil_thermal_resistance + 0.34d0 !+ ( 0.58 - 0.34 ) * iceprop(i) 
+!    soil_thermal_resistance = soil_thermal_resistance + 0.34d0 !+ ( 0.58 - 0.34 ) * iceprop(i)
     ! NOTE: conversion to resistance (s.m-1)
     soil_thermal_resistance = (soil_thermal_resistance) ** (-dble_one)
 
@@ -2044,7 +2044,7 @@ contains
     ! Soil conductance to water vapour diffusion (m s-1)...
     gws = porosity(1) * water_diffusion / (tortuosity*drythick)
     ! apply potential flow restriction at this stage
-    gws = min(gws,(soil_waterfrac(1)*top_soil_depth*1d3)/seconds_per_day)
+    gws = min(gws,(soil_waterfrac(1)*layer_thickness(1)*1d3)/seconds_per_day)
 
     ! calculate saturated vapour pressure (kPa), function of temperature.
     esat = 0.1d0 * exp( 1.80956664d0 + ( 17.2693882d0 * (meant+freeze) - 4717.306081d0 ) / ( meant+freeze - 35.86d0 ) )
@@ -2072,7 +2072,7 @@ contains
 
     ! ground heat flux (W/m2); positive moving up profile, note 0.34 is soil thermal conductance
     ground_heat = -0.34d0 * ( soil_temp - mean_annual_temp ) / ( 0.5d0 * layer_thickness(1) )
- 
+
     ! calculate balance residual
     soil_energy_balance = soil_radiation - (sensible + soilevap) + ground_heat
 
@@ -2186,7 +2186,7 @@ contains
 
     ! arguments..
     character(len=*),intent(in) :: called_from    ! name of procedure calling (used to pass through for errors)
-    double precision,intent(in)             :: tol, x1, x2
+    double precision,intent(in) :: tol, x1, x2
 
     ! Interfaces are the correct way to pass procedures as arguments.
     interface
