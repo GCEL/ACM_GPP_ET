@@ -141,8 +141,8 @@ for (n in seq(1,PROJECT$nosites)) {
                                      ,lat=as.double(lat),nopars=as.integer(nopars),nomet=as.integer(dim(met)[2])
                                      ,nofluxes=as.integer(nofluxes),nopools=as.integer(nopools),nodays=as.integer(dim(met)[1])
                                      ,deltat=as.double(array(0,dim=c(as.integer(dim(met)[1])))),nos_iter=as.integer(nos_iter)
-                                     ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[4],soil_info[4]),dim=c(3)))
-                                     ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[2],soil_info[2]),dim=c(3))) )
+                                     ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[3],soil_info[4],soil_info[4]),dim=c(4)))
+                                     ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[1],soil_info[2],soil_info[2]),dim=c(4))) )
                    # extract output from the analysis
                    output=tmp$out_var ; output=array(output, dim=c(nos_iter,(dim(met)[1]),output_dim))
                    # If this is the last site in the list best un-load the shared onject now

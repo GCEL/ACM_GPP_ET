@@ -77,7 +77,7 @@ system("mv ./src/acm_gpp_et.so .")
 ## Borrow met data from an existing CARDAMOM analysis
 
 #drivers = read.csv("/home/lsmallma/WORK/R/Scripts/weather_generator/acm_recal_with_spa_200pixels_continuous_timeseries_obs_iWUE_trunk_nowater_copy.csv")
-drivers = read.csv("/home/lsmallma/gcel/acm_recal_with_spa_200pixels_continuous_timeseries_obs_whole_unfiltered_iWUE_trunk_water_copy.csv")
+drivers = read.csv("/home/lsmallma/gcel/ACM_GPP_ET_RECALIBRATION/output_files/acm_recal_with_spa_200pixels_continuous_timeseries_obs_whole_unfiltered_iWUE_trunk_water_copy.csv")
 
 ###
 ## Define our output variables based on the grid of the CARDAMOM analysis we are borrowing
@@ -101,10 +101,12 @@ output_dim=9 ; nofluxes = 6 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
 simulated_pixels=paste(drivers$lat,drivers$long,sep="")
 simulated_pixels=unique(simulated_pixels)
 combined_var=paste(drivers$lat,drivers$long,sep="")
+#for (i in seq(1,1)) {
 for (i in seq(1, length(simulated_pixels))){
 
-     if (i%%1 == 0) {print(paste(i," of ",length(simulated_pixels),sep=""))}
+     #if (i%%1 == 0) {print(paste(i," of ",length(simulated_pixels),sep=""))}
      how_many=which(combined_var == simulated_pixels[i])
+#     how_many=which(combined_var == simulated_pixels[72])
 
      # met note that the dimension here are different to that of drivers$met
      met=array(-9999,dim=c(length(how_many),12))
@@ -143,8 +145,8 @@ for (i in seq(1, length(simulated_pixels))){
                                 ,nofluxes=as.integer(nofluxes),nopools=as.integer(nopools)
                                 ,nodays=as.integer(dim(met)[1])
                                 ,deltat=as.double(array(0,dim=c(as.integer(dim(met)[1])))),nos_iter=as.integer(nos_iter)
-                                ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[4],soil_info[4]),dim=c(3)))
-                                ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[2],soil_info[2]),dim=c(3))) )
+                                ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[3],soil_info[4],soil_info[4]),dim=c(4)))
+                                ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[1],soil_info[2],soil_info[2]),dim=c(4))) )
         output=tmp$out_var ; output=array(output, dim=c(nos_iter,(dim(met)[1]),output_dim))
         if (i == length(simulated_pixels)) {dyn.unload("./acm_gpp_et.so")}
         rm(tmp) ; gc()

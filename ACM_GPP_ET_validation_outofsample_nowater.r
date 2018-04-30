@@ -77,7 +77,7 @@ system("mv ./src/acm_gpp_et.so .")
 ## Borrow met data from an existing CARDAMOM analysis
 
 #drivers = read.csv("/home/lsmallma/WORK/R/Scripts/weather_generator/acm_recal_with_spa_200pixels_continuous_timeseries_obs_iWUE_trunk_nowater_copy.csv")
-drivers = read.csv("/home/lsmallma/gcel/acm_recal_with_spa_200pixels_continuous_timeseries_obs_whole_unfiltered_iWUE_trunk_nowater_copy.csv")
+drivers = read.csv("/home/lsmallma/gcel/ACM_GPP_ET_RECALIBRATION/output_files/acm_recal_with_spa_200pixels_continuous_timeseries_obs_whole_unfiltered_iWUE_trunk_nowater_copy.csv")
 
 ###
 ## Define our output variables based on the grid of the CARDAMOM analysis we are borrowing

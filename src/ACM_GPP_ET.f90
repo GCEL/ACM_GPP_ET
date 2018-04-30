@@ -24,7 +24,7 @@ double precision, parameter :: xacc = 1d-4        & ! accuracy parameter for zbr
                               ,dble_one = 1d0     &
                               ,vsmall = tiny(0d0)
 
-integer, parameter :: nos_root_layers = 2, nos_soil_layers = nos_root_layers + 1
+integer, parameter :: nos_root_layers = 3, nos_soil_layers = nos_root_layers + 1
 double precision, parameter :: pi = 3.1415927d0,  &
                              pi_1 = pi**(-dble_one),   &
                               pi2 = pi**2,        &
@@ -62,7 +62,7 @@ double precision, parameter :: &
                                                     ! sensitivty
 ! hydraulic parameters
 double precision, parameter :: &
-                       tortuosity = 2.5d0,          & ! tortuosity
+                       tortuosity = 2.5d0,        & ! tortuosity
                            gplant = 5d0,          & ! plant hydraulic conductivity (mmol m-1 s-1 MPa-1)
                       root_resist = 25d0,         & ! Root resistivity (MPa s g mmol−1 H2O)
                       root_radius = 0.00029d0,    & ! root radius (m) Bonen et al 2014 = 0.00029
@@ -73,7 +73,7 @@ double precision, parameter :: &
                      root_density = 0.31d6,       & ! root density (g biomass m-3 root)
                                                     ! 0.5e6 Williams et al 1996
                                                     ! 0.31e6 Bonan et al 2014
-          root_mass_length_coef_1 = (root_cross_sec_area * root_density)**(-1.d0), &
+          root_mass_length_coef_1 = (root_cross_sec_area * root_density)**(-1d0), &
                const_sfc_pressure = 101325d0,     & ! (Pa)  Atmospheric surface pressure
                              head = 0.009807d0,   & ! head of pressure (MPa/m)
                            head_1 = 101.968d0       ! inverse head of pressure (m/MPa)
@@ -83,17 +83,19 @@ double precision, parameter :: &
                     canopy_height = 9d0,          & ! canopy height assumed to be 9 m
                      tower_height = canopy_height + 2d0, & ! tower (observation) height assumed to be 2 m above canopy
                          min_wind = 0.1d0,        & ! minimum wind speed at canopy top
-                     min_drythick = 0.001d0,      & ! minimum dry thickness depth (m)
-                        min_layer = 0.01d0,       & ! minimum thickness of the second rooting layer (m)
+                     min_drythick = 0.01d0,       & ! minimum dry thickness depth (m)
+                        min_layer = 0.03d0,       & ! minimum thickness of the second rooting layer (m)
                       soil_roughl = 0.05d0,       & ! soil roughness length (m)
-                   top_soil_depth = 0.3d0,        & ! depth to which we conider the top soil to extend (m)
+                   top_soil_depth = 0.1d0,        & ! thickness of the top soil layer (m)
+                   mid_soil_depth = 0.2d0,        & ! thickness of the second soil layer (m)
                          min_root = 5d0,          & ! minimum root biomass (gBiomass.m-2)
                   min_throughfall = 0.2d0,        & ! minimum fraction of precipitation which
                                                     ! is through fall
-                     min_storage = 0.2d0            ! minimum canopy water (surface) storage (mm)
+                      min_storage = 0.2d0           ! minimum canopy water (surface) storage (mm)
 
 ! timing parameters
 double precision, parameter :: &
+                 seconds_per_hour = 3600d0,       & ! Number of seconds per hour
                   seconds_per_day = 86400d0,      & ! number of seconds per day
                 seconds_per_day_1 = 1d0/seconds_per_day ! inverse of seconds per day
 
@@ -137,6 +139,7 @@ double precision :: root_reach, root_biomass, &
                 max_supply, & ! maximum water supply (mmolH2O/m2/day)
                      meant, & ! mean air temperature (oC)
                    meant_K, & ! mean air temperature (K)
+          mean_annual_temp, & 
         canopy_swrad_MJday, & ! canopy_absorbed shortwave radiation (MJ.m-2.day-1)
           canopy_par_MJday, & ! canopy_absorbed PAR radiation (MJ.m-2.day-1)
           soil_swrad_MJday, & ! soil absorbed shortwave radiation (MJ.m-2.day-1)
@@ -286,35 +289,66 @@ contains
     ! infinity check requirement
     infi = 0d0
     ! load ACM-GPP-ET parameters
-    NUE                       = 2.36541035069e+01 !1.850535d+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
+    NUE                       = 2.533495d+01 !1.850535d+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
                                               ! ,unlimited by CO2, light and
                                               ! photoperiod
                                               ! (gC/gN/m2leaf/day)
-    pn_max_temp               = 5.19014181055e+01 !6.982614d+01  ! Maximum temperature for photosynthesis (oC)
-    pn_opt_temp               = 3.97261895228e+01 !3.798068d+01  ! Optimum temperature for photosynthesis (oC)
-    pn_kurtosis               = 1.13699236239e-01!1.723531d-01  ! Kurtosis of photosynthesis temperature response
-    e0                        = 5.63067976105e+00!4.489652d+00  ! Quantum yield gC/MJ/m2/day PAR
-    max_lai_lwrad_absorption  = 9.51312185437e-01!9.282892d-01  ! Max fraction of LW from sky absorbed by canopy
-    lai_half_lwrad_absorption = 5.20986924822e-01!5.941333d-01  ! LAI at which canopy LW absorption = 50 %
-    max_lai_nir_absorption    = 5.57000881765e-01!8.333743d-01  ! Max fraction of NIR absorbed by canopy
-    lai_half_nir_absorption   = 1.08094247547e+00!2.148633d+00  ! LAI at which canopy NIR absorption = 50 %
-    minlwp                    = -1.99728034169e+00!-1.990154d+00 ! minimum leaf water potential (MPa)
-    max_lai_par_absorption    = 6.53197566084e-01!8.737539d-01  ! Max fraction of PAR absorbed by canopy
-    lai_half_par_absorption   = 1.35986868154e+00 !1.804925d+00  ! LAI at which canopy PAR absorption = 50 %
-    lai_half_lwrad_to_sky     = 1.44161929602e+00!2.489314d+00  ! LAI at which 50 % LW is reflected back to sky
-    iWUE                      = 8.25845096832e-03!1.722579d-02  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
-    soil_swrad_absorption     = 8.26173021819e-01!7.375071d-01  ! Fraction of SW rad absorbed by soil
-    max_lai_swrad_reflected   = 7.70158671479e-02!2.796492d-01  ! Max fraction of SW reflected back to sky
+    pn_max_temp               = 5.481670d+01 !6.982614d+01  ! Maximum temperature for photosynthesis (oC)
+    pn_opt_temp               = 3.978788d+01 !3.798068d+01  ! Optimum temperature for photosynthesis (oC)
+    pn_kurtosis               = 1.226751d-01!1.723531d-01  ! Kurtosis of photosynthesis temperature response
+    e0                        = 4.828569d+00!4.489652d+00  ! Quantum yield gC/MJ/m2/day PAR
+    max_lai_lwrad_absorption  = 9.122036d-01!9.282892d-01  ! Max fraction of LW from sky absorbed by canopy
+    lai_half_lwrad_absorption = 1.677391d+00!5.941333d-01  ! LAI at which canopy LW absorption = 50 %
+    max_lai_nir_absorption    = 5.989914d-01!8.333743d-01  ! Max fraction of NIR absorbed by canopy
+    lai_half_nir_absorption   = 1.298528d+00!2.148633d+00  ! LAI at which canopy NIR absorption = 50 %
+    minlwp                    = -1.998797d+00!-1.990154d+00 ! minimum leaf water potential (MPa)
+    max_lai_par_absorption    = 8.800404d-01!8.737539d-01  ! Max fraction of PAR absorbed by canopy
+    lai_half_par_absorption   = 2.288156d+00 !1.804925d+00  ! LAI at which canopy PAR absorption = 50 %
+    lai_half_lwrad_to_sky     = 2.102549d+00!2.489314d+00  ! LAI at which 50 % LW is reflected back to sky
+    iWUE                      = 6.756860d-02!1.722579d-02  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
+    soil_swrad_absorption     = 9.580914d-01!7.375071d-01  ! Fraction of SW rad absorbed by soil
+    max_lai_swrad_reflected   = 2.879882d-01!2.796492d-01  ! Max fraction of SW reflected back to sky
     lai_half_swrad_reflected  = (lai_half_nir_absorption+lai_half_par_absorption) * 0.5d0
-    max_lai_lwrad_release     = 2.04579713675e-01!2.481599d-01  ! Max fraction of LW emitted from canopy to be released
-    lai_half_lwrad_release    = 6.19050308211e-01!5.020443d-01  ! LAI at which LW emitted from canopy to be released at 50 %
-    soilevap_rad_intercept    = 1.21920035124e-02!1.122969d-02  ! Intercept (kgH2O/m2/day) on linear adjustment to soil evaporation
+    max_lai_lwrad_release     = 2.672116d-01!2.481599d-01  ! Max fraction of LW emitted from canopy to be released
+    lai_half_lwrad_release    = 1.946119d+00!5.020443d-01  ! LAI at which LW emitted from canopy to be released at 50 %
+    soilevap_rad_intercept    = 2.822011d-02!1.122969d-02  ! Intercept (kgH2O/m2/day) on linear adjustment to soil evaporation
                                               ! to account for non-calculation
                                               ! of energy balance
-    soilevap_rad_coef         = 1.74747849804e+00!1.748044d+00  ! Coefficient on linear adjustment to
+    soilevap_rad_coef         = 2.822011d-02!1.748044d+00  ! Coefficient on linear adjustment to
                                               ! soil evaporation to account for
                                               ! non-calculation of energy
                                               ! balance
+    ! load ACM-GPP-ET parameters
+!    NUE                       = pars(4+1)     ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
+!                                              ! ,unlimited by CO2, light and
+!                                              ! photoperiod
+!                                              ! (gC/gN/m2leaf/day)
+!    pn_max_temp               = pars(4+2)  ! Maximum temperature for photosynthesis (oC)
+!    pn_opt_temp               = pars(4+3)  ! Optimum temperature for photosynthesis (oC)
+!    pn_kurtosis               = pars(4+4)  ! Kurtosis of photosynthesis temperature response
+!    e0                        = pars(4+5)  ! Quantum yield gC/MJ/m2/day PAR
+!    max_lai_lwrad_absorption  = pars(4+6)  ! Max fraction of LW from sky absorbed by canopy
+!    lai_half_lwrad_absorption = pars(4+7)  ! LAI at which canopy LW absorption = 50 %
+!    max_lai_nir_absorption    = pars(4+8)  ! Max fraction of NIR absorbed by canopy
+!    lai_half_nir_absorption   = pars(4+9)  ! LAI at which canopy NIR absorption = 50 %
+!    minlwp                    = pars(4+10) ! minimum leaf water potential (MPa)
+!    max_lai_par_absorption    = pars(4+11)  ! Max fraction of PAR absorbed by canopy
+!    lai_half_par_absorption   = pars(4+12)  ! LAI at which canopy PAR absorption = 50 %
+!    lai_half_lwrad_to_sky     = pars(4+13)  ! LAI at which 50 % LW is reflected back to sky
+!    iWUE                      = pars(4+14)  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
+!    soil_swrad_absorption     = pars(4+15)  ! Fraction of SW rad absorbed by soil
+!    max_lai_swrad_reflected   = pars(4+16)  ! Max fraction of SW reflected back to sky
+!    lai_half_swrad_reflected  = (lai_half_nir_absorption+lai_half_par_absorption) * 0.5d0
+!    max_lai_lwrad_release     = pars(4+17)  ! Max fraction of LW emitted from canopy to be released
+!    lai_half_lwrad_release    = pars(4+18)  ! LAI at which LW emitted from canopy to be released at 50 %
+!    soilevap_rad_intercept    = pars(4+19)  ! Intercept (kgH2O/m2/day) on linear adjustment to soil evaporation
+!                                              ! to account for non-calculation
+!                                              ! of energy balance
+!    soilevap_rad_coef         = pars(4+20)  ! Coefficient on linear adjustment to
+!                                              ! soil evaporation to account for
+!                                              ! non-calculation of energy
+!                                              ! balance
+
     ! check loaded parameters
     avN = pars(1)
     ! if input minlwp not empty over-write default value
@@ -344,8 +378,10 @@ contains
     maxt = met(3,1)  ! maximum temperature (oC)
     if (met(8,1) /= -9999d0) then
         meant = met(8,1)  ! mean air temperature (oC)
+        mean_annual_temp = sum(met(8,:)) / dble(nodays)
     else
         meant = (met(3,1)+met(2,1))*0.5d0
+        mean_annual_temp = sum((met(3,:)+met(2,:))*0.5d0) / dble(nodays)
     endif
     meant_K = meant + freeze
     lai = met(11,1) ! leaf area index (m2/m2)
@@ -355,15 +391,16 @@ contains
     root_biomass = max(min_root,root_C*2d0)
     root_reach = max_depth * root_biomass / (root_k + root_biomass)
     ! determine initial soil layer thickness
-    layer_thickness(1) = top_soil_depth ; layer_thickness(2) = max(min_layer,root_reach-layer_thickness(1))
-    layer_thickness(3) = max_depth - sum(layer_thickness(1:2))
+    layer_thickness(1) = top_soil_depth ; layer_thickness(2) = mid_soil_depth
+    layer_thickness(3) = max(min_layer,root_reach-sum(layer_thickness(1:2)))
+    layer_thickness(4) = max_depth - sum(layer_thickness(1:3))
     previous_depth = max(top_soil_depth,root_reach)
     ! needed to initialise soils
     call calculate_Rtot(Rtot)
     ! used to initialise soils
     FLUXES(1,2) = calculate_update_soil_water(dble_zero,dble_zero,dble_zero) ! assume no evap or rainfall
     ! store soil water content of the rooting zone (mm)
-    POOLS(1,1) = 1d3*sum(soil_waterfrac(1:nos_root_layers)*layer_thickness(1:nos_root_layers))
+    POOLS(1,1) = 1d3*soil_waterfrac(1)*layer_thickness(1)
 
     !
     ! Begin looping through each time step
@@ -395,7 +432,7 @@ contains
 
       ! calculate daylength in hours and seconds
       dayl_hours = daylength_hours((doy-(deltat(n)*0.5d0)),lat)
-      dayl_seconds = dayl_hours * 3600d0
+      dayl_seconds = dayl_hours * seconds_per_hour
       seconds_per_step = seconds_per_day * deltat(n)
       days_per_step = deltat(n)
       days_per_step_1 = deltat_1(n)
@@ -445,7 +482,7 @@ contains
                                           ((rainfall-intercepted_rainfall)*seconds_per_step))
 
       ! store soil water content of the rooting zone (mm)
-      POOLS(n,1) = 1d3*sum(soil_waterfrac(1:nos_root_layers)*layer_thickness(1:nos_root_layers))
+      POOLS(n,1) = 1d3*soil_waterfrac(1)*layer_thickness(1)
 
       ! pass soil surface runoff and underflow (drainage) from soil column kg/m2/day
       FLUXES(n,5) = runoff
@@ -611,10 +648,12 @@ contains
 
     ! local variables
     integer :: step
-    double precision :: local_water, local_drythick, local_SWP, soilevap_tmp, &
-              canopy_radiation, soil_radiation & ! isothermal net radiation (W/m2)
+    double precision ::       canopy_radiation & 
+                               ,soil_radiation & ! isothermal net radiation (W/m2)
                               ,water_diffusion & ! Diffusion of water through soil matrix (m.s-1)
                                  ,water_supply & ! Potential water supply to canopy from soil (kgH2O.m-2.day-1)
+                                  ,lambda_soil & 
+                                    ,soil_temp & ! Soil surface temperature (oC)
                                     ,Jm3kPaK_1 &
                                         ,esurf & ! see code below
                                          ,esat & ! soil air space saturation vapour pressure
@@ -646,7 +685,7 @@ contains
     gb = aerodynamic_conductance
 
     !!!!!!!!!!
-    ! Calculate evaporative fluxes (W.m-2)
+    ! Calculate canopy evaporative fluxes (kgH2O/m2/day)
     !!!!!!!!!!
 
     ! Calculate energy change due to VPD per kelvin (multiple use value)
@@ -660,39 +699,52 @@ contains
     ! Calculate the potential wet canopy evaporation, limited by energy used for
     ! transpiration
     wetcanopy_evap = (wetcanopy_evap / (lambda*(slope+psych))) * seconds_per_day
-    wetcanopy_evap = wetcanopy_evap - transpiration
+    wetcanopy_evap = max(dble_zero,wetcanopy_evap - transpiration)
 
     ! Update based on canopy water storage
     call canopy_interception_and_storage(wetcanopy_evap)
 
+    !!!!!!!!!!
+    ! Calculate soil evaporative fluxes (kgH2O/m2/day)
+    !!!!!!!!!!    
+
+    ! solve soil surface energy balance for soil temperature (oC) and thus soil
+    ! evaporation (below)
+    soil_temp = zbrent('acm_et:soil_energy_balance',soil_energy_balance,meant-50d0,meant+50d0,0.01d0) 
+    lambda_soil = 2501000d0-2364d0*soil_temp
+    soil_radiation = soil_radiation - 4d0 * emiss_boltz * ( meant+freeze ) ** 3 * ( soil_temp - meant )
+    soil_temp = soil_temp + freeze
+
     ! Estimate water diffusion rate (m2.s-1) Jones (2014) appendix 2
-    water_diffusion = 24.2d-6 * ( (maxt+freeze) / 293.2d0 )**1.75d0
-
-
+    water_diffusion = 24.2d-6 * ( (soil_temp) / 293.2d0 )**1.75d0
     ! Soil conductance to water vapour diffusion (m s-1)...
     gws = porosity(1) * water_diffusion / (tortuosity*drythick)
     ! apply potential flow restriction at this stage
-    gws = min(gws,(soil_waterfrac(1)*top_soil_depth*1d3)/dayl_seconds)
+    gws = min(gws,(soil_waterfrac(1)*top_soil_depth*1d3)/seconds_per_day)
+
     ! calculate saturated vapour pressure (kPa), function of temperature.
-    esat = 0.1d0 * exp( 1.80956664d0 + ( 17.2693882d0 * (maxt+freeze) - 4717.306081d0 ) / ( maxt+freeze - 35.86d0 ) )
+    esat = 0.1d0 * exp( 1.80956664d0 + ( 17.2693882d0 * (meant+freeze) - 4717.306081d0 ) / ( meant+freeze - 35.86d0 ) )
     ! vapour pressure of air (kPa)
     ea = esat - (vpd_pa * 1d-3)
+    ! calculate saturated vapour pressure (kPa), function of temperature.
+    esat = 0.1d0 * exp( 1.80956664d0 + ( 17.2693882d0 * (soil_temp) - 4717.306081d0 ) / ( soil_temp - 35.86d0 ) )
+
     ! vapour pressure in soil airspace (kPa), dependent on soil water potential
     ! - Jones p.110. partial_molar_vol_water
-    esurf = esat * exp( 1d6 * local_SWP * partial_molar_vol_water / ( Rcon * (maxt+freeze) ) )
+    esurf = esat * exp( 1d6 * SWP(1) * partial_molar_vol_water / ( Rcon * (soil_temp) ) )
     ! calculate VPD of the soil surface (kPa)
     esurf = esat - esurf
     ! now difference in VPD between soil air space and canopy
     esurf = (vpd_pa * 1d-3) - esurf
 
-    ! update soil isothermal net radiation to net radiation
-!    soil_radiation = soil_radiation + calculate_soil_netrad_adjustment(soil_radiation,gs,gb,esurf)
-    ! Estimate potential soil evaporation flux (kg.m-2.day-1)
+    ! generate final output
+    ! Estimate potential soil evaporation flux (kgH2O.m-2.day-1)
     soilevap = (slope*soil_radiation) + (air_density_kg*cpair*esurf*soil_conductance)
-    soilevap = soilevap / (lambda*(slope+(psych*(dble_one+soil_conductance/gws))))
+    soilevap = soilevap / (lambda_soil*(slope+(psych*(dble_one+soil_conductance/gws))))
+
     soilevap = soilevap * seconds_per_day
     ! apply statistical adjustment to account for energy balance
-    soilevap = soilevap_rad_intercept + (soilevap * soilevap_rad_coef)
+!    soilevap = soilevap_rad_intercept + (soilevap * soilevap_rad_coef)
     soilevap = max(dble_zero,min(soil_waterfrac(1) * top_soil_depth * 1d3, soilevap))
 
   end subroutine acm_et
@@ -741,9 +793,6 @@ contains
     ! See Harman & Finnigan 2008; Jones 1992 etc for details.
 
     implicit none
-
-    ! local parameters
-    double precision, parameter :: min_wind = 0.01d0 ! minimum wind speed at canopy top
 
     ! log law decay
     canopy_wind = (ustar / vonkarman) * log(displacement / roughl)
@@ -1005,16 +1054,19 @@ contains
 
     ! local variables
     integer :: i
-    double precision :: slpa, cumdepth, prev, curr, sum_water_flux, &
-                        soilR1,soilR2,transpiration_resistance,root_reach_local
+    double precision :: bonus, cumdepth, prev, curr, sum_water_flux, &
+                        soilR1,soilR2,transpiration_resistance,root_reach_local, &
+                        root_depth_50
     double precision, dimension(nos_root_layers) :: root_mass    &
                                                    ,soilRT_local &
                                                    ,root_length  &
                                                    ,ratio
+    double precision, parameter :: root_depth_frac_50 = 0.25d0 ! fractional soil depth above which 50 % 
+                                                               ! of the root mass is assumed to be located
 
     ! reset water flux
     water_flux = dble_zero ; wSWP = dble_zero ; soilRT_local = dble_zero ; soilRT = dble_zero
-    ratio = dble_zero ; ratio(1) = dble_one
+    ratio = dble_zero ; ratio(1) = dble_one ; root_mass = dble_zero
     ! calculate soil depth to which roots reach
     root_reach = max_depth * root_biomass / (root_k + root_biomass)
     ! calculate the plant hydraulic resistance component. Currently unclear
@@ -1023,23 +1075,62 @@ contains
 !    transpiration_resistance = (gplant * lai)**(-dble_one)
     transpiration_resistance = canopy_height / (gplant * lai)
 
+    !!!!!!!!!!!
+    ! Calculate root profile
+    !!!!!!!!!!!
+
     ! The original SPA src generates an exponential distribution which aims
     ! to maintain 50 % of root biomass in the top 25 % of the rooting depth.
-    ! In a simple 2 root layer system this can be estimates more simply
+    ! In a simple 3 root layer system this can be estimates more simply
 
     ! top 25 % of root profile
-    slpa = (root_reach * 0.25d0) - layer_thickness(1)
-    if (slpa <= dble_zero) then
-        ! > 50 % of root is in top layer
-        root_mass(1) = root_biomass * 0.5d0
-        root_mass(1) = root_mass(1) + ((root_biomass-root_mass(1)) * (abs(slpa)/root_reach))
+    root_depth_50 = root_reach * root_depth_frac_50
+    if (root_depth_50 <= layer_thickness(1)) then
+        ! Greater than 50 % of the fine root biomass can be found in the top
+        ! soil layer
+
+        ! Start by assigning all 50 % of root biomass to the top soil layer
+        root_mass(1) = root_biomass * 0.5d0 
+        ! Then quantify how much additional root is found in the top soil layer
+        ! assuming that the top 25 % depth is found somewhere within the top
+        ! layer
+        bonus = (root_biomass-root_mass(1)) &
+              * (layer_thickness(1)-root_depth_50) / (root_reach - root_depth_50)
+        root_mass(1) = root_mass(1) + bonus
+        ! partition the remaining root biomass between the seconds and third
+        ! soil layers
+        if (root_reach > sum(layer_thickness(1:2))) then
+            root_mass(2) = (root_biomass - root_mass(1)) &
+                         * (layer_thickness(2)/(root_reach-layer_thickness(1)))
+            root_mass(3) = root_biomass - sum(root_mass(1:2))
+        else
+            root_mass(2) = root_biomass - root_mass(1)
+        endif
+    else if (root_depth_50 > layer_thickness(1) .and. root_depth_50 <= sum(layer_thickness(1:2))) then
+        ! Greater than 50 % of fine root biomass found in the top two soil
+        ! layers. We will divide the root biomass uniformly based on volume,
+        ! plus bonus for the second layer (as done above)
+        root_mass(1) = root_biomass * 0.5d0 * (layer_thickness(1)/root_depth_50)
+        root_mass(2) = root_biomass * 0.5d0 * ((root_depth_50-layer_thickness(1))/root_depth_50)
+        ! determine bonus for the seconds layer
+        bonus = (root_biomass-sum(root_mass(1:2))) &
+              * ((sum(layer_thickness(1:2))-root_depth_50)/(root_reach-root_depth_50))
+        root_mass(2) = root_mass(2) + bonus
+        root_mass(3) = root_biomass - sum(root_mass(1:2))
     else
-        ! < 50 % of root is in bottom layer
-        root_mass(1) = root_biomass * 0.5d0 * (layer_thickness(1)/(abs(slpa)+layer_thickness(1)))
+        ! Greater than 50 % of fine root biomass stock spans across all three
+        ! layers
+        root_mass(1) = root_biomass * 0.5d0 * (layer_thickness(1)/root_depth_50)
+        root_mass(2) = root_biomass * 0.5d0 * (layer_thickness(2)/root_depth_50)
+        root_mass(3) = root_biomass - sum(root_mass(1:2))
     endif
-    root_mass(2) = max(dble_zero,root_biomass - root_mass(1))
+    ! now convert root mass into lengths 
     root_length = root_mass * root_mass_length_coef_1
 !    root_length = root_mass / (root_density * root_cross_sec_area)
+
+    !!!!!!!!!!!
+    ! Calculate hydraulic properties and each rooted layer
+    !!!!!!!!!!!    
 
     ! soil conductivity converted from m.s-1 -> m2.s-1.MPa-1 by head
     root_reach_local = min(root_reach,layer_thickness(1))
@@ -1055,21 +1146,32 @@ contains
     ! soilWP prior to application of minlwp
     demand = abs(minlwp-SWP(1:nos_root_layers))+head*canopy_height
     water_flux(1) = demand(1)/(transpiration_resistance + soilR1 + soilR2)
+
+    ! second root layer
+    if (root_mass(2) > dble_zero) then
+        root_reach_local = min(root_reach,layer_thickness(2))
+        soilR1=soil_resistance(root_length(2),root_reach_local,soil_conductivity(2)*head_1)
+        soilR2=root_resistance(root_mass(2),root_reach_local)
+        soilRT_local(2) = soilR1 + soilR2 + transpiration_resistance
+        water_flux(2) = demand(2)/(transpiration_resistance + soilR1 + soilR2)
+    endif ! roots present in the seconds layer?
+
     ! Bottom root layer
-    if (root_mass(2) > dble_zero ) then
+    if (root_mass(3) > dble_zero ) then
        ! soil conductivity converted from m.s-1 -> m2.s-1.MPa-1 by head
-       soilR1=soil_resistance(root_length(2),layer_thickness(2),soil_conductivity(2)*head_1)
-       soilR2=root_resistance(root_mass(2),layer_thickness(2))
-       soilRT_local(2)=soilR1 + soilR2 + transpiration_resistance
+       soilR1=soil_resistance(root_length(3),layer_thickness(3),soil_conductivity(3)*head_1)
+       soilR2=root_resistance(root_mass(3),layer_thickness(3))
+       soilRT_local(3)=soilR1 + soilR2 + transpiration_resistance
        ! calculate and accumulate steady state water flux in mmol.m-2.s-1
-!       demand = abs(minlwp-SWP(2))+head*canopy_height
-       water_flux(2) = demand(2)/(transpiration_resistance + soilR1 + soilR2)
-       ratio = layer_thickness(1:nos_root_layers)/sum(layer_thickness(1:nos_root_layers))
-    endif ! roots present in second layer?
+       water_flux(3) = demand(3)/(transpiration_resistance + soilR1 + soilR2)
+    endif ! roots present in third layer?
+    ratio = layer_thickness(1:nos_root_layers)/sum(layer_thickness(1:nos_root_layers))
 
     ! if freezing then assume soil surface is frozen
     if (meant < dble_one) then
-        water_flux(1) = dble_zero ; ratio(1) = dble_zero ; ratio(2) = dble_one
+        water_flux(1) = dble_zero 
+        ratio(1) = dble_zero
+        ratio(2:nos_root_layers) = layer_thickness(2:nos_root_layers) / sum(layer_thickness(2:nos_root_layers))
     endif
     ! calculate sum value
     sum_water_flux = sum(water_flux)
@@ -1165,8 +1267,8 @@ contains
 
         ! sanity checks
         ! NOTE: addition of 1e-10 is to prevent precision error causing stop
-        if (canopy_storage > (max_storage + vsmall) .or. canopy_storage < dble_zero) then
-           print*,"Canopy water storage mass balance error!!"
+        if (canopy_storage > (max_storage + 1d-15) .or. canopy_storage < dble_zero) then
+           print*,"Canopy water storage mass balance error!! ",canopy_storage-max_storage
            print*,"through_fall_total",through_fall
            print*,"canopy_storage",canopy_storage,"max_storage",max_storage
            print*,"potential_evaporation",potential_evaporation,"actual",wetcanopy_evaporation * days_per_step_1
@@ -1248,7 +1350,7 @@ contains
            exit
        end if
 
-    end do
+    end do ! nos_soil_layers
 
     ! if after all of this we have some water left assume it is runoff
     ! converted to kgH2O.m-2.day-1
@@ -1717,7 +1819,7 @@ contains
    waterloss = dble_zero ; watergain = dble_zero
 
    !!!!!!!!!!
-   ! Rainfal infiltration drainage
+   ! Rainfall infiltration drainage
    !!!!!!!!!!
 
    ! Reset runoff variable before assignment
@@ -1750,12 +1852,12 @@ contains
 
    depth_change = dble_zero ; water_change = dble_zero
    ! if roots extent down into the bucket
-   if (root_reach > top_soil_depth .or. previous_depth > top_soil_depth) then
+   if (root_reach > (top_soil_depth+mid_soil_depth) .or. previous_depth > (top_soil_depth+mid_soil_depth)) then
       ! how much has root depth extended since last step?
       depth_change = root_reach - previous_depth
 
       ! if there has been an increase
-      if (depth_change > dble_zero .and. root_reach > layer_thickness(1)+min_layer) then
+      if (depth_change > dble_zero .and. root_reach > sum(layer_thickness(1:2))+min_layer) then
 
          ! determine how much water is within the new volume of soil
          water_change = soil_waterfrac(nos_soil_layers) * depth_change
@@ -1764,8 +1866,12 @@ contains
                                             + water_change) / (layer_thickness(nos_root_layers)+depth_change)
          ! explicitly update the soil profile if there has been rooting depth
          ! changes
-         layer_thickness(1) = top_soil_depth ; layer_thickness(2) = max(min_layer,root_reach-layer_thickness(1))
-         layer_thickness(3) = max_depth - sum(layer_thickness(1:2))
+!         layer_thickness(1) = top_soil_depth ; layer_thickness(2) = max(min_layer,root_reach-layer_thickness(1))
+!         layer_thickness(3) = max_depth - sum(layer_thickness(1:2))
+         layer_thickness(1) = top_soil_depth ; layer_thickness(2) = mid_soil_depth
+         layer_thickness(3) = max(min_layer,root_reach-sum(layer_thickness(1:2)))
+         layer_thickness(4) = max_depth - sum(layer_thickness(1:3))
+
 
       elseif (depth_change < dble_zero .and. root_reach > layer_thickness(1)+min_layer) then
 
@@ -1777,8 +1883,11 @@ contains
 
          ! explicitly update the soil profile if there has been rooting depth
          ! changes
-         layer_thickness(1) = top_soil_depth ; layer_thickness(2) = max(min_layer,root_reach-layer_thickness(1))
-         layer_thickness(3) = max_depth - sum(layer_thickness(1:2))
+!         layer_thickness(1) = top_soil_depth ; layer_thickness(2) = max(min_layer,root_reach-layer_thickness(1))
+!         layer_thickness(3) = max_depth - sum(layer_thickness(1:2))
+         layer_thickness(1) = top_soil_depth ; layer_thickness(2) = mid_soil_depth
+         layer_thickness(3) = max(min_layer,root_reach-sum(layer_thickness(1:2)))
+         layer_thickness(4) = max_depth - sum(layer_thickness(1:3))
 
       else
 
@@ -1821,7 +1930,8 @@ contains
   !
   !------------------------------------------------------------------
   !
-  double precision function calculate_soil_netrad_adjustment(soil_radiation,gs,gb,vpd_in)
+  subroutine calculate_soil_netrad_adjustment(soil_radiation,gs,gb,vpd_in &
+                                             ,delta_radiation,delta_temperature)
 
     ! function estimates the steady state solution to canopy temperature by
     ! balancing approximate turbulent fluxes
@@ -1832,12 +1942,12 @@ contains
     double precision, intent(in) ::  &
                            soil_radiation, & ! estimate of net absorbed radiation (SW+LW) J.m-2.day-1
                                    vpd_in, & ! vapour pressure deficit (Pa)
-                                    gs,gb   ! canopy conductance (m.s-1)
+                                    gs,gb    ! canopy conductance (m.s-1)
+    double precision, intent(out) :: delta_radiation,delta_temperature
     ! local variables
     double precision :: thermal_gains, thermal_losses, sm_1_kPaK_1,    &
                         soil_evaporative_resistance,                 &
-                        soil_thermal_resistance,radiative_conductance, &
-                        delta_temperature
+                        soil_thermal_resistance,radiative_conductance
 
     !!!!!!!!!!
     ! Calculate total thermal resistance in form of radiation (gr) and sensible
@@ -1851,6 +1961,8 @@ contains
     ! NOTE: that aerodynamic_conductance already implicitly contains LAI scaling
     ! from roughness length and displacement height components
     soil_thermal_resistance = radiative_conductance + gb * 0.93d0
+!    ! include term for energy loss into the soil via ground heat flux
+!    soil_thermal_resistance = soil_thermal_resistance + 0.34d0 !+ ( 0.58 - 0.34 ) * iceprop(i) 
     ! NOTE: conversion to resistance (s.m-1)
     soil_thermal_resistance = (soil_thermal_resistance) ** (-dble_one)
 
@@ -1874,14 +1986,14 @@ contains
     thermal_gains = thermal_gains / (air_density_kg * cpair * sm_1_kPaK_1)
     ! calculate thermal losses to the system (K)
     thermal_losses = (soil_thermal_resistance * vpd_in * 1d-3) / sm_1_kPaK_1
-    ! calculate net difference in canopy temperature
+    ! calculate net difference in canopy temperature (K)
     delta_temperature = thermal_gains - thermal_losses
-
-    calculate_soil_netrad_adjustment = - 4d0 * emiss_boltz * ( maxt+freeze ) ** 3 * ( delta_temperature )
+    ! calculate net difference in radiation balance (W/m2)
+    delta_radiation = - 4d0 * emiss_boltz * ( maxt+freeze ) ** 3 * ( delta_temperature )
 
     return
 
-  end function calculate_soil_netrad_adjustment
+  end subroutine calculate_soil_netrad_adjustment
   !
   !------------------------------------------------------------------
   !
@@ -1903,6 +2015,71 @@ contains
    return
 
   end function root_resistance
+  !
+  !------------------------------------------------------------------
+  !
+  double precision function soil_energy_balance(soil_temp)
+
+    ! Estimate soil energy balance assuming that ground heat flux is neutral
+    ! over the day (not strictly true but a small component of the energy
+    ! balance). Thus sensible and evaporative fluxes are the only components to
+    ! be solved.
+
+    ! arguments
+    double precision, intent(in) :: soil_temp ! soil temperature (oC)
+
+    ! local variables
+    double precision :: water_diffusion, gws, esat, ea, esurf, &
+                        soilevap, sensible, lambda_soil, soil_radiation, &
+                        ground_heat
+
+    ! soil radiation balance (W/m2)
+    soil_radiation = soil_lwrad_Wm2 + (soil_swrad_MJday * 1d6 * seconds_per_day_1)
+    soil_radiation = soil_radiation - 4d0 * emiss_boltz * ( meant+freeze ) ** 3 * ( soil_temp - meant )
+
+    ! calculate soil lambda
+    lambda_soil = 2501000d0-2364d0*soil_temp
+    ! Estimate water diffusion rate (m2.s-1) Jones (2014) appendix 2
+    water_diffusion = 24.2d-6 * ( (soil_temp+freeze) / 293.2d0 )**1.75d0
+    ! Soil conductance to water vapour diffusion (m s-1)...
+    gws = porosity(1) * water_diffusion / (tortuosity*drythick)
+    ! apply potential flow restriction at this stage
+    gws = min(gws,(soil_waterfrac(1)*top_soil_depth*1d3)/seconds_per_day)
+
+    ! calculate saturated vapour pressure (kPa), function of temperature.
+    esat = 0.1d0 * exp( 1.80956664d0 + ( 17.2693882d0 * (meant+freeze) - 4717.306081d0 ) / ( meant+freeze - 35.86d0 ) )
+    ! vapour pressure of air (kPa)
+    ea = esat - (vpd_pa * 1d-3)
+
+    ! calculate saturated vapour pressure (kPa), function of temperature.
+    esat = 0.1d0 * exp( 1.80956664d0 + ( 17.2693882d0 * (soil_temp+freeze) - 4717.306081d0 ) / ( soil_temp+freeze - 35.86d0 ) )
+    ! vapour pressure in soil airspace (kPa), dependent on soil water potential
+    ! - Jones p.110. partial_molar_vol_water
+    esurf = esat * exp( 1d6 * SWP(1) * partial_molar_vol_water / ( Rcon * (soil_temp+freeze) ) )
+    ! calculate VPD of the soil surface (kPa)
+    esurf = esat - esurf
+    ! now difference in VPD between soil air space and canopy
+    esurf = (vpd_pa * 1d-3) - esurf
+
+    ! Estimate potential soil evaporation flux (W/m2) ; positive if evaporating
+    soilevap = (slope*soil_radiation) + (air_density_kg*cpair*esurf*soil_conductance)
+    soilevap = soilevap / (lambda_soil*(slope+(psych*(dble_one+soil_conductance/gws))))
+!    soilevap = (soilevap_rad_intercept*seconds_per_day_1) + (soilevap * soilevap_rad_coef)
+    soilevap = lambda_soil * soilevap
+
+    ! soil sensible heat flux (W/m2); positive if releasing heat
+    sensible = (soil_temp-meant) * soil_conductance
+
+    ! ground heat flux (W/m2); positive moving up profile, note 0.34 is soil thermal conductance
+    ground_heat = -0.34d0 * ( soil_temp - mean_annual_temp ) / ( 0.5d0 * layer_thickness(1) )
+ 
+    ! calculate balance residual
+    soil_energy_balance = soil_radiation - (sensible + soilevap) + ground_heat
+
+    ! Return to subroutine
+    return
+
+  end function soil_energy_balance
   !
   !-----------------------------------------------------------------
   !
@@ -2126,4 +2303,4 @@ contains
 !
 !--------------------------------------------------------------------
 !
-end module CARBON_MODEl_MOD
+end module CARBON_MODEL_MOD

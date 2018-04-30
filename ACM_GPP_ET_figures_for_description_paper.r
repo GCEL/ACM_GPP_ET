@@ -274,7 +274,7 @@ dev.off()
 ## Paper figures
 
 # extract the lat / long information for the calibration sites
-data = read.csv("/home/lsmallma/gcel/data_for_ACM_era_200pixels_continuous.csv",header=TRUE)
+data = read.csv("/home/lsmallma/gcel/ACM_GPP_ET_RECALIBRATION/data_for_ACM_era_200pixels_continuous.csv",header=TRUE)
 #latitude = data$Lat ; longitude = data$Lon
 latitude = calibration_output$drivers$lat ; longitude = calibration_output$drivers$long
 latlong = paste(latitude,longitude)
@@ -367,7 +367,7 @@ var2 = calibration_output$drivers$GPP
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
               main="Calibration", ylab="SPA", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-mtext(expression(paste("GPP"," (gC ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = 1.2)
+mtext(expression(paste("GPP"," (gC ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = -0.2, adj = 2.3)
 var1 = validation_water_output$mean_gpp
 var2 = validation_water_output$drivers$GPP
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
@@ -380,9 +380,9 @@ var2 = (calibration_output$drivers$Evap-calibration_output$drivers$soilevap-cali
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-mtext(expression(paste("Transpiration"," (kgH2O ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = 1.2)
+mtext(expression(paste("Transpiration"," (kgH2O ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = -0.2, adj = 2.3)
 var1 = validation_water_output$mean_transpiration
-var2 = (validation_water_output$drivers$Evap-calibration_output$drivers$soilevap-calibration_output$drivers$wetevap)
+var2 = (validation_water_output$drivers$Evap-validation_water_output$drivers$soilevap-validation_water_output$drivers$wetevap)
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
@@ -393,7 +393,7 @@ var2 = calibration_output$drivers$soilevap
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab="ACM-GPP-ET",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-mtext(expression(paste("Soil evaporation"," (kgH2O ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = 1.2)
+mtext(expression(paste("Soil evaporation"," (kgH2O ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = -0.2, adj = 2.3)
 var1 = validation_water_output$mean_soilevaporation
 var2 = validation_water_output$drivers$soilevap
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="ACM-GPP-ET",
@@ -406,7 +406,7 @@ var2 = calibration_output$drivers$wetevap
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab="ACM-GPP-ET",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-mtext(expression(paste("Wet canopy evaporation"," (kgH2O ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = 1.2)
+mtext(expression(paste("Wet canopy evaporation"," (kgH2O ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = -0.2, adj = 2.3)
 var1 = validation_water_output$mean_wetcanopyevap
 var2 = validation_water_output$drivers$wetevap
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab="ACM-GPP-ET",
@@ -1115,250 +1115,255 @@ dev.off()
 ###############################################
 ###############################################
 ###############################################
-
-load("/Users/lsmallma/Desktop/ACM/acm_recal_with_spa_200pixels_continuous_parameters.RData")
-load("/Users/lsmallma/Desktop/ACM/acm_recal_with_spa_200pixels_continuous.RData")
-par(mfrow=c(3,7))
-for (i in seq(1,21)) {hist(parameters[i,,],main=i)}
-maxl=which(parameters[21,,] == max(parameters[21,,]))
-for (i in seq(1,21)) {print(parameters[i,,][maxl])}
-
-setwd("/Users/lsmallma/WORK/Github/GCEL/ACM_GPP_ET/")
-load("./outputs/validation_water_output.RData")
-load("./outputs/validation_nowater_output.RData")
-
-names(validation_water_output)
-names(validation_water_output$drivers)
-
-gpp_residual = validation_water_output$mean_gpp-validation_water_output$drivers$GPP
-trans_residual = validation_water_output$mean_transpiration-(validation_water_output$drivers$Evap-validation_water_output$drivers$soilevap-validation_water_output$drivers$wetevap)
-soil_residual = validation_water_output$mean_soilevaporation-validation_water_output$drivers$soilevap
-swp_residual = validation_water_output$mean_wSWP-validation_water_output$drivers$SWP
-
-spa_transpiration = (validation_water_output$drivers$Evap-validation_water_output$drivers$soilevap-validation_water_output$drivers$wetevap)
-
-locations = which(abs(soil_residual) > 4)
-validation_water_output$drivers$lat[locations]
-validation_water_output$drivers$long[locations]
-test_site = which(validation_water_output$drivers$lat == validation_water_output$drivers$lat[locations[2]] & validation_water_output$drivers$long == validation_water_output$drivers$long[locations[2]])
-par(mfrow=c(3,3))
-plot(validation_water_output$mean_gpp[test_site])
-plot(validation_water_output$mean_lai[test_site])
-plot(validation_water_output$mean_WUE[test_site])
-plot(validation_water_output$mean_transpiration[test_site])
-plot(validation_water_output$mean_soilevaporation[test_site])
-plot(validation_water_output$mean_drainagemm[test_site])
-plot(validation_water_output$mean_runoffmm[test_site])
-plot(validation_water_output$mean_wSWP[test_site])
-plot(validation_water_output$mean_rootwatermm[test_site])
-
-par(mfrow=c(2,5))
-plot(validation_water_output$mean_gpp[test_site], type="l", col="red", ylim=c(0,max(validation_water_output$drivers$GPP[test_site])))
-lines(validation_water_output$drivers$GPP[test_site], col="black")
-plot(validation_water_output$mean_soilevaporation[test_site], type="l", col="red")
-lines(validation_water_output$drivers$soilevap[test_site], col="black")
-plot(validation_water_output$mean_wSWP[test_site], type="l", col="red")
-lines(validation_water_output$drivers$SWP[test_site], col="black")
-plot(validation_water_output$mean_rootwatermm[test_site], type="l", col="red")
-lines(validation_water_output$drivers$SWC[test_site], col="black")
-plot(validation_water_output$mean_transpiration[test_site], type="l", col="red", ylim=c(0,max(spa_transpiration[test_site])))
-lines(spa_transpiration[test_site], col="black")
-
-plot(validation_water_output$mean_gpp[test_site]~validation_water_output$drivers$GPP[test_site])
-abline(0,1,col="red", lwd=3)
-plot(validation_water_output$mean_soilevaporation[test_site]~validation_water_output$drivers$soilevap[test_site])
-abline(0,1,col="red", lwd=3)
-plot(validation_water_output$mean_wSWP[test_site]~validation_water_output$drivers$SWP[test_site])
-abline(0,1,col="red", lwd=3)
-plot(validation_water_output$mean_rootwatermm[test_site]~validation_water_output$drivers$SWC[test_site])
-abline(0,1,col="red", lwd=3)
-plot(validation_water_output$mean_transpiration[test_site]~spa_transpiration[test_site])
-abline(0,1,col="red", lwd=3)
-
-par(mfrow=c(3,4))
-plot(soil_residual[test_site]~validation_water_output$drivers$lai[test_site], main="", ylab="Residual", xlab="LAI")
-plot(soil_residual[test_site]~validation_water_output$drivers$avgN[test_site], main="", ylab="Residual", xlab="avgN")
-plot(soil_residual[test_site]~validation_water_output$drivers$swrad_avg[test_site], main="", ylab="Residual", xlab="swrad_avg")
-plot(soil_residual[test_site]~validation_water_output$drivers$co2_avg[test_site], main="", ylab="Residual", xlab="CO2")
-plot(soil_residual[test_site]~validation_water_output$drivers$sat_max[test_site], main="", ylab="Residual", xlab="sat_max")
-plot(soil_residual[test_site]~validation_water_output$drivers$vpd_avg[test_site], main="", ylab="Residual", xlab="vpd_avg")
-plot(soil_residual[test_site]~validation_water_output$drivers$wind_avg[test_site], main="", ylab="Residual", xlab="wind_avg")
-plot(soil_residual[test_site]~validation_water_output$drivers$ppt_avg[test_site], main="", ylab="Residual", xlab="rainfall")
-plot(soil_residual[test_site]~validation_water_output$drivers$SWP[test_site], main="", ylab="Residual", xlab="wSWP")
-plot(soil_residual[test_site]~validation_water_output$drivers$SWC[test_site], main="", ylab="Residual", xlab="SWC")
-plot(soil_residual[test_site]~validation_water_output$drivers$energy_balance_residual[test_site], main="", ylab="Residual", xlab="energy balance")
-plot(soil_residual[test_site]~validation_water_output$drivers$netrad[test_site], main="", ylab="Residual", xlab="NetRad")
-
-validation_water_output$drivers$porosity[test_site]
-
-jpeg("./FIGURES/gpp_residual_investigation_water.jpg", width=7200, height = 4000, res = 400, quality = 100)
-par(mfrow=c(3,4))
-plot(gpp_residual~validation_water_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
-plot(gpp_residual~validation_water_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
-plot(gpp_residual~validation_water_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
-plot(gpp_residual~validation_water_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
-plot(gpp_residual~validation_water_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
-plot(gpp_residual~validation_water_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
-plot(gpp_residual~validation_water_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
-plot(gpp_residual~validation_water_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
-plot(gpp_residual~validation_water_output$drivers$SWP, main="", ylab="Residual", xlab="sfc_pressure")
-plot(gpp_residual~validation_water_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
-plot(gpp_residual~validation_water_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
-plot(gpp_residual~validation_water_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
-dev.off()
-
-jpeg("./FIGURES/trans_residual_investigation_water.jpg", width=7200, height = 4000, res = 400, quality = 100)
-par(mfrow=c(3,4))
-plot(trans_residual~validation_water_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
-plot(trans_residual~validation_water_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
-plot(trans_residual~validation_water_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
-plot(trans_residual~validation_water_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
-plot(trans_residual~validation_water_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
-plot(trans_residual~validation_water_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
-plot(trans_residual~validation_water_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
-plot(trans_residual~validation_water_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
-plot(trans_residual~validation_water_output$drivers$SWP, main="", ylab="Residual", xlab="sfc_pressure")
-plot(trans_residual~validation_water_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
-plot(trans_residual~validation_water_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
-plot(trans_residual~validation_water_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
-dev.off()
-
-jpeg("./FIGURES/soil_residual_investigation_water.jpg", width=7200, height = 4000, res = 400, quality = 100)
-par(mfrow=c(3,4))
-plot(soil_residual~validation_water_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
-plot(soil_residual~validation_water_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
-plot(soil_residual~validation_water_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
-plot(soil_residual~validation_water_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
-plot(soil_residual~validation_water_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
-plot(soil_residual~validation_water_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
-plot(soil_residual~validation_water_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
-plot(soil_residual~validation_water_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
-plot(soil_residual~validation_water_output$drivers$SWP, main="", ylab="Residual", xlab="wSWP")
-plot(soil_residual~validation_water_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
-plot(soil_residual~validation_water_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
-plot(soil_residual~validation_water_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
-dev.off()
-
-jpeg("./FIGURES/wSWP_residual_investigation_water.jpg", width=7200, height = 4000, res = 400, quality = 100)
-par(mfrow=c(3,4))
-plot(swp_residual~validation_water_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
-plot(swp_residual~validation_water_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
-plot(swp_residual~validation_water_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
-plot(swp_residual~validation_water_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
-plot(swp_residual~validation_water_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
-plot(swp_residual~validation_water_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
-plot(swp_residual~validation_water_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
-plot(swp_residual~validation_water_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
-plot(swp_residual~validation_water_output$drivers$sfc_pressure, main="", ylab="Residual", xlab="sfc_pressure")
-plot(swp_residual~validation_water_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
-plot(swp_residual~validation_water_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
-plot(swp_residual~validation_water_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
-dev.off()
-
-par(mfrow=c(2,2))
-plot(soil_residual~validation_water_output$drivers$SWP, main="", ylab="Residual", xlab="SWP")
-plot(soil_residual~validation_water_output$mean_wSWP, main="", ylab="Residual", xlab="SWP")
-plot(soil_residual[which(validation_water_output$mean_wSWP > -0.1)]~validation_water_output$drivers$swrad_avg[which(validation_water_output$mean_wSWP > -0.1)], main="", ylab="Residual", xlab="SW-RAD")
-plot(soil_residual[which(validation_water_output$mean_wSWP > -0.1)]~validation_water_output$drivers$swrad_avg[which(validation_water_output$mean_wSWP > -0.1)], main="", ylab="Residual", xlab="SW-RAD")
-
-par(mfrow=c(2,2))
-plot(validation_water_output$mean_rootwatermm~validation_water_output$drivers$SWC, main="Rootwatermm", ylab="ACM", xlab="SPA")
-abline(0,1,col="red",lwd=3)
-plot(validation_water_output$mean_wSWP~validation_water_output$drivers$SWP, main="wSWP", ylab="ACM", xlab="SPA")
-abline(0,1,col="red",lwd=3)
-plot(validation_water_output$mean_rootwatermm[which(abs(swp_residual) < 0.2)]~validation_water_output$drivers$SWC[which(abs(swp_residual) < 0.2)], main="Rootwatermm", ylab="ACM", xlab="SPA")
-abline(0,1,col="red",lwd=3)
-plot(validation_water_output$mean_wSWP[which(abs(swp_residual) < 0.2)]~validation_water_output$drivers$SWP[which(abs(swp_residual) < 0.2)], main="wSWP", ylab="ACM", xlab="SPA", ylim=c(-0.5,0))
-abline(0,1,col="red",lwd=3)
-
-length(which(abs(swp_residual) < 0.2)) / length(swp_residual)
-summary(lm(validation_water_output$mean_soilevaporation[which(abs(swp_residual) < 0.2)]~validation_water_output$drivers$soilevap[which(abs(swp_residual) < 0.2)]))
-
-soilevap_rad_intercept    = 1.122969e-02 ; soilevap_rad_coef = 1.748044e+00 
-soilevap = soilevap_rad_intercept + (soilevap * soilevap_rad_coef)
-
-uncorrected_soilevap = (validation_water_output$mean_soilevaporation - soilevap_rad_intercept) / soilevap_rad_coef
-plot(validation_water_output$mean_soilevaporation~uncorrected_soilevap)
-plot(validation_water_output$drivers$soilevap~uncorrected_soilevap)
-
-summary(lm(validation_water_output$drivers$soilevap~uncorrected_soilevap))
-
-usoil_residual = uncorrected_soilevap-validation_water_output$drivers$soilevap
-jpeg("./FIGURES/usoil_residual_investigation_water.jpg", width=7200, height = 4000, res = 400, quality = 100)
-par(mfrow=c(3,4))
-plot(usoil_residual~validation_water_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
-plot(usoil_residual~validation_water_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
-plot(usoil_residual~validation_water_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
-plot(usoil_residual~validation_water_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
-plot(usoil_residual~validation_water_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
-plot(usoil_residual~validation_water_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
-plot(usoil_residual~validation_water_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
-plot(usoil_residual~validation_water_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
-plot(usoil_residual~validation_water_output$drivers$sfc_pressure, main="", ylab="Residual", xlab="sfc_pressure")
-plot(usoil_residual~validation_water_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
-plot(usoil_residual~validation_water_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
-plot(usoil_residual~validation_water_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
-dev.off()
-
-uncorrected_soilevap = (validation_nowater_output$mean_soilevaporation - soilevap_rad_intercept) / soilevap_rad_coef
-usoil_residual = uncorrected_soilevap-validation_nowater_output$drivers$soilevap
-jpeg("./FIGURES/usoil_residual_investigation_nowater.jpg", width=7200, height = 4000, res = 400, quality = 100)
-par(mfrow=c(3,4))
-plot(usoil_residual~validation_nowater_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
-plot(usoil_residual~validation_nowater_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
-plot(usoil_residual~validation_nowater_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
-plot(usoil_residual~validation_nowater_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
-plot(usoil_residual~validation_nowater_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
-plot(usoil_residual~validation_nowater_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
-plot(usoil_residual~validation_nowater_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
-plot(usoil_residual~validation_nowater_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
-plot(usoil_residual~validation_nowater_output$drivers$sfc_pressure, main="", ylab="Residual", xlab="sfc_pressure")
-plot(usoil_residual~validation_nowater_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
-plot(usoil_residual~validation_nowater_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
-plot(usoil_residual~validation_nowater_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
-dev.off()
-
-
-
-
-
-
-setwd("/Users/lsmallma/WORK/Github/GCEL/ACM_GPP_ET/")
-load("./outputs/global_1x1_degree_2001_2015_NUE_half.RData")
-load("./outputs/global_1x1_degree_2001_2015_NUE_half_co2_plus100.RData")
-load("./outputs/global_1x1_degree_2001_2015_NUE_half_Tair_plus4.RData")
-
-fig_height=4000 ; fig_width=7200
-jpeg(file="./FIGURES/Cal_val_paper_figure_5.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-par(mfrow=c(2,3), mar=c(1.4, 1.2, 2.4, 8.5), omi=c(0.1, 0.1, 0.1, 0.1))
-## Summary figures GPP, ET, WUE; CO2 + 100
-colour_choices_upper = colorRampPalette((brewer.pal(11,"Spectral")))
-var1=((global_output_NUE_half_co2_plus100$mean_gpp*365.25)-(global_output_NUE_half$mean_gpp*365.25))/(global_output_NUE_half$mean_gpp*365.25) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
-image.plot(var1, main=expression(paste(Delta,"GPP"," (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
-mtext(expression(paste("C",O[2],"+100 ppm")),side = 2,cex=1.8, padj = 1.2)
-var1=((global_output_NUE_half_co2_plus100$mean_transpiration+global_output_NUE_half_co2_plus100$mean_wetcanopyevap+global_output_NUE_half_co2_plus100$mean_soilevaporation)*365.25)
-var1 = var1-((global_output_NUE_half$mean_transpiration+global_output_NUE_half$mean_wetcanopyevap+global_output_NUE_half$mean_soilevaporation)*365.25)
-var1 = var1 / ((global_output_NUE_half$mean_transpiration+global_output_NUE_half$mean_wetcanopyevap+global_output_NUE_half$mean_soilevaporation)*365.25)  
-colour_choices=colour_choices_upper(length(var1))
-zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
-image.plot(var1, main=expression(paste(Delta,"ET"," (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
-var1=(global_output_NUE_half_co2_plus100$mean_wue - global_output_NUE_half$mean_wue) / global_output_NUE_half$mean_wue ; colour_choices=colour_choices_upper(length(var1))
-zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
-image.plot(var1, main=expression(paste(Delta,"WUE (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
-## Summary figures GPP, ET, WUE; Tair + 1
-var1=((global_output_NUE_half_Tair_plus4$mean_gpp*365.25)-(global_output_NUE_half$mean_gpp*365.25))/(global_output_NUE_half$mean_gpp*365.25) ; colour_choices=colour_choices_upper(length(var1))
-zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
-image.plot(var1, main=expression(paste(Delta,"GPP"," (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
-mtext(expression(paste("Tair+",1^o,"C",sep="")),side = 2,cex=1.8, padj = 1.2)
-var1=((global_output_NUE_half_Tair_plus4$mean_transpiration+global_output_NUE_half_Tair_plus4$mean_wetcanopyevap+global_output_NUE_half_Tair_plus4$mean_soilevaporation)*365.25)
-var1 = var1-((global_output_NUE_half$mean_transpiration+global_output_NUE_half$mean_wetcanopyevap+global_output_NUE_half$mean_soilevaporation)*365.25)
-var1 = var1 / ((global_output_NUE_half$mean_transpiration+global_output_NUE_half$mean_wetcanopyevap+global_output_NUE_half$mean_soilevaporation)*365.25)  
-colour_choices=colour_choices_upper(length(var1))
-zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
-image.plot(var1, main=expression(paste(Delta,"ET"," (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
-var1 = (global_output_NUE_half_Tair_plus4$mean_wue - global_output_NUE_half$mean_wue) / global_output_NUE_half$mean_wue ; colour_choices=colour_choices_upper(length(var1))
-zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
-image.plot(var1, main=expression(paste(Delta,"WUE (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
-dev.off()
-
+# 
+# soil = read.table("/home/lsmallma/Desktop/acm_gpp_et_soil_test.txt", sep="", header=FALSE)
+# par(mfrow=c(2,3))
+# plot(soil[,1])
+# plot(soil[,2])
+# plot(soil[,3])
+# 
+# plot(soil_residual[test_site]~soil[,1])
+# plot(soil_residual[test_site]~soil[,2])
+# plot(soil_residual[test_site]~soil[,3])
+# 
+# setwd("/home/lsmallma/WORK/GREENHOUSE/models/ACM_GPP_ET/")
+# load("./outputs/validation_water_output.RData")
+# load("./outputs/validation_nowater_output.RData")
+# 
+# names(validation_water_output)
+# names(validation_water_output$drivers)
+# 
+# gpp_residual = validation_water_output$mean_gpp-validation_water_output$drivers$GPP
+# trans_residual = validation_water_output$mean_transpiration-(validation_water_output$drivers$Evap-validation_water_output$drivers$soilevap-validation_water_output$drivers$wetevap)
+# soil_residual = validation_water_output$mean_soilevaporation-validation_water_output$drivers$soilevap
+# swp_residual = validation_water_output$mean_wSWP-validation_water_output$drivers$SWP
+# 
+# spa_transpiration = (validation_water_output$drivers$Evap-validation_water_output$drivers$soilevap-validation_water_output$drivers$wetevap)
+# 
+# locations = which(abs(soil_residual) > 4)
+# validation_water_output$drivers$lat[locations]
+# validation_water_output$drivers$long[locations]
+# test_site = which(validation_water_output$drivers$lat == validation_water_output$drivers$lat[locations[2]] & validation_water_output$drivers$long == validation_water_output$drivers$long[locations[2]])
+# par(mfrow=c(3,3))
+# plot(validation_water_output$mean_gpp[test_site])
+# plot(validation_water_output$mean_lai[test_site])
+# plot(validation_water_output$mean_WUE[test_site])
+# plot(validation_water_output$mean_transpiration[test_site])
+# plot(validation_water_output$mean_soilevaporation[test_site])
+# plot(validation_water_output$mean_drainagemm[test_site])
+# plot(validation_water_output$mean_runoffmm[test_site])
+# plot(validation_water_output$mean_wSWP[test_site])
+# plot(validation_water_output$mean_rootwatermm[test_site])
+# 
+# par(mfrow=c(2,5))
+# plot(validation_water_output$mean_gpp[test_site], type="l", col="red", ylim=c(0,max(validation_water_output$drivers$GPP[test_site])))
+# lines(validation_water_output$drivers$GPP[test_site], col="black")
+# plot(validation_water_output$mean_soilevaporation[test_site], type="l", col="red")
+# lines(validation_water_output$drivers$soilevap[test_site], col="black")
+# plot(validation_water_output$mean_wSWP[test_site], type="l", col="red")
+# lines(validation_water_output$drivers$SWP[test_site], col="black")
+# plot(validation_water_output$mean_rootwatermm[test_site], type="l", col="red")
+# lines(validation_water_output$drivers$SWC[test_site], col="black")
+# plot(validation_water_output$mean_transpiration[test_site], type="l", col="red", ylim=c(0,max(spa_transpiration[test_site])))
+# lines(spa_transpiration[test_site], col="black")
+# 
+# plot(validation_water_output$mean_gpp[test_site]~validation_water_output$drivers$GPP[test_site])
+# abline(0,1,col="red", lwd=3)
+# plot(validation_water_output$mean_soilevaporation[test_site]~validation_water_output$drivers$soilevap[test_site])
+# abline(0,1,col="red", lwd=3)
+# plot(validation_water_output$mean_wSWP[test_site]~validation_water_output$drivers$SWP[test_site])
+# abline(0,1,col="red", lwd=3)
+# plot(validation_water_output$mean_rootwatermm[test_site]~validation_water_output$drivers$SWC[test_site])
+# abline(0,1,col="red", lwd=3)
+# plot(validation_water_output$mean_transpiration[test_site]~spa_transpiration[test_site])
+# abline(0,1,col="red", lwd=3)
+# 
+# par(mfrow=c(4,4))
+# plot(soil_residual[test_site]~validation_water_output$drivers$doy[test_site], main="", ylab="Residual", xlab="DOYT")
+# plot(soil_residual[test_site]~validation_water_output$drivers$lai[test_site], main="", ylab="Residual", xlab="LAI")
+# plot(soil_residual[test_site]~validation_water_output$drivers$avgN[test_site], main="", ylab="Residual", xlab="avgN")
+# plot(soil_residual[test_site]~validation_water_output$drivers$swrad_avg[test_site], main="", ylab="Residual", xlab="swrad_avg")
+# plot(soil_residual[test_site]~validation_water_output$drivers$co2_avg[test_site], main="", ylab="Residual", xlab="CO2")
+# plot(soil_residual[test_site]~validation_water_output$drivers$sat_max[test_site], main="", ylab="Residual", xlab="sat_max")
+# plot(soil_residual[test_site]~validation_water_output$drivers$vpd_avg[test_site], main="", ylab="Residual", xlab="vpd_avg")
+# plot(soil_residual[test_site]~validation_water_output$drivers$wind_avg[test_site], main="", ylab="Residual", xlab="wind_avg")
+# plot(soil_residual[test_site]~validation_water_output$drivers$ppt_avg[test_site], main="", ylab="Residual", xlab="rainfall")
+# plot(soil_residual[test_site]~validation_water_output$drivers$SWP[test_site], main="", ylab="Residual", xlab="wSWP")
+# plot(soil_residual[test_site]~validation_water_output$drivers$SWC[test_site], main="", ylab="Residual", xlab="SWC")
+# plot(soil_residual[test_site]~validation_water_output$drivers$Rtot[test_site], main="", ylab="Residual", xlab="Rtot")
+# plot(soil_residual[test_site]~validation_water_output$drivers$energy_balance_residual[test_site], main="", ylab="Residual", xlab="energy balance")
+# plot(soil_residual[test_site]~validation_water_output$drivers$netrad[test_site], main="", ylab="Residual", xlab="NetRad")
+# 
+# validation_water_output$drivers$porosity[test_site]
+# 
+# jpeg("./FIGURES/gpp_residual_investigation_water.jpg", width=7200, height = 4000, res = 400, quality = 100)
+# par(mfrow=c(3,4))
+# plot(gpp_residual~validation_water_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
+# plot(gpp_residual~validation_water_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
+# plot(gpp_residual~validation_water_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
+# plot(gpp_residual~validation_water_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
+# plot(gpp_residual~validation_water_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
+# plot(gpp_residual~validation_water_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
+# plot(gpp_residual~validation_water_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
+# plot(gpp_residual~validation_water_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
+# plot(gpp_residual~validation_water_output$drivers$SWP, main="", ylab="Residual", xlab="sfc_pressure")
+# plot(gpp_residual~validation_water_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
+# plot(gpp_residual~validation_water_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
+# plot(gpp_residual~validation_water_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
+# dev.off()
+# 
+# jpeg("./FIGURES/trans_residual_investigation_water.jpg", width=7200, height = 4000, res = 400, quality = 100)
+# par(mfrow=c(3,4))
+# plot(trans_residual~validation_water_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
+# plot(trans_residual~validation_water_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
+# plot(trans_residual~validation_water_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
+# plot(trans_residual~validation_water_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
+# plot(trans_residual~validation_water_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
+# plot(trans_residual~validation_water_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
+# plot(trans_residual~validation_water_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
+# plot(trans_residual~validation_water_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
+# plot(trans_residual~validation_water_output$drivers$SWP, main="", ylab="Residual", xlab="sfc_pressure")
+# plot(trans_residual~validation_water_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
+# plot(trans_residual~validation_water_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
+# plot(trans_residual~validation_water_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
+# dev.off()
+# 
+# jpeg("./FIGURES/soil_residual_investigation_water.jpg", width=7200, height = 4000, res = 400, quality = 100)
+# par(mfrow=c(3,4))
+# plot(soil_residual~validation_water_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
+# plot(soil_residual~validation_water_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
+# plot(soil_residual~validation_water_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
+# plot(soil_residual~validation_water_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
+# plot(soil_residual~validation_water_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
+# plot(soil_residual~validation_water_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
+# plot(soil_residual~validation_water_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
+# plot(soil_residual~validation_water_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
+# plot(soil_residual~validation_water_output$drivers$SWP, main="", ylab="Residual", xlab="wSWP")
+# plot(soil_residual~validation_water_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
+# plot(soil_residual~validation_water_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
+# plot(soil_residual~validation_water_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
+# dev.off()
+# 
+# jpeg("./FIGURES/wSWP_residual_investigation_water.jpg", width=7200, height = 4000, res = 400, quality = 100)
+# par(mfrow=c(3,4))
+# plot(swp_residual~validation_water_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
+# plot(swp_residual~validation_water_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
+# plot(swp_residual~validation_water_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
+# plot(swp_residual~validation_water_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
+# plot(swp_residual~validation_water_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
+# plot(swp_residual~validation_water_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
+# plot(swp_residual~validation_water_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
+# plot(swp_residual~validation_water_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
+# plot(swp_residual~validation_water_output$drivers$sfc_pressure, main="", ylab="Residual", xlab="sfc_pressure")
+# plot(swp_residual~validation_water_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
+# plot(swp_residual~validation_water_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
+# plot(swp_residual~validation_water_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
+# dev.off()
+# 
+# par(mfrow=c(2,2))
+# plot(soil_residual~validation_water_output$drivers$SWP, main="", ylab="Residual", xlab="SWP")
+# plot(soil_residual~validation_water_output$mean_wSWP, main="", ylab="Residual", xlab="SWP")
+# plot(soil_residual[which(validation_water_output$mean_wSWP > -0.1)]~validation_water_output$drivers$swrad_avg[which(validation_water_output$mean_wSWP > -0.1)], main="", ylab="Residual", xlab="SW-RAD")
+# plot(soil_residual[which(validation_water_output$mean_wSWP > -0.1)]~validation_water_output$drivers$swrad_avg[which(validation_water_output$mean_wSWP > -0.1)], main="", ylab="Residual", xlab="SW-RAD")
+# 
+# par(mfrow=c(2,2))
+# plot(validation_water_output$mean_rootwatermm~validation_water_output$drivers$SWC, main="Rootwatermm", ylab="ACM", xlab="SPA")
+# abline(0,1,col="red",lwd=3)
+# plot(validation_water_output$mean_wSWP~validation_water_output$drivers$SWP, main="wSWP", ylab="ACM", xlab="SPA")
+# abline(0,1,col="red",lwd=3)
+# plot(validation_water_output$mean_rootwatermm[which(abs(swp_residual) < 0.2)]~validation_water_output$drivers$SWC[which(abs(swp_residual) < 0.2)], main="Rootwatermm", ylab="ACM", xlab="SPA")
+# abline(0,1,col="red",lwd=3)
+# plot(validation_water_output$mean_wSWP[which(abs(swp_residual) < 0.2)]~validation_water_output$drivers$SWP[which(abs(swp_residual) < 0.2)], main="wSWP", ylab="ACM", xlab="SPA", ylim=c(-0.5,0))
+# abline(0,1,col="red",lwd=3)
+# 
+# length(which(abs(swp_residual) < 0.2)) / length(swp_residual)
+# summary(lm(validation_water_output$mean_soilevaporation[which(abs(swp_residual) < 0.2)]~validation_water_output$drivers$soilevap[which(abs(swp_residual) < 0.2)]))
+# 
+# soilevap_rad_intercept    = 1.122969e-02 ; soilevap_rad_coef = 1.748044e+00 
+# soilevap = soilevap_rad_intercept + (soilevap * soilevap_rad_coef)
+# 
+# uncorrected_soilevap = (validation_water_output$mean_soilevaporation - soilevap_rad_intercept) / soilevap_rad_coef
+# plot(validation_water_output$mean_soilevaporation~uncorrected_soilevap)
+# plot(validation_water_output$drivers$soilevap~uncorrected_soilevap)
+# 
+# summary(lm(validation_water_output$drivers$soilevap~uncorrected_soilevap))
+# 
+# usoil_residual = uncorrected_soilevap-validation_water_output$drivers$soilevap
+# jpeg("./FIGURES/usoil_residual_investigation_water.jpg", width=7200, height = 4000, res = 400, quality = 100)
+# par(mfrow=c(3,4))
+# plot(usoil_residual~validation_water_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
+# plot(usoil_residual~validation_water_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
+# plot(usoil_residual~validation_water_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
+# plot(usoil_residual~validation_water_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
+# plot(usoil_residual~validation_water_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
+# plot(usoil_residual~validation_water_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
+# plot(usoil_residual~validation_water_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
+# plot(usoil_residual~validation_water_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
+# plot(usoil_residual~validation_water_output$drivers$sfc_pressure, main="", ylab="Residual", xlab="sfc_pressure")
+# plot(usoil_residual~validation_water_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
+# plot(usoil_residual~validation_water_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
+# plot(usoil_residual~validation_water_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
+# dev.off()
+# 
+# uncorrected_soilevap = (validation_nowater_output$mean_soilevaporation - soilevap_rad_intercept) / soilevap_rad_coef
+# usoil_residual = uncorrected_soilevap-validation_nowater_output$drivers$soilevap
+# jpeg("./FIGURES/usoil_residual_investigation_nowater.jpg", width=7200, height = 4000, res = 400, quality = 100)
+# par(mfrow=c(3,4))
+# plot(usoil_residual~validation_nowater_output$drivers$lai, main="", ylab="Residual", xlab="LAI")
+# plot(usoil_residual~validation_nowater_output$drivers$avgN, main="", ylab="Residual", xlab="avgN")
+# plot(usoil_residual~validation_nowater_output$drivers$swrad_avg, main="", ylab="Residual", xlab="swrad_avg")
+# plot(usoil_residual~validation_nowater_output$drivers$co2_avg, main="", ylab="Residual", xlab="CO2")
+# plot(usoil_residual~validation_nowater_output$drivers$sat_max, main="", ylab="Residual", xlab="sat_max")
+# plot(usoil_residual~validation_nowater_output$drivers$vpd_avg, main="", ylab="Residual", xlab="vpd_avg")
+# plot(usoil_residual~validation_nowater_output$drivers$wind_avg, main="", ylab="Residual", xlab="wind_avg")
+# plot(usoil_residual~validation_nowater_output$drivers$ppt_avg, main="", ylab="Residual", xlab="rainfall")
+# plot(usoil_residual~validation_nowater_output$drivers$sfc_pressure, main="", ylab="Residual", xlab="sfc_pressure")
+# plot(usoil_residual~validation_nowater_output$drivers$SWC, main="", ylab="Residual", xlab="SWC")
+# plot(usoil_residual~validation_nowater_output$drivers$energy_balance_residual, main="", ylab="Residual", xlab="energy balance")
+# plot(usoil_residual~validation_nowater_output$drivers$netrad, main="", ylab="Residual", xlab="NetRad")
+# dev.off()
+# 
+# 
+# 
+# 
+# 
+# 
+# setwd("/Users/lsmallma/WORK/Github/GCEL/ACM_GPP_ET/")
+# load("./outputs/global_1x1_degree_2001_2015_NUE_half.RData")
+# load("./outputs/global_1x1_degree_2001_2015_NUE_half_co2_plus100.RData")
+# load("./outputs/global_1x1_degree_2001_2015_NUE_half_Tair_plus4.RData")
+# 
+# fig_height=4000 ; fig_width=7200
+# jpeg(file="./FIGURES/Cal_val_paper_figure_5.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+# par(mfrow=c(2,3), mar=c(1.4, 1.2, 2.4, 8.5), omi=c(0.1, 0.1, 0.1, 0.1))
+# ## Summary figures GPP, ET, WUE; CO2 + 100
+# colour_choices_upper = colorRampPalette((brewer.pal(11,"Spectral")))
+# var1=((global_output_NUE_half_co2_plus100$mean_gpp*365.25)-(global_output_NUE_half$mean_gpp*365.25))/(global_output_NUE_half$mean_gpp*365.25) ; colour_choices=colour_choices_upper(length(var1))
+# zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
+# image.plot(var1, main=expression(paste(Delta,"GPP"," (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+# mtext(expression(paste("C",O[2],"+100 ppm")),side = 2,cex=1.8, padj = 1.2)
+# var1=((global_output_NUE_half_co2_plus100$mean_transpiration+global_output_NUE_half_co2_plus100$mean_wetcanopyevap+global_output_NUE_half_co2_plus100$mean_soilevaporation)*365.25)
+# var1 = var1-((global_output_NUE_half$mean_transpiration+global_output_NUE_half$mean_wetcanopyevap+global_output_NUE_half$mean_soilevaporation)*365.25)
+# var1 = var1 / ((global_output_NUE_half$mean_transpiration+global_output_NUE_half$mean_wetcanopyevap+global_output_NUE_half$mean_soilevaporation)*365.25)  
+# colour_choices=colour_choices_upper(length(var1))
+# zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
+# image.plot(var1, main=expression(paste(Delta,"ET"," (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+# var1=(global_output_NUE_half_co2_plus100$mean_wue - global_output_NUE_half$mean_wue) / global_output_NUE_half$mean_wue ; colour_choices=colour_choices_upper(length(var1))
+# zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
+# image.plot(var1, main=expression(paste(Delta,"WUE (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+# ## Summary figures GPP, ET, WUE; Tair + 1
+# var1=((global_output_NUE_half_Tair_plus4$mean_gpp*365.25)-(global_output_NUE_half$mean_gpp*365.25))/(global_output_NUE_half$mean_gpp*365.25) ; colour_choices=colour_choices_upper(length(var1))
+# zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
+# image.plot(var1, main=expression(paste(Delta,"GPP"," (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+# mtext(expression(paste("Tair+",1^o,"C",sep="")),side = 2,cex=1.8, padj = 1.2)
+# var1=((global_output_NUE_half_Tair_plus4$mean_transpiration+global_output_NUE_half_Tair_plus4$mean_wetcanopyevap+global_output_NUE_half_Tair_plus4$mean_soilevaporation)*365.25)
+# var1 = var1-((global_output_NUE_half$mean_transpiration+global_output_NUE_half$mean_wetcanopyevap+global_output_NUE_half$mean_soilevaporation)*365.25)
+# var1 = var1 / ((global_output_NUE_half$mean_transpiration+global_output_NUE_half$mean_wetcanopyevap+global_output_NUE_half$mean_soilevaporation)*365.25)  
+# colour_choices=colour_choices_upper(length(var1))
+# zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
+# image.plot(var1, main=expression(paste(Delta,"ET"," (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+# var1 = (global_output_NUE_half_Tair_plus4$mean_wue - global_output_NUE_half$mean_wue) / global_output_NUE_half$mean_wue ; colour_choices=colour_choices_upper(length(var1))
+# zaxis=max(abs(quantile(var1,prob=c(0.001,0.999),na.rm=TRUE))) ; zaxis = c(-1*zaxis,zaxis)
+# image.plot(var1, main=expression(paste(Delta,"WUE (Fraction)")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
+# dev.off()
+# 
