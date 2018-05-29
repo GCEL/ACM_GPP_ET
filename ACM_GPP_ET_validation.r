@@ -112,7 +112,7 @@ for (n in seq(1,dim(drivers)[1])) {
      met[,5] = drivers$co2_avg[n]  # CO2 ppm
      met[,6] = drivers$doy[n]  # day of year
      met[,7] = drivers$ppt_avg[n]/(60*60)  # rainfall (kgH2O.m-2.hr-1 -> kg.m-2.s-1)
-     met[,8] = drivers$sat_avg[n] # avg temperature (oC)
+     met[,8] = -9999 # drivers$sat_avg[n] # avg temperature (oC)
      met[,9] = drivers$wind_avg[n] # avg wind speed (m.s-1)
      met[,10]= drivers$vpd_avg[n]*1000 # avg VPD (kPa->Pa)
      # ecosystem state drivers now rather than meteorology
@@ -140,8 +140,8 @@ for (n in seq(1,dim(drivers)[1])) {
                                 ,nofluxes=as.integer(nofluxes),nopools=as.integer(nopools)
                                 ,nodays=as.integer(dim(met)[1])
                                 ,deltat=as.double(array(0,dim=c(as.integer(dim(met)[1])))),nos_iter=as.integer(nos_iter)
-                                ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[4],soil_info[4]),dim=c(3)))
-                                ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[2],soil_info[2]),dim=c(3))) )
+                                ,soil_frac_clay=as.double(array(c(soil_info[3],soil_info[3],soil_info[4],soil_info[4]),dim=c(4)))
+                                ,soil_frac_sand=as.double(array(c(soil_info[1],soil_info[1],soil_info[2],soil_info[2]),dim=c(4))) )
         output=tmp$out_var ; output=array(output, dim=c(nos_iter,(dim(met)[1]),output_dim))
         if (n == dim(drivers)[1]) {dyn.unload("./acm_gpp_et.so")}
         rm(tmp) ; gc()

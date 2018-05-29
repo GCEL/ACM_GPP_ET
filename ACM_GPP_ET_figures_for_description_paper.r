@@ -25,9 +25,10 @@ setwd("/home/lsmallma/WORK/GREENHOUSE/models/ACM_GPP_ET/")
 ## Read in each of the data sets
 
 ## ACM-GPP-ET runs
-load("./outputs/calibration_output.RData")
-load("./outputs/validation_nowater_output.RData")
-load("./outputs/validation_water_output.RData")
+load("./outputs/calibration_output.RData")             # Calibration dataset
+load("./outputs/validation_nowater_output.RData")      # Out of sample SPA, water held at field capacity
+load("./outputs/validation_water_output.RData")        # Out of sample SPA, water allowed to vary
+load("./outputs/fluxnet_independent_validation.RData") # Independent FLUXNET GPP and ET derived estimates
 load("./outputs/global_1x1_degree_2001_2015.RData")
 load("./outputs/global_1x1_degree_2001_2015_co2_plus100.RData")
 load("./outputs/global_1x1_degree_2001_2015_Tair_plus1.RData")
@@ -311,7 +312,7 @@ zaxis=quantile(var1,na.rm=TRUE,prob=c(0.001,0.999))
 par(fig=c(0.0,0.70,0.0,1.0),mar=c(0.6, 0.8, 2.4, 0.5), omi=c(0.2, 0.2, 0.2, 0.4))
 image.plot(var1, main=expression(paste("Mean LAI"," (",m^2,"/",m^2,")")),zlim=zaxis, col=colour_choices,axes=FALSE, cex.main=2.4,legend.width=3.0,cex=1.8,axis.args=list(cex.axis=2.0,hadj=0.1))
 par(fig=c(0.0,0.70,0.0,1.0),new=TRUE)
-plot(longitude,latitude, xlab="", ylab="", pch=16,cex=1.0,xaxt = "n", yaxt = "n",ylim=c(1,179), xlim=c(1,359))
+plot(longitude,latitude, xlab="", ylab="", pch=16,cex=1.0,xaxt = "n", yaxt = "n",ylim=c(1,179), xlim=c(1,359), xaxs="i", yaxs="i")
 par(fig=c(0.70,1.0,0.0,1.0),mar=c(4.6, 4.6, 0.4, 0.5), omi=c(0.2, 0.2, 0.2, 0.4), new=TRUE)
 var1 = as.vector(global_output$mean_temperature)
 var2 = as.vector(global_output$mean_precipitation*(365.25*60*60*24))
