@@ -467,7 +467,6 @@ contains
       ! do mass balance (i.e. is there enough water to support ET)
       ET_net = calculate_update_soil_water(FLUXES(n,2)*days_per_step,FLUXES(n,4)*days_per_step, &
                                           ((rainfall-intercepted_rainfall)*seconds_per_step))
-
       ! store soil water content of the rooting zone (mm)
       POOLS(n,1) = 1d3*soil_waterfrac(1)*layer_thickness(1)
 
@@ -1790,9 +1789,9 @@ contains
    evaporation_losses = ET_leaf * uptake_fraction
    ! Assume all soil evaporation comes from the soil surface only
    evaporation_losses(1) = evaporation_losses(1) + ET_soil
-   ! can not evaporate from soil more than is available
-   avail_flux = soil_waterfrac(1:nos_root_layers) * layer_thickness(1:nos_root_layers)
-   where (evaporation_losses > avail_flux) evaporation_losses = avail_flux * 0.99d0
+   ! can not evaporate from soil more than is available (m -> mm)
+   avail_flux = soil_waterfrac(1:nos_root_layers) * layer_thickness(1:nos_root_layers) * 1d3
+   where (evaporation_losses > avail_flux) evaporation_losses = avail_flux * 0.999d0
 
    ! this will update the ET estimate outside of the function
    ! unit / time correction also occurs outside of this function
