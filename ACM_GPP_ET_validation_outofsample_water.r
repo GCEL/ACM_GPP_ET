@@ -80,7 +80,13 @@ system("mv ./src/acm_gpp_et.so .")
 drivers = read.csv("/home/lsmallma/gcel/ACM_GPP_ET_RECALIBRATION/output_files/acm_recal_with_spa_200pixels_continuous_timeseries_obs_whole_unfiltered_iWUE_trunk_water_copy.csv")
 
 ###
-## Define our output variables based on the grid of the CARDAMOM analysis we are borrowing
+## Some ACM_GPP_ET parameters
+
+output_dim = 9 ; nofluxes = 6 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
+#soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
+simulated_pixels = paste(drivers$lat,drivers$long,sep="")
+simulated_pixels = unique(simulated_pixels)
+combined_var = paste(drivers$lat,drivers$long,sep="")
 
 mean_lai = array(NA, dim=c(dim(drivers)[1]))
 mean_gpp = array(NA, dim=c(dim(drivers)[1]))
@@ -92,24 +98,15 @@ mean_runoffmm = array(NA, dim=c(dim(drivers)[1]))
 mean_drainagemm = array(NA, dim=c(dim(drivers)[1]))
 mean_WUE = array(NA, dim=c(dim(drivers)[1]))
 mean_wSWP = array(NA, dim=c(dim(drivers)[1]))
-
-###
-## Some ACM_GPP_ET parameters
-
-output_dim=9 ; nofluxes = 6 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
-#soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
-simulated_pixels=paste(drivers$lat,drivers$long,sep="")
-simulated_pixels=unique(simulated_pixels)
-combined_var=paste(drivers$lat,drivers$long,sep="")
-#for (i in seq(1,1)) {
+# Loop through each site now
 for (i in seq(1, length(simulated_pixels))){
-
-     #if (i%%1 == 0) {print(paste(i," of ",length(simulated_pixels),sep=""))}
-     how_many=which(combined_var == simulated_pixels[i])
-#     how_many=which(combined_var == simulated_pixels[72])
+#for (i in seq(1, 1)){
+#i = 153
+#     if (i%%1 == 0) {print(paste(i," of ",length(simulated_pixels),sep=""))}
+     how_many = which(combined_var == simulated_pixels[i])
 
      # met note that the dimension here are different to that of drivers$met
-     met=array(-9999,dim=c(length(how_many),12))
+     met = array(-9999,dim=c(length(how_many),12))
      met[,1] = 1:length(how_many)  # day of analysis
      met[,2] = drivers$sat_min[how_many]  # min temperature (oC)
      met[,3] = drivers$sat_max[how_many]  # max temperature (oC)
@@ -163,7 +160,43 @@ for (i in seq(1, length(simulated_pixels))){
      mean_runoffmm[how_many] = (output[,,8])        # surface runoff (mm)
      mean_drainagemm[how_many] = (output[,,9])      # drainage from soil column (mm)
 
+#r2 = summary(lm(drivers$SWC[how_many]~mean_rootwatermm[how_many]))$adj.r.squared
+#if (r2 < 0.5) {
+#par(mfrow=c(3,2))
+#plot(drivers$SWC[how_many], pch=16, main=paste("SWC (mm) / R2 = ",round(r2,digits=2))) ; lines(mean_rootwatermm[how_many], lwd=2,col="blue")
+#plot(drivers$wetevap[how_many], pch=16, main=paste("CanEvap (kg/m2/day) ",i,sep="")) ; lines(mean_wetcanopyevap[how_many], lwd=2,col="blue")
+#plot(drivers$soilevap[how_many], pch=16, main="SoilEvap (kg/m2/day)") ; lines(mean_soilevaporation[how_many], lwd=2,col="blue")
+#plot(mean_runoffmm[how_many], type="l", lwd=2, col="blue", main="Runoff (kg/m2/day)") 
+#plot(mean_drainagemm[how_many], type="l", lwd=2, col="blue", main="Drainage (kg/m2/day)") 
+#}
+#     mean_lai[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,1])[floor(length(how_many)/2):length(how_many)] # lai
+#     mean_gpp[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,2])[floor(length(how_many)/2):length(how_many)] # GPP (gC.m-2.day-1)
+#     mean_transpiration[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,3])[floor(length(how_many)/2):length(how_many)]   # transpiration (kg.m-2.day-1)
+#     mean_wetcanopyevap[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,4])[floor(length(how_many)/2):length(how_many)]   # wetcanopy evaporation (kg.m-2.day-1)
+#     mean_soilevaporation[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,5])[floor(length(how_many)/2):length(how_many)] # soil evaporation (kg.m-2.day-1)
+#     mean_wSWP[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,6])[floor(length(how_many)/2):length(how_many)]            # weighted soil water potential (MPa)
+#     mean_WUE[how_many[floor(length(how_many)/2):length(how_many)]] = mean_gpp[how_many[floor(length(how_many)/2):length(how_many)]]/mean_transpiration[how_many[floor(length(how_many)/2):length(how_many)]] # water use efficiency (gC/kgH2O)
+#     mean_rootwatermm[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,7])[floor(length(how_many)/2):length(how_many)]     # water in rooting zone (mm)
+#     mean_runoffmm[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,8])[floor(length(how_many)/2):length(how_many)]        # surface runoff (mm)
+#     mean_drainagemm[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,9])[floor(length(how_many)/2):length(how_many)]      # drainage from soil column (mm)
+
 } # site loop
+
+###
+## Remove the first day of each site to avoid spin up errors (particularly SPA)
+### 
+
+drivers = drivers[(length(simulated_pixels)+1):dim(drivers)[1],]
+mean_lai = mean_lai[(length(simulated_pixels)+1):length(mean_lai)]
+mean_gpp = mean_gpp[(length(simulated_pixels)+1):length(mean_gpp)]
+mean_transpiration = mean_transpiration[(length(simulated_pixels)+1):length(mean_transpiration)]
+mean_wetcanopyevap = mean_wetcanopyevap[(length(simulated_pixels)+1):length(mean_wetcanopyevap)]
+mean_soilevaporation = mean_soilevaporation[(length(simulated_pixels)+1):length(mean_soilevaporation)]
+mean_wSWP = mean_wSWP[(length(simulated_pixels)+1):length(mean_wSWP)]
+mean_WUE = mean_WUE[(length(simulated_pixels)+1):length(mean_WUE)]
+mean_rootwatermm = mean_rootwatermm[(length(simulated_pixels)+1):length(mean_rootwatermm)]
+mean_runoffmm = mean_runoffmm[(length(simulated_pixels)+1):length(mean_runoffmm)]
+mean_drainagemm = mean_drainagemm[(length(simulated_pixels)+1):length(mean_drainagemm)]
 
 ###
 ## Calculate some statistics
@@ -176,16 +209,16 @@ soilevaporation_r2 = summary(lm(drivers$soilevap~mean_soilevaporation))$adj.r.sq
 wetcanopyevap_r2 = summary(lm(drivers$wetevap~mean_wetcanopyevap))$adj.r.squared
 
 # bias
-gpp_bias = mean(drivers$GPP-mean_gpp)
-transpiration_bias = mean((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)
-soilevaporation_bias = mean(drivers$soilevap-mean_soilevaporation)
-wetcanopyevap_bias = mean(drivers$wetevap-mean_wetcanopyevap)
+gpp_bias = mean(mean_gpp-drivers$GPP, na.rm=TRUE)
+transpiration_bias = mean(mean_transpiration-(drivers$Evap-drivers$soilevap-drivers$wetevap), na.rm=TRUE)
+soilevaporation_bias = mean(mean_soilevaporation-drivers$soilevap, na.rm=TRUE)
+wetcanopyevap_bias = mean(mean_wetcanopyevap-drivers$wetevap, na.rm=TRUE)
 
 # rmse
-gpp_rmse = sqrt(mean((drivers$GPP-mean_gpp)**2))
-transpiration_rmse = sqrt(mean(((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)**2))
-soilevaporation_rmse = sqrt(mean((drivers$soilevap-mean_soilevaporation)**2))
-wetcanopyevap_rmse = sqrt(mean((drivers$wetevap-mean_wetcanopyevap)**2))
+gpp_rmse = sqrt(mean((drivers$GPP-mean_gpp)**2, na.rm=TRUE))
+transpiration_rmse = sqrt(mean(((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)**2, na.rm=TRUE))
+soilevaporation_rmse = sqrt(mean((drivers$soilevap-mean_soilevaporation)**2, na.rm=TRUE))
+wetcanopyevap_rmse = sqrt(mean((drivers$wetevap-mean_wetcanopyevap)**2, na.rm=TRUE))
 
 print("GPP gC/m2/day")
 print(gpp_r2) ; print(gpp_bias) ; print(gpp_rmse)

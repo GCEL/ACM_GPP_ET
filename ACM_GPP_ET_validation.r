@@ -171,10 +171,10 @@ soilevaporation_r2 = summary(lm(drivers$soilevap~mean_soilevaporation))$adj.r.sq
 wetcanopyevap_r2 = summary(lm(drivers$wetevap~mean_wetcanopyevap))$adj.r.squared
 
 # bias
-gpp_bias = mean(drivers$GPP-mean_gpp)
-transpiration_bias = mean((drivers$Evap-drivers$soilevap-drivers$wetevap)-mean_transpiration)
-soilevaporation_bias = mean(drivers$soilevap-mean_soilevaporation)
-wetcanopyevap_bias = mean(drivers$wetevap-mean_wetcanopyevap)
+gpp_bias = mean(mean_gpp-drivers$GPP, na.rm=TRUE)
+transpiration_bias = mean(mean_transpiration-(drivers$Evap-drivers$soilevap-drivers$wetevap), na.rm=TRUE)
+soilevaporation_bias = mean(mean_soilevaporation-drivers$soilevap, na.rm=TRUE)
+wetcanopyevap_bias = mean(mean_wetcanopyevap-drivers$wetevap, na.rm=TRUE)
 
 # rmse
 gpp_rmse = sqrt(mean((drivers$GPP-mean_gpp)**2))
