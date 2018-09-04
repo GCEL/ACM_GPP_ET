@@ -82,7 +82,7 @@ drivers = read.csv("/home/lsmallma/gcel/ACM_GPP_ET_RECALIBRATION/output_files/ac
 ###
 ## Some ACM_GPP_ET parameters
 
-output_dim = 9 ; nofluxes = 6 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
+output_dim = 11 ; nofluxes = 8 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
 #soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
 simulated_pixels = paste(drivers$lat,drivers$long,sep="")
 simulated_pixels = unique(simulated_pixels)
@@ -104,7 +104,7 @@ for (i in seq(1, length(simulated_pixels))){
 #i = 153
 #     if (i%%1 == 0) {print(paste(i," of ",length(simulated_pixels),sep=""))}
      how_many = which(combined_var == simulated_pixels[i])
-
+#how_many = which(drivers$lat < 29.12275+1e-4 & drivers$lat > 29.12275-1e-4 & drivers$long < 81.0+1e-4 & drivers$long  > 81.0-1e-4)
      # met note that the dimension here are different to that of drivers$met
      met = array(-9999,dim=c(length(how_many),12))
      met[,1] = 1:length(how_many)  # day of analysis
@@ -125,7 +125,7 @@ for (i in seq(1, length(simulated_pixels))){
      parameters[1,] = drivers$avgN[how_many[1]]  # foliar N (gN.m-2)
      parameters[2,] = -9999 # min leaf water potential (MPa)
      parameters[3,] = 100   # root biomass needed to reach 50 % depth
-     parameters[4,] = 2   # max root depth (m)
+     parameters[4,] = 2     # max root depth (m)
 
      # other inputs
      lat = drivers$lat[how_many[1]]
@@ -147,7 +147,7 @@ for (i in seq(1, length(simulated_pixels))){
         output=tmp$out_var ; output=array(output, dim=c(nos_iter,(dim(met)[1]),output_dim))
         if (i == length(simulated_pixels)) {dyn.unload("./acm_gpp_et.so")}
         rm(tmp) ; gc()
-
+#stop('')
      # assign outputs to out final grids
      mean_lai[how_many] = (output[,,1]) # lai
      mean_gpp[how_many] = (output[,,2]) # GPP (gC.m-2.day-1)
@@ -160,30 +160,11 @@ for (i in seq(1, length(simulated_pixels))){
      mean_runoffmm[how_many] = (output[,,8])        # surface runoff (mm)
      mean_drainagemm[how_many] = (output[,,9])      # drainage from soil column (mm)
 
-#r2 = summary(lm(drivers$SWC[how_many]~mean_rootwatermm[how_many]))$adj.r.squared
-#if (r2 < 0.5) {
-#par(mfrow=c(3,2))
-#plot(drivers$SWC[how_many], pch=16, main=paste("SWC (mm) / R2 = ",round(r2,digits=2))) ; lines(mean_rootwatermm[how_many], lwd=2,col="blue")
-#plot(drivers$wetevap[how_many], pch=16, main=paste("CanEvap (kg/m2/day) ",i,sep="")) ; lines(mean_wetcanopyevap[how_many], lwd=2,col="blue")
-#plot(drivers$soilevap[how_many], pch=16, main="SoilEvap (kg/m2/day)") ; lines(mean_soilevaporation[how_many], lwd=2,col="blue")
-#plot(mean_runoffmm[how_many], type="l", lwd=2, col="blue", main="Runoff (kg/m2/day)") 
-#plot(mean_drainagemm[how_many], type="l", lwd=2, col="blue", main="Drainage (kg/m2/day)") 
-#}
-#     mean_lai[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,1])[floor(length(how_many)/2):length(how_many)] # lai
-#     mean_gpp[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,2])[floor(length(how_many)/2):length(how_many)] # GPP (gC.m-2.day-1)
-#     mean_transpiration[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,3])[floor(length(how_many)/2):length(how_many)]   # transpiration (kg.m-2.day-1)
-#     mean_wetcanopyevap[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,4])[floor(length(how_many)/2):length(how_many)]   # wetcanopy evaporation (kg.m-2.day-1)
-#     mean_soilevaporation[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,5])[floor(length(how_many)/2):length(how_many)] # soil evaporation (kg.m-2.day-1)
-#     mean_wSWP[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,6])[floor(length(how_many)/2):length(how_many)]            # weighted soil water potential (MPa)
-#     mean_WUE[how_many[floor(length(how_many)/2):length(how_many)]] = mean_gpp[how_many[floor(length(how_many)/2):length(how_many)]]/mean_transpiration[how_many[floor(length(how_many)/2):length(how_many)]] # water use efficiency (gC/kgH2O)
-#     mean_rootwatermm[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,7])[floor(length(how_many)/2):length(how_many)]     # water in rooting zone (mm)
-#     mean_runoffmm[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,8])[floor(length(how_many)/2):length(how_many)]        # surface runoff (mm)
-#     mean_drainagemm[how_many[floor(length(how_many)/2):length(how_many)]] = (output[,,9])[floor(length(how_many)/2):length(how_many)]      # drainage from soil column (mm)
-
 } # site loop
 
 ###
 ## Remove the first day of each site to avoid spin up errors (particularly SPA)
+## i.e. select day 2 onwards
 ### 
 
 drivers = drivers[(length(simulated_pixels)+1):dim(drivers)[1],]

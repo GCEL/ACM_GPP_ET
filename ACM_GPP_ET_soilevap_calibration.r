@@ -79,7 +79,7 @@ drivers = read.csv("/home/lsmallma/WORK/R/Scripts/weather_generator/acm_recal_wi
 ###
 ## Some ACM_GPP_ET parameters
 
-output_dim=7 ; nofluxes = 4 ; nopools = 1 ; nopars = 5 ; nos_iter = 500
+output_dim=11 ; nofluxes = 8 ; nopools = 1 ; nopars = 5 ; nos_iter = 500
 mean_soilevaporation = array(NA, dim=c(dim(drivers)[1],nos_iter))
 soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
 

@@ -56,6 +56,9 @@ subroutine racmgppet(output_dim,met,pars,out_var,lat  &
   ! begin iterations
   do i = 1, nos_iter
 
+     ! reset at the beginning of each iteration
+     POOLS = 0d0 ; FLUXES = 0d0
+
      ! call the models
      call CARBON_MODEL(1,nodays,met,pars(1:nopars,i),deltat,nodays &
                       ,lat,FLUXES,POOLS,nopars,nomet,nopools,nofluxes)
@@ -69,15 +72,17 @@ subroutine racmgppet(output_dim,met,pars,out_var,lat  &
 !endif
 
      ! now allocate the output the our 'output' variable
-     out_var(i,1:nodays,1)  = met(11,1:nodays)   ! LAI output for consistency check
-     out_var(i,1:nodays,2)  = FLUXES(1:nodays,1) ! GPP (gC.m-2.day-1)
-     out_var(i,1:nodays,3)  = FLUXES(1:nodays,2) ! transpiration (kgH2O.m-2.day-1)
-     out_var(i,1:nodays,4)  = FLUXES(1:nodays,3) ! wet canopy evaporation (kgH2O.m-2.day-1)
-     out_var(i,1:nodays,5)  = FLUXES(1:nodays,4) ! soil evaporation (kgH2O.m-2.day-1)
-     out_var(i,1:nodays,6)  = wSWP_time(1:nodays)! weighted soil water potential (MPa)
-     out_var(i,1:nodays,7)  = POOLS(1:nodays,1)  ! Water in rooting zone (mm)
-     out_var(i,1:nodays,8)  = FLUXES(1:nodays,5) ! runoff (kgH2O.m-2.day-1)
-     out_var(i,1:nodays,9)  = FLUXES(1:nodays,6) ! drainage / underflow (kgH2O.m-2.day-1)
+     out_var(i,1:nodays,1)  = met(11,1:nodays)    ! LAI output for consistency check
+     out_var(i,1:nodays,2)  = FLUXES(1:nodays,1)  ! GPP (gC.m-2.day-1)
+     out_var(i,1:nodays,3)  = FLUXES(1:nodays,2)  ! transpiration (kgH2O.m-2.day-1)
+     out_var(i,1:nodays,4)  = FLUXES(1:nodays,3)  ! wet canopy evaporation (kgH2O.m-2.day-1)
+     out_var(i,1:nodays,5)  = FLUXES(1:nodays,4)  ! soil evaporation (kgH2O.m-2.day-1)
+     out_var(i,1:nodays,6)  = wSWP_time(1:nodays) ! weighted soil water potential (MPa)
+     out_var(i,1:nodays,7)  = POOLS(1:nodays,1)   ! Water in rooting zone (mm)
+     out_var(i,1:nodays,8)  = FLUXES(1:nodays,5)  ! runoff (kgH2O.m-2.day-1)
+     out_var(i,1:nodays,9)  = FLUXES(1:nodays,6)  ! drainage / underflow (kgH2O.m-2.day-1)
+     out_var(i,1:nodays,10)  = FLUXES(1:nodays,7) ! estimate mean LWP (MPa)
+     out_var(i,1:nodays,11)  = FLUXES(1:nodays,8) ! internal leaf CO2 concentration (umol/mol)
 
   end do ! nos_iter loop
 

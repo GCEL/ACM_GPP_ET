@@ -40,6 +40,9 @@ mean_wSWP = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
 min_wSWP = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
 mean_runoffmm = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
 mean_drainagemm = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
+mean_LWP = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
+mean_ci = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
+
 # save some mean statistics
 mean_temperature = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
 mean_radiation = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim))
@@ -62,6 +65,8 @@ timeseries_WUE = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim,length(PROJECT
 timeseries_wSWP = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim,length(PROJECT$model$timestep_days)))
 timeseries_runoffmm = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim,length(PROJECT$model$timestep_days)))
 timeseries_drainagemm = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim,length(PROJECT$model$timestep_days)))
+timeseries_LWP = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim,length(PROJECT$model$timestep_days)))
+timeseries_ci = array(NA, dim=c(PROJECT$long_dim,PROJECT$lat_dim,length(PROJECT$model$timestep_days)))
 
 # work out area matrix for the pixels in meters
 # include adjustment for g-> Tg (*1e-12)
@@ -81,7 +86,7 @@ if (PROJECT$grid_type == "UK") {
 ###
 ## Some ACM_GPP_ET parameters
 
-output_dim=9 ; nofluxes = 6 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
+output_dim=11 ; nofluxes = 8 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
 
 steps_per_year = length(PROJECT$model$timestep_days)/nos_years
 # iterative process through the years...
@@ -174,6 +179,8 @@ for (n in seq(1,PROJECT$nosites)) {
 	       timeseries_rootwatermm[slot_i,slot_j,] = (output[,1:dim(met)[1],7])     # water in rooting zone (mm)
                timeseries_runoffmm[slot_i,slot_j,] = (output[,1:dim(met)[1],8])        # surface runoff (mm)
                timeseries_drainagemm[slot_i,slot_j,] = (output[,1:dim(met)[1],9])      # drainage / underflow from bottom of soil column (mm)
+               timeseries_LWP[slot_i,slot_j,] = (output[,1:dim(met)[1],10])            # Leaf water potential (MPa)
+               timeseries_ci[slot_i,slot_j,] = (output[,1:dim(met)[1],11])             # internal CO2 concentration (umol/mol)
 
 	       # assign timeseries mean values to grid
 	       mean_lai[slot_i,slot_j] = mean(output[,1:dim(met)[1],1])             # lai (m2/m2)
@@ -189,6 +196,8 @@ for (n in seq(1,PROJECT$nosites)) {
 	       mean_rootwatermm[slot_i,slot_j] = mean(output[,1:dim(met)[1],7])     # water in rooting zone (mm)
                mean_runoffmm[slot_i,slot_j] = mean(output[,1:dim(met)[1],8])        # surface runoff (mm)
                mean_drainagemm[slot_i,slot_j] = mean(output[,1:dim(met)[1],9])      # drainage / underflow from bottom of soil column (mm)
+               mean_LWP[slot_i,slot_j] = mean(output[,1:dim(met)[1],10])            # Leaf water potential
+               mean_ci[slot_i,slot_j] = mean(output[,1:dim(met)[1],11])             # internal CO2 concentration
 
      } # have got LAI and root infromation
 
@@ -266,6 +275,8 @@ global_output_NUE_half = list(        units = units,
                                    mean_wue = mean_wue,
                                   mean_wSWP = mean_wSWP,
                                    min_wSWP = min_wSWP,
+                                   mean_LWP = mean_LWP,
+                                    mean_ci = mean_ci,
                               mean_runoffmm = mean_runoffmm,
                             mean_drainagemm = mean_drainagemm,
                              timeseries_lai = timeseries_lai,
@@ -278,7 +289,9 @@ global_output_NUE_half = list(        units = units,
                              timeseries_WUE = timeseries_WUE,
                             timeseries_wSWP = timeseries_wSWP,
                         timeseries_runoffmm = timeseries_runoffmm,
-                      timeseries_drainagemm = timeseries_drainagemm)
+                      timeseries_drainagemm = timeseries_drainagemm,
+                             timeseries_LWP = timeseries_LWP,
+                              timeseries_ci = timeseries_ci)
 
 # Now save the file
 save(global_output_NUE_half, file="./outputs/global_1x1_degree_2001_2015_NUE_half.RData")

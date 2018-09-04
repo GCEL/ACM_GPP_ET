@@ -96,7 +96,7 @@ mean_wSWP = array(NA, dim=c(dim(drivers)[1]))
 ###
 ## Some ACM_GPP_ET parameters
 
-output_dim=9 ; nofluxes = 6 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
+output_dim=11 ; nofluxes = 8 ; nopools = 1 ; nopars = 4 ; nos_iter = 1
 #soils_data=read.csv("/home/lsmallma/gcel/HWSD/processed_file/HWSD_sand_silt_clay_orgfrac_vector_with_lat_long_200.csv",header=TRUE)
 
 # iterative process through the years...
@@ -160,6 +160,27 @@ for (n in seq(1,dim(drivers)[1])) {
      mean_drainagemm[n] = mean(output[,,9])      # drainage from soil column (mm)
 
 } # site loop
+
+###
+## Remove the first day of each site to avoid spin up errors (particularly SPA)
+## i.e. select day 2 onwards
+### 
+
+# determine unique locations
+simulated_pixels = paste(drivers$lat,drivers$long,sep="")
+simulated_pixels = unique(simulated_pixels)
+
+drivers = drivers[(length(simulated_pixels)+1):dim(drivers)[1],]
+mean_lai = mean_lai[(length(simulated_pixels)+1):length(mean_lai)]
+mean_gpp = mean_gpp[(length(simulated_pixels)+1):length(mean_gpp)]
+mean_transpiration = mean_transpiration[(length(simulated_pixels)+1):length(mean_transpiration)]
+mean_wetcanopyevap = mean_wetcanopyevap[(length(simulated_pixels)+1):length(mean_wetcanopyevap)]
+mean_soilevaporation = mean_soilevaporation[(length(simulated_pixels)+1):length(mean_soilevaporation)]
+mean_wSWP = mean_wSWP[(length(simulated_pixels)+1):length(mean_wSWP)]
+mean_WUE = mean_WUE[(length(simulated_pixels)+1):length(mean_WUE)]
+mean_rootwatermm = mean_rootwatermm[(length(simulated_pixels)+1):length(mean_rootwatermm)]
+mean_runoffmm = mean_runoffmm[(length(simulated_pixels)+1):length(mean_runoffmm)]
+mean_drainagemm = mean_drainagemm[(length(simulated_pixels)+1):length(mean_drainagemm)]
 
 ###
 ## Calculate some statistics
