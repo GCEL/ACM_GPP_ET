@@ -98,10 +98,12 @@ mean_runoffmm = array(NA, dim=c(dim(drivers)[1]))
 mean_drainagemm = array(NA, dim=c(dim(drivers)[1]))
 mean_WUE = array(NA, dim=c(dim(drivers)[1]))
 mean_wSWP = array(NA, dim=c(dim(drivers)[1]))
+mean_ci = array(NA, dim=c(dim(drivers)[1]))
+mean_lwp = array(NA, dim=c(dim(drivers)[1]))
+
 # Loop through each site now
 for (i in seq(1, length(simulated_pixels))){
-#for (i in seq(1, 1)){
-#i = 153
+
 #     if (i%%1 == 0) {print(paste(i," of ",length(simulated_pixels),sep=""))}
      how_many = which(combined_var == simulated_pixels[i])
 #how_many = which(drivers$lat < 29.12275+1e-4 & drivers$lat > 29.12275-1e-4 & drivers$long < 81.0+1e-4 & drivers$long  > 81.0-1e-4)
@@ -159,6 +161,9 @@ for (i in seq(1, length(simulated_pixels))){
      mean_rootwatermm[how_many] = (output[,,7])     # water in rooting zone (mm)
      mean_runoffmm[how_many] = (output[,,8])        # surface runoff (mm)
      mean_drainagemm[how_many] = (output[,,9])      # drainage from soil column (mm)
+     mean_lwp[how_many] = (output[,,10])            # mean internal CO2 concentration (ppm)
+     mean_ci[how_many] = (output[,,11])             # mean internal CO2 concentration (ppm)
+
 
 } # site loop
 
@@ -178,6 +183,8 @@ mean_WUE = mean_WUE[(length(simulated_pixels)+1):length(mean_WUE)]
 mean_rootwatermm = mean_rootwatermm[(length(simulated_pixels)+1):length(mean_rootwatermm)]
 mean_runoffmm = mean_runoffmm[(length(simulated_pixels)+1):length(mean_runoffmm)]
 mean_drainagemm = mean_drainagemm[(length(simulated_pixels)+1):length(mean_drainagemm)]
+mean_lwp = mean_lwp[(length(simulated_pixels)+1):length(mean_lwp)]
+mean_ci = mean_ci[(length(simulated_pixels)+1):length(mean_ci)]
 
 ###
 ## Calculate some statistics
@@ -242,7 +249,9 @@ validation_water_output = list(drivers = drivers,
                        mean_WUE = mean_WUE,
                mean_rootwatermm = mean_rootwatermm,
                   mean_runoffmm = mean_runoffmm,
-                mean_drainagemm = mean_drainagemm)
+                mean_drainagemm = mean_drainagemm,
+                       mean_lwp = mean_lwp,
+                        mean_ci = mean_ci)
 # Now save the file
 save(validation_water_output, file="./outputs/validation_water_output.RData")
 

@@ -57,12 +57,11 @@ double precision, parameter :: pi = 3.1415927d0,  &
 
 ! photosynthesis / respiration parameters
 double precision, parameter :: &
-                    kc_saturation = 310d0,        & ! CO2 half saturation, saturation value
-                 kc_half_sat_conc = 23.956d0,     & ! CO2 half sat, half sat
-               co2comp_saturation = 36.5d0,       & ! CO2 compensation point, saturation
-            co2comp_half_sat_conc = 9.46d0          ! CO2 comp point, half sat
-                                                    ! Each of these are temperature
-                                                    ! sensitivty
+                    kc_saturation = 310d0,        & ! CO2 half saturation, at reference temperature (298.15 K)
+                 kc_half_sat_conc = 23.956d0,     & ! CO2 half sat, sensitivity coefficient
+               co2comp_saturation = 36.5d0,       & ! CO2 compensation point, at reference temperature (298.15 K)
+            co2comp_half_sat_conc = 9.46d0          ! CO2 comp point, sensitivity coefficient
+
 ! hydraulic parameters
 double precision, parameter :: &
                        tortuosity = 2.5d0,        & ! tortuosity
@@ -312,30 +311,30 @@ contains
     infi = 0d0
 
     ! load ACM-GPP-ET parameters
-    NUE                        = 1.470113e+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
+    NUE                        = 1.182549d+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
                                                ! ,unlimited by CO2, light and
                                                ! photoperiod (gC/gN/m2leaf/day)
-    pn_max_temp                = 5.793474e+01  ! Maximum temperature for photosynthesis (oC)
-    pn_opt_temp                = 3.460799e+01  ! Optimum temperature for photosynthesis (oC)
-    pn_kurtosis                = 1.510070e-01  ! Kurtosis of photosynthesis temperature response
-    e0                         = 5.219229e+00  ! Quantum yield gC/MJ/m2/day PAR
-    max_lai_lwrad_transmitted  = 8.141620e-01  ! Max fractional reduction of LW from sky transmitted through canopy
-    lai_half_lwrad_transmitted = 6.160656e-01  ! LAI at which canopy LW transmittance reduction = 50 %
-    max_lai_nir_reflection     = 6.603448e-01  ! Max fraction of NIR reflected by canopy
-    lai_half_nir_reflection    = 1.325310e+00  ! LAI at which canopy NIR reflected = 50 %
-    minlwp                     =-1.998737e+00  ! minimum leaf water potential (MPa)
-    max_lai_par_reflection     = 2.503036e-01  ! Max fraction of PAR reflected by canopy
-    lai_half_par_reflection    = 1.457031e+00  ! LAI at which canopy PAR reflected = 50 %
-    lai_half_lwrad_reflected   = 1.086999e+00  ! LAI at which 50 % LW is reflected back to sky
-    iWUE                       = 8.574372e-08  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
-    soil_swrad_absorption      = 7.876866e-01  ! Fraction of SW rad absorbed by soil
-    max_lai_par_transmitted    = 9.901250e-01  ! Max fractional reduction in PAR transmittance by canopy
-    lai_half_par_transmitted   = 1.984911e+00  ! LAI at which PAR transmittance reduction = 50 %
-    max_lai_nir_transmitted    = 7.126618e-01  ! Max fractional reduction in NIR transmittance by canopy
-    lai_half_nir_transmitted   = 1.434948e+00  ! LAI at which NIR transmittance reduction = 50 %
-    max_lai_lwrad_release      = 9.899182e-01  ! Max fraction of LW emitted (1-par) from canopy to be released
-    lai_half_lwrad_release     = 6.479677e-01  ! LAI at which LW emitted from canopy to be released at 50 %
-    max_lai_lwrad_reflected    = 2.051849e-01  ! LAI at which 50 % LW is reflected back to sky
+    pn_max_temp                = 5.357174d+01  ! Maximum temperature for photosynthesis (oC)
+    pn_opt_temp                = 3.137242d+01  ! Optimum temperature for photosynthesis (oC)
+    pn_kurtosis                = 1.927458d-01  ! Kurtosis of photosynthesis temperature response
+    e0                         = 5.875662d+00  ! Quantum yield gC/MJ/m2/day PAR
+    max_lai_lwrad_transmitted  = 7.626683d-01  ! Max fractional reduction of LW from sky transmitted through canopy
+    lai_half_lwrad_transmitted = 7.160363d-01  ! LAI at which canopy LW transmittance reduction = 50 %
+    max_lai_nir_reflection     = 4.634860d-01  ! Max fraction of NIR reflected by canopy
+    lai_half_nir_reflection    = 1.559148d+00  ! LAI at which canopy NIR reflected = 50 %
+    minlwp                     =-1.996830d+00  ! minimum leaf water potential (MPa)
+    max_lai_par_reflection     = 1.623013d-01  ! Max fraction of PAR reflected by canopy
+    lai_half_par_reflection    = 1.114360d+00  ! LAI at which canopy PAR reflected = 50 %
+    lai_half_lwrad_reflected   = 1.126214d+00  ! LAI at which 50 % LW is reflected back to sky
+    iWUE                       = 1.602503d-06  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
+    soil_swrad_absorption      = 6.643079d-01  ! Fraction of SW rad absorbed by soil
+    max_lai_par_transmitted    = 8.079519d-01  ! Max fractional reduction in PAR transmittance by canopy
+    lai_half_par_transmitted   = 9.178784d-01  ! LAI at which PAR transmittance reduction = 50 %
+    max_lai_nir_transmitted    = 8.289803d-01  ! Max fractional reduction in NIR transmittance by canopy
+    lai_half_nir_transmitted   = 1.961831d+00  ! LAI at which NIR transmittance reduction = 50 %
+    max_lai_lwrad_release      = 9.852855d-01  ! Max fraction of LW emitted (1-par) from canopy to be released
+    lai_half_lwrad_release     = 7.535450d-01  ! LAI at which LW emitted from canopy to be released at 50 %
+    max_lai_lwrad_reflected    = 1.955832d-02  ! LAI at which 50 % LW is reflected back to sky
 
     ! load ACM-GPP-ET parameters
 !    NUE                       = pars(5+1)     ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
@@ -532,18 +531,17 @@ contains
           call update_net_radiation(isothermal,leafT,lai,dble_one &
                                    ,dble_zero,aerodynamic_conductance,vpd_pa &
                                    ,deltaTemp,deltaR)
-          ! update states
+          ! update long wave and canopy temperature based on potential canopy surface flux
           canopy_lwrad_Wm2 = canopy_lwrad_Wm2 + deltaR
           leafT = leafT + deltaTemp
           ! Canopy intercepted rainfall evaporation (kgH2O/m2/day)
           call calculate_wetcanopy_evaporation(wetcanopy_evap,act_pot_ratio,canopy_storage,dble_zero)
+          ! restore temperature and radiation values
+          leafT = leafT - deltaTemp ; canopy_lwrad_Wm2 = canopy_lwrad_Wm2 - deltaR
       else 
           ! Canopy intercepted rainfall evaporation (kgH2O/m2/day)
           call calculate_wetcanopy_evaporation(wetcanopy_evap,act_pot_ratio,canopy_storage,dble_zero)
       endif ! do energy balance
-      ! whether calculating energy balance or not remove the energy already used
-      ! by the wet canopy evaporation from the energy balance
-      canopy_lwrad_Wm2 = canopy_lwrad_Wm2 - (wetcanopy_evap * seconds_per_day_1 * lambda)
 
       ! calculate radiation absorption and estimate stomatal conductance
       call acm_albedo_gc(abs(deltaWP),Rtot)
@@ -559,22 +557,6 @@ contains
       ! restrict transpiration to positive only
       transpiration = max(dble_zero,transpiration)
 
-      !!!!!!!!!!
-      ! GPP (gC.m-2.day-1)
-      !!!!!!!!!!
-
-      ! reset output variable
-      ci_global = dble_zero
-      if (stomatal_conductance > dble_zero) then
-          FLUXES(n,1) = max(dble_zero,acm_gpp(stomatal_conductance))
-      else
-          FLUXES(n,1) = dble_zero
-      endif
-
-      !!!!!!!!!!
-      ! Update water balance
-      !!!!!!!!!!
-
       ! if snow present assume that soilevaporation is sublimation of soil first
       snow_sublimation = dble_zero
       if (snow_storage > dble_zero) then
@@ -583,6 +565,22 @@ contains
           soilevaporation = soilevaporation - snow_sublimation
           snow_storage = snow_storage - (snow_sublimation * deltat(n))
       end if
+
+      !!!!!!!!!!
+      ! GPP (gC.m-2.day-1)
+      !!!!!!!!!!
+
+      ! reset output variable
+      ci_global = dble_zero
+      if (stomatal_conductance > vsmall) then
+          FLUXES(n,1) = max(dble_zero,acm_gpp(stomatal_conductance))
+      else
+          FLUXES(n,1) = dble_zero
+      endif
+
+      !!!!!!!!!!
+      ! Update water balance
+      !!!!!!!!!!
 
       ! determine potential evaporation which sources its water from the soil,
       ! i.e. excluding wet canopy surface
@@ -761,10 +759,11 @@ contains
             ! save values which will need to be reset
             airt_save = leafT ; lw_save = canopy_lwrad_Wm2
             ! estimate energy balance without wet evaporation effects
-            isothermal = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * seconds_per_day_1)
+            isothermal = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * dayl_seconds_1)
             call update_net_radiation(isothermal,leafT,lai,dble_one &
                                      ,gs_in,aerodynamic_conductance,vpd_pa &
                                      ,deltaTemp,deltaR)
+            ! note that both the leafT and canopy LW have an implicit day -> day length correction
             canopy_lwrad_Wm2 = canopy_lwrad_Wm2 + deltaR
             leafT = leafT + deltaTemp
         endif
@@ -777,10 +776,11 @@ contains
         if (do_energy_balance) then
             leafT = airt_save ; canopy_lwrad_Wm2 = lw_save
             ! estimate energy balance without wet evaporation effects
-            isothermal = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * seconds_per_day_1)
+            isothermal = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * dayl_seconds_1)
             call update_net_radiation(isothermal,leafT,lai,dble_one &
                                      ,gs_in,aerodynamic_conductance,vpd_pa &
                                      ,deltaTemp,deltaR)
+            ! note that both the leafT and canopy LW have an implicit day -> day length correction
             canopy_lwrad_Wm2 = canopy_lwrad_Wm2 + deltaR
             leafT = leafT + deltaTemp
         endif
@@ -805,10 +805,11 @@ contains
             ! save values which will need to be reset
             airt_save = leafT ; lw_save = canopy_lwrad_Wm2
             ! estimate energy balance without wet evaporation effects
-            isothermal = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * seconds_per_day_1)
+            isothermal = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * dayl_seconds_1)
             call update_net_radiation(isothermal,leafT,lai,dble_one &
                                      ,gs_in,aerodynamic_conductance,vpd_pa &
                                      ,deltaTemp,deltaR)
+            ! note that both the leafT and canopy LW have an implicit day -> day length correction
             canopy_lwrad_Wm2 = canopy_lwrad_Wm2 + deltaR
             leafT = leafT + deltaTemp
         endif
@@ -824,10 +825,11 @@ contains
         if (do_energy_balance) then
             leafT = airt_save ; canopy_lwrad_Wm2 = lw_save
             ! estimate energy balance without wet evaporation effects
-            isothermal = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * seconds_per_day_1)
+            isothermal = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * dayl_seconds_1)
             call update_net_radiation(isothermal,leafT,lai,dble_one &
                                      ,gs_in,aerodynamic_conductance,vpd_pa &
                                      ,deltaTemp,deltaR)
+            ! note that both the leafT and canopy LW have an implicit day -> day length correction
             canopy_lwrad_Wm2 = canopy_lwrad_Wm2 + deltaR
             leafT = leafT + deltaTemp
         endif
@@ -887,38 +889,50 @@ contains
        max_supply = vsmall
     end if
 
-    ! Invert Penman-Monteith equation to give gs (m.s-1) needed to meet
-    ! maximum possible evaporation for the day.
-    ! This will then be reduced based on CO2 limits for diffusion based
-    ! photosynthesis
-    denom = slope * ((canopy_swrad_MJday * 1d6 * dayl_seconds_1) + canopy_lwrad_Wm2) &
-            + (air_density_kg * cpair * vpd_pa * 1d-3 * aerodynamic_conductance)
-    denom = (denom / (lambda * max_supply * mmol_to_kg_water * dayl_seconds_1)) - slope
-    denom = denom / psych
-    stomatal_conductance = aerodynamic_conductance / denom
+    if (lai > vsmall) then
 
-    ! convert m.s-1 to mmolH2O.m-2.s-1
-    stomatal_conductance = stomatal_conductance * 1d3 * convert_ms1_mol_1
-    ! if conditions are dew forming then set conductance to maximum as we are not going to be limited by water demand
-    if (stomatal_conductance <= dble_zero .or. stomatal_conductance > max_gs) stomatal_conductance = max_gs
+        ! there is lai therefore we have have stomatal conductance
 
-    ! if we are potentially limited by stomatal conductance or we are using instrinsic water use efficiency (rather than WUE)
-    ! then iterate to find optimum gs otherwise just go with the max...
-    if (stomatal_conductance /= max_gs .or. do_iWUE ) then
-        ! If there is a positive demand for water then we will solve for photosynthesis limits on gs through iterative solution
-        delta_gs = 1d-3*lai ! mmolH2O/m2leaf/day
-        stomatal_conductance = zbrent('acm_albedo_gc:find_gs',find_gs,min_gs,stomatal_conductance,tol_gs)
-    end if
+        ! Invert Penman-Monteith equation to give gs (m.s-1) needed to meet
+        ! maximum possible evaporation for the day.
+        ! This will then be reduced based on CO2 limits for diffusion based
+        ! photosynthesis
+        denom = slope * ((canopy_swrad_MJday * 1d6 * dayl_seconds_1) + canopy_lwrad_Wm2) &
+              + (air_density_kg * cpair * vpd_pa * 1d-3 * aerodynamic_conductance)
+        denom = (denom / (lambda * max_supply * mmol_to_kg_water * dayl_seconds_1)) - slope
+        denom = denom / psych
+        stomatal_conductance = aerodynamic_conductance / denom
 
-    ! if desired calculate the steady-state energy balance
-    if (do_energy_balance) then
-        isothermal = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * seconds_per_day_1)
-        call update_net_radiation(isothermal,leafT,lai,dble_one &
-                                 ,stomatal_conductance,aerodynamic_conductance,vpd_pa &
-                                 ,deltaTemp,deltaR)
-        canopy_lwrad_Wm2 = canopy_lwrad_Wm2 + deltaR
-        leafT = leafT + deltaTemp
-    endif
+        ! convert m.s-1 to mmolH2O.m-2.s-1
+        stomatal_conductance = stomatal_conductance * 1d3 * convert_ms1_mol_1
+        ! if conditions are dew forming then set conductance to maximum as we are not going to be limited by water demand
+        if (stomatal_conductance <= dble_zero .or. stomatal_conductance > max_gs) stomatal_conductance = max_gs
+
+        ! if we are potentially limited by stomatal conductance or we are using instrinsic water use efficiency (rather than WUE)
+        ! then iterate to find optimum gs otherwise just go with the max...
+        if (stomatal_conductance /= max_gs .or. do_iWUE ) then
+            ! If there is a positive demand for water then we will solve for photosynthesis limits on gs through iterative solution
+            delta_gs = 1d-3*lai ! mmolH2O/m2leaf/day
+            stomatal_conductance = zbrent('acm_albedo_gc:find_gs',find_gs,min_gs,stomatal_conductance,tol_gs)
+        end if
+
+        ! if desired calculate the steady-state energy balance
+        if (do_energy_balance) then
+            isothermal = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * dayl_seconds_1)
+            call update_net_radiation(isothermal,leafT,lai,dble_one &
+                                     ,stomatal_conductance,aerodynamic_conductance,vpd_pa &
+                                     ,deltaTemp,deltaR)
+            ! note that both the leafT and canopy LW have an implicit day -> day length correction
+            canopy_lwrad_Wm2 = canopy_lwrad_Wm2 + deltaR
+            leafT = leafT + deltaTemp
+        endif
+
+    else
+
+        ! if no LAI then there can be no stomatal conductance
+        stomatal_conductance = dble_zero    
+ 
+    endif ! if LAI > vsmall
 
   end subroutine acm_albedo_gc
   !
@@ -1045,6 +1059,7 @@ contains
 
     ! Absorbed shortwave radiation MJ.m-2.day-1 -> J.m-2.s-1
     canopy_radiation = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * seconds_per_day_1)
+!    canopy_radiation = canopy_lwrad_Wm2 + (canopy_swrad_MJday * 1d6 * dayl_seconds_1)
 
     !!!!!!!!!!
     ! Calculate canopy evaporative fluxes (kgH2O/m2/day)
@@ -1059,9 +1074,9 @@ contains
     wetcanopy_evap = wetcanopy_evap - transpiration
 
     ! dew is unlikely to occur (if we had energy balance) if mint > 0
-!    if (wetcanopy_evap < dble_zero .and. mint > dble_one) wetcanopy_evap = dble_zero
+    if (wetcanopy_evap < dble_zero .and. mint > dble_zero) wetcanopy_evap = dble_zero
     ! Sublimation is unlikely to occur (if we had energy balance) if maxt < 0
-!    if (wetcanopy_evap > dble_zero .and. maxt < dble_one) wetcanopy_evap = dble_zero
+    if (wetcanopy_evap > dble_zero .and. maxt < dble_zero) wetcanopy_evap = dble_zero
 
     ! Remember potential evaporation to later calculation of the potential
     ! actual ratio
@@ -1724,20 +1739,31 @@ contains
                                                   ! enters as potential but leaves as water balance adjusted
     ! local variables
     integer :: i, hr
-    double precision :: through_fall, max_storage, max_storage_1, daily_addition, wetcanopy_evaporation &
-                       ,drain_rate, evap_rate, initial_canopy, co_access, daily_pot_evap
+    double precision :: a, through_fall, max_storage, max_storage_1, daily_addition, wetcanopy_evaporation &
+                       ,potential_drainage_rate ,drain_rate, evap_rate, initial_canopy, co_mass_balance, dx, tmp1, tmp2, tmp3
+    ! local parameters
+    double precision, parameter :: CanIntFrac = -0.5d0,  & ! Coefficient scaling rainfall interception fraction with LAI
+                                  CanStorFrac = 0.1d0,   & ! Coefficient scaling canopy water storage with LAI
+                                 RefDrainRate = 0.002d0, & ! Reference drainage rate (mm/min; Rutter et al 1975)
+                                  RefDrainLAI = 1.05d0,  & ! Reference drainage LAI (m2/m2; Rutter et al 1975)
+                                 RefDrainCoef = 3.7d0,   & ! Reference drainage Coefficient (Rutter et al 1975)
+                               RefDrainCoef_1 = RefDrainCoef ** (-dble_one)
 
     ! hold initial canopy storage in memory
     initial_canopy = storage
     ! determine maximum canopy storage & through fall fraction
-    through_fall = max(min_throughfall,exp(-0.5d0*lai))
+    through_fall = max(min_throughfall,exp(CanIntFrac*lai))
     ! maximum canopy storage (mm); minimum is applied to prevent errors in
     ! drainage calculation. Assume minimum capacity due to wood
-    max_storage = max(min_storage,0.1d0*lai) ; max_storage_1 = max_storage**(-dble_one)
-    ! restrict dew formation to the size of the canopy storage
-    potential_evaporation = max(-max_storage,potential_evaporation)
+    max_storage = max(min_storage,CanStorFrac*lai) ; max_storage_1 = max_storage**(-dble_one)
     ! potential intercepted rainfall (kgH2O.m-2.s-1)
     intercepted_rainfall = rainfall * (dble_one - through_fall)
+    
+    ! calculate drainage coefficients (Rutter et al 1975); Corsican Pine
+    ! 0.002 is canopy specific coefficient modified by 0.002*(max_storage/1.05)
+    ! where max_storage is the canopy maximum capacity (mm) (LAI based) and
+    ! 1.05 is the original canopy capacitance
+    a = log( RefDrainRate * ( max_storage / RefDrainLAI ) ) - RefDrainCoef * max_storage
 
     ! average rainfall intercepted by canopy (kgH2O.m-2.day-1)
     daily_addition = intercepted_rainfall * seconds_per_day 
@@ -1753,26 +1779,41 @@ contains
        storage = storage + daily_addition
 
        if (storage > max_storage) then
-           ! assume co-access to available water above max_storage by both drainage and
-           ! evaporation. Water below max_storage is accessable by evaporation only. 
-           ! Note: dew formation prevented under these circumstances
-           daily_pot_evap = max(dble_zero,potential_evaporation)
-           ! restrict evaporation and drainage to the quanity above max_storage
-           evap_rate = min(storage-max_storage,daily_pot_evap)
-!print*,"evap_rate",evap_rate,storage-max_storage,daily_pot_evap
-           drain_rate = storage-max_storage
-!print*,"drain_rate",drain_rate
-           ! estimate co-access fractions for each flux
-           co_access = evap_rate / (evap_rate + drain_rate)
-!print*,"coaccess  ",co_access
-           ! and limit based on available water if total demand is greater than excess
-           co_access = co_access * ((storage-max_storage) / (evap_rate + drain_rate))
-           evap_rate = evap_rate * co_access
-           drain_rate = drain_rate * (dble_one - co_access)
-!print*,"evap",evap_rate,"drain",drain_rate,"co",co_access
-           ! estimate evaporation from remaining water, less that already removed from storage and evaporation energy used
-           evap_rate = evap_rate + min(daily_pot_evap - evap_rate, storage - evap_rate - drain_rate)
-!print*,"evap_final = ",evap_rate
+
+           if (potential_evaporation > dble_zero) then
+
+               ! assume co-access to available water above max_storage by both drainage and
+               ! evaporation. Water below max_storage is accessable by evaporation only. 
+
+               ! Trapezium rule for approximating integral of drainage rate.
+               ! Allows estimation of the mean drainage rate between starting point and max_storage,
+               ! thus the time period appropriate for co-access can be quantified
+               dx = storage - ((storage + max_storage)*0.5d0)
+               tmp1 = exp(a + (RefDrainCoef * storage)) 
+               tmp2 = exp(a + (RefDrainCoef * max_storage)) 
+               tmp3 = exp(a + (RefDrainCoef * (storage+dx))) 
+               potential_drainage_rate = 0.5d0 * dx * ((tmp1 + tmp2) + 2d0 * tmp3)
+               potential_drainage_rate = potential_drainage_rate * 1440d0
+              
+               ! restrict evaporation and drainage to the quantity above max_storage
+               evap_rate = potential_evaporation ; drain_rate = min(potential_drainage_rate,storage-max_storage)
+
+               ! limit based on available water if total demand is greater than excess
+               co_mass_balance = ((storage-max_storage) / (evap_rate + drain_rate))
+               evap_rate = evap_rate * co_mass_balance ; drain_rate = drain_rate * co_mass_balance 
+
+               ! estimate evaporation from remaining water, less that already removed from storage and evaporation energy used
+               evap_rate = evap_rate + min(potential_evaporation - evap_rate, storage - evap_rate - drain_rate)
+
+           else 
+
+               ! load dew formation to the current local evap_rate variable
+               evap_rate = potential_evaporation
+               ! restrict drainage the quantity above max_storage, adding dew formation too
+               drain_rate = (storage - evap_rate) - max_storage
+
+           endif
+
        else
            ! no drainage just apply evaporation / dew formation fluxes directly
            evap_rate = potential_evaporation
@@ -1783,45 +1824,16 @@ contains
                evap_rate = evap_rate * min(dble_one,storage * max_storage_1)
                ! and the total amount of water
                evap_rate = min(evap_rate,storage)
+           else 
+               ! then dew formation has occurred, if this pushes storage > max_storage add it to drainage
+               drain_rate = max(dble_zero,(storage - evap_rate) - max_storage)
            endif ! evap_rate > 0
-       endif
+       endif ! storage > max_storage
 
        ! update canopy storage with water flux
        storage = max(dble_zero,storage - evap_rate - drain_rate)
        wetcanopy_evaporation = wetcanopy_evaporation + evap_rate
        through_fall = through_fall + drain_rate
-
-!       ! estimate rate of drainage from store
-!       if (storage > max_storage) then
-!           ! estimate availble for drainage
-!           drain_rate = storage-max_storage
-!           ! update through fall with the new drainage
-!           through_fall = through_fall + drain_rate
-!           ! update storage
-!           storage = storage - drain_rate
-!       endif ! storage > max_storage
-!
-!       ! apply evaporative / dew flux
-!       if (potential_evaporation > dble_zero) then
-!           ! evaporation
-!           evap_rate = potential_evaporation * min(dble_one,storage * max_storage_1)
-!           evap_rate = min(storage,evap_rate)
-!           storage = max(dble_zero,storage - evap_rate)
-!           wetcanopy_evaporation = wetcanopy_evaporation + evap_rate
-!       else
-!           ! dew
-!           storage = storage - potential_evaporation
-!           wetcanopy_evaporation = wetcanopy_evaporation + potential_evaporation
-!       end if
-!
-!       ! estimate rate of drainage from store
-!       if (storage > max_storage) then
-!           drain_rate = storage-max_storage
-!           ! update through fall with the new drainage
-!           through_fall = through_fall + drain_rate
-!           ! update storage
-!           storage = storage - drain_rate
-!       endif ! storage > max_storage
 
     end do ! days
 

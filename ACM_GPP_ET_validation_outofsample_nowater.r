@@ -92,6 +92,8 @@ mean_runoffmm = array(NA, dim=c(dim(drivers)[1]))
 mean_drainagemm = array(NA, dim=c(dim(drivers)[1]))
 mean_WUE = array(NA, dim=c(dim(drivers)[1]))
 mean_wSWP = array(NA, dim=c(dim(drivers)[1]))
+mean_ci = array(NA, dim=c(dim(drivers)[1]))
+mean_lwp = array(NA, dim=c(dim(drivers)[1]))
 
 ###
 ## Some ACM_GPP_ET parameters
@@ -158,6 +160,8 @@ for (n in seq(1,dim(drivers)[1])) {
      mean_rootwatermm[n] = mean(output[,,7])     # water in rooting zone (mm)
      mean_runoffmm[n] = mean(output[,,8])        # surface runoff (mm)
      mean_drainagemm[n] = mean(output[,,9])      # drainage from soil column (mm)
+     mean_lwp[n] = mean(output[,,10])            # mean internal CO2 concentration (ppm)
+     mean_ci[n] = mean(output[,,11])             # mean internal CO2 concentration (ppm)
 
 } # site loop
 
@@ -181,6 +185,8 @@ mean_WUE = mean_WUE[(length(simulated_pixels)+1):length(mean_WUE)]
 mean_rootwatermm = mean_rootwatermm[(length(simulated_pixels)+1):length(mean_rootwatermm)]
 mean_runoffmm = mean_runoffmm[(length(simulated_pixels)+1):length(mean_runoffmm)]
 mean_drainagemm = mean_drainagemm[(length(simulated_pixels)+1):length(mean_drainagemm)]
+mean_lwp = mean_lwp[(length(simulated_pixels)+1):length(mean_lwp)]
+mean_ci = mean_ci[(length(simulated_pixels)+1):length(mean_ci)]
 
 ###
 ## Calculate some statistics
@@ -245,7 +251,9 @@ validation_nowater_output = list(drivers = drivers,
                        mean_WUE = mean_WUE,
                mean_rootwatermm = mean_rootwatermm,
                   mean_runoffmm = mean_runoffmm,
-                mean_drainagemm = mean_drainagemm)
+                mean_drainagemm = mean_drainagemm,
+                       mean_lwp = mean_lwp,
+                        mean_ci = mean_ci)
 # Now save the file
 save(validation_nowater_output, file="./outputs/validation_nowater_output.RData")
 
