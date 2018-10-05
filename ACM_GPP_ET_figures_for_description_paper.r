@@ -1006,9 +1006,10 @@ points(fluxnet_mean_temperature, fluxnet_mean_rainfall*(365.25*60*60*24), pch=1,
 dev.off()
 
 my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
-fig_height=4000 ; fig_width=4000
+fig_height=4000 ; fig_width=4200
 jpeg(file="./FIGURES/Cal_val_paper_figure_2_heat_map_calibration.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-par(mfrow=c(2,2), mar=c(4.4, 3.8, 4.4, 1.0), omi=c(0.2, 0.2, 0.3, 0.40))
+
+par(mfrow=c(2,2), mar=c(3.9, 4.15, 3.8, 0.4), omi=c(0.5, 0.1, 0.1, 0.1))
 var1 = calibration_output$mean_gpp
 var2 = calibration_output$drivers$GPP
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
@@ -1017,16 +1018,18 @@ smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
 text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$gpp_rmse,2))), cex=1.2, pos=4)
 text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$gpp_bias,2))), cex=1.2, pos=4)
 text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$gpp_r2,2))), cex=1.2, pos=4)
-mtext("Calibration",side = 3,cex=1.8, padj = -1.2, adj = 1.5)
+mtext("Calibration",side = 3, cex=1.8, padj = -1.7, adj = 1.40)
+mtext(expression(paste("GPP (gC/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
 
 var1 = calibration_output$mean_transpiration
 var2 = (calibration_output$drivers$Evap-calibration_output$drivers$soilevap-calibration_output$drivers$wetevap)
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab="",
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
 text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$transpiration_rmse,2))), cex=1.2, pos=4)
 text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$transpiration_bias,2))), cex=1.2, pos=4)
 text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$transpiration_r2,2))), cex=1.2, pos=4)
+mtext(expression(paste("Transpiration (kg",H[2],"O/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
 
 var1 = calibration_output$mean_soilevaporation
 var2 = calibration_output$drivers$soilevap
@@ -1036,15 +1039,18 @@ smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab=
 text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$soilevaporation_rmse,2))), cex=1.2, pos=4)
 text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$soilevaporation_bias,2))), cex=1.2, pos=4)
 text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$soilevaporation_r2,2))), cex=1.2, pos=4)
+mtext(expression(paste("Soil evaporation (kg",H[2],"O/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
 
 var1 = calibration_output$mean_wetcanopyevap
 var2 = calibration_output$drivers$wetevap
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab="ACM-GPP-ET",
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="ACM-GPP-ET",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$wetcanopyevap_rmse,2))), cex=1.2, pos=4)
-text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$wetcanopyevap_bias,2))), cex=1.2, pos=4)
-text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$wetcanopyevap_r2,2))), cex=1.2, pos=4)
+text(-0.75,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$wetcanopyevap_rmse,2))), cex=1.2, pos=4)
+text(-0.75,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$wetcanopyevap_bias,2))), cex=1.2, pos=4)
+text(-0.75,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$wetcanopyevap_r2,2))), cex=1.2, pos=4)
+mtext(expression(paste("Wet Canopy evaporation (kg",H[2],"O/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
+
 dev.off()
 
 # my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
