@@ -38,19 +38,24 @@ subroutine racmgppet(output_dim,met,pars,out_var,lat  &
   double precision, dimension((nodays+1),nopools) :: POOLS
   ! vector of ecosystem fluxes
   double precision, dimension(nodays,nofluxes) :: FLUXES
+  ! profiling example
+  !real :: begin, done,f1=0,f2=0,f3=0,f4=0,f5=0,total_time = 0
+  !real :: Rtot_track_time = 0, aero_time = 0 , soilwater_time = 0 , acm_et_time = 0 , Rm_time = 0
+  !call cpu_time(done)
+  !print*,"time taken per step",(done-begin) / real(nodays), nodays
 
   ! zero initial conditions
   POOLS = 0d0 ; FLUXES = 0d0
   out_var = 0d0
 
   ! update soil parameters
-  soil_frac_clay=soil_frac_clay_in
-  soil_frac_sand=soil_frac_sand_in
+  soil_frac_clay = soil_frac_clay_in
+  soil_frac_sand = soil_frac_sand_in
 
   ! generate deltat step from input data
   deltat(1) = met(1,1)
   do i = 2, nodays
-     deltat(i)=met(1,i)-met(1,(i-1))
+     deltat(i) = met(1,i)-met(1,(i-1))
   end do
 
   ! begin iterations

@@ -18,7 +18,7 @@
 ## Set working directory
 
 setwd("/home/lsmallma/WORK/GREENHOUSE/models/CARDAMOM/")
-source("./cardamom_functions/load_all_cardamom_functions.r")
+source("./R_functions/load_all_cardamom_functions.r")
 setwd("/home/lsmallma/WORK/GREENHOUSE/models/ACM_GPP_ET/")
 
 ###
@@ -28,7 +28,8 @@ setwd("/home/lsmallma/WORK/GREENHOUSE/models/ACM_GPP_ET/")
 load("./outputs/calibration_output.RData")             # Calibration dataset
 load("./outputs/validation_nowater_output.RData")      # Out of sample SPA, water held at field capacity
 load("./outputs/validation_water_output.RData")        # Out of sample SPA, water allowed to vary
-load("./outputs/fluxnet_independent_validation.RData") # Independent FLUXNET GPP and ET derived estimates
+load("./outputs/fluxnet_independent_validation.RData") # Independent FLUXNET GPP and ET derived estimates by ACM-GPP-ET
+load("./outputs/spa_fluxnet_independent_validation.RData") # Independent FLUXNET GPP and ET derived estimate by SPA
 load("./outputs/global_1x1_degree_2001_2015.RData")
 #load("./outputs/global_1x1_degree_2001_2015_co2_plus100.RData")
 #load("./outputs/global_1x1_degree_2001_2015_Tair_plus1.RData")
@@ -159,35 +160,35 @@ print(paste("    WUE RMSE = ",round(mean(SPA_WUE_rmse,na.rm=TRUE),digits=3)," kg
 print(paste("    WUE BIAS = ",round(mean(SPA_WUE_bias,na.rm=TRUE),digits=3)," kgH2O/m2/day",sep=""))
 
 my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
-#fig_height=6000 ; fig_width=4000
-#jpeg(file="./FIGURES/Cal_val_paper_figure_3_heat_map.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-par(mfrow=c(4,2), mar=c(4.4, 4.2, 3.4, 2), omi=c(0.2, 0.2, 0.2, 0.40))
-var1 = nowater$GPP
-var2 = water$GPP
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
-              main=expression(paste("GPP"," (gC ",m^-2," da",y^-1,")")), ylab="", xlab="",cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20) ; abline(0,1,col="red",lwd=3)
-#text(0,max(var2*0.82,na.rm=TRUE),labels=bquote(RMSE == .(round(mean(fluxnet_validation_output$gpp_rmse,na.rm=TRUE),2))), cex=1.5, pos=4)
-#text(0,max(var2*0.72,na.rm=TRUE),labels=bquote(Bias == .(round(mean(fluxnet_validation_output$gpp_bias,na.rm=TRUE),2))), cex=1.5, pos=4)
-#text(0,max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_daily_GPP_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
-mtext(expression(paste("SPA - dynamic soil water")),side = 2,cex=2.0, padj = -1.5, adj = 0.5)
-mtext(expression(paste("SPA - fixed soil water")),side = 1,cex=2.0, padj = 1.75, adj = 1.7)
-var1 = nowater$Evap
-var2 = water$Evap
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main=expression(paste("Evapo-transpiration"," (kg",H[2],"O ",m^-2," da",y^-1,")")), ylab="", xlab="",
-              cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20) ; abline(0,1,col="red",lwd=3)
-#text(max(var1*0.82,na.rm=TRUE),max(var2*0.82,na.rm=TRUE),labels=bquote(RMSE == .(round(mean(fluxnet_validation_output$ET_rmse,na.rm=TRUE),2))), cex=1.5, pos=4)
-#text(max(var1*0.72,na.rm=TRUE),max(var2*0.72,na.rm=TRUE),labels=bquote(Bias == .(round(mean(fluxnet_validation_output$ET_bias,na.rm=TRUE),2))), cex=1.5, pos=4)
-#text(max(var1*0.92,na.rm=TRUE),max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_daily_ET_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
-
-hist(SPA_GPP_r2, main="", xlab=expression(paste("Site specific GPP ",R^2,"",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey") 
-hist(SPA_ET_r2, main="", xlab=expression(paste("Site specific ET ",R^2,"",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey") 
-hist(SPA_GPP_rmse, main="", xlab=expression(paste("Site specific GPP RMSE (gC/",m^2,"/day)",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
-hist(SPA_ET_rmse, main="", xlab=expression(paste("Site specific ET RMSE (kg",H[2],"O/",m^2,"/day)",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
-hist(SPA_GPP_bias, main="", xlab=expression(paste("Site specific GPP Bias (gC/",m^2,"/day)",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
-hist(SPA_ET_bias, main="", xlab=expression(paste("Site specific ET Bias (kg",H[2],"O/",m^2,"/day)",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
-#dev.off()
+# #fig_height=6000 ; fig_width=4000
+# #jpeg(file="./FIGURES/Cal_val_paper_figure_3_heat_map.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+# par(mfrow=c(4,2), mar=c(4.4, 4.2, 3.4, 2), omi=c(0.2, 0.2, 0.2, 0.40))
+# var1 = nowater$GPP
+# var2 = water$GPP
+# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
+#               main=expression(paste("GPP"," (gC ",m^-2," da",y^-1,")")), ylab="", xlab="",cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,
+#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20) ; abline(0,1,col="red",lwd=3)
+# #text(0,max(var2*0.82,na.rm=TRUE),labels=bquote(RMSE == .(round(mean(fluxnet_validation_output$gpp_rmse,na.rm=TRUE),2))), cex=1.5, pos=4)
+# #text(0,max(var2*0.72,na.rm=TRUE),labels=bquote(Bias == .(round(mean(fluxnet_validation_output$gpp_bias,na.rm=TRUE),2))), cex=1.5, pos=4)
+# #text(0,max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_daily_GPP_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
+# mtext(expression(paste("SPA - dynamic soil water")),side = 2,cex=2.0, padj = -1.5, adj = 0.5)
+# mtext(expression(paste("SPA - fixed soil water")),side = 1,cex=2.0, padj = 1.75, adj = 1.7)
+# var1 = nowater$Evap
+# var2 = water$Evap
+# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main=expression(paste("Evapo-transpiration"," (kg",H[2],"O ",m^-2," da",y^-1,")")), ylab="", xlab="",
+#               cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,
+#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20) ; abline(0,1,col="red",lwd=3)
+# #text(max(var1*0.82,na.rm=TRUE),max(var2*0.82,na.rm=TRUE),labels=bquote(RMSE == .(round(mean(fluxnet_validation_output$ET_rmse,na.rm=TRUE),2))), cex=1.5, pos=4)
+# #text(max(var1*0.72,na.rm=TRUE),max(var2*0.72,na.rm=TRUE),labels=bquote(Bias == .(round(mean(fluxnet_validation_output$ET_bias,na.rm=TRUE),2))), cex=1.5, pos=4)
+# #text(max(var1*0.92,na.rm=TRUE),max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_daily_ET_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
+# 
+# hist(SPA_GPP_r2, main="", xlab=expression(paste("Site specific GPP ",R^2,"",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey") 
+# hist(SPA_ET_r2, main="", xlab=expression(paste("Site specific ET ",R^2,"",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey") 
+# hist(SPA_GPP_rmse, main="", xlab=expression(paste("Site specific GPP RMSE (gC/",m^2,"/day)",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
+# hist(SPA_ET_rmse, main="", xlab=expression(paste("Site specific ET RMSE (kg",H[2],"O/",m^2,"/day)",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
+# hist(SPA_GPP_bias, main="", xlab=expression(paste("Site specific GPP Bias (gC/",m^2,"/day)",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
+# hist(SPA_ET_bias, main="", xlab=expression(paste("Site specific ET Bias (kg",H[2],"O/",m^2,"/day)",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
+# #dev.off()
 
 ###
 ## What did ACM do in response to change in water
@@ -436,7 +437,6 @@ plot(SPA_deltaGPP ~ ACM_deltaGPP) ; abline(0,1,col="red") ; plot(SPA_deltaET ~ A
 
 spa_transpiration = (validation_water_output$drivers$Evap - validation_water_output$drivers$soilevap - validation_water_output$drivers$wetevap)
 acm_et = validation_water_output$mean_transpiration + validation_water_output$mean_soilevaporation + validation_water_output$mean_wetcanopyevap
-#tmp = which(validation_water_output$drivers$GPP > 1 & spa_transpiration > 0.5 & validation_water_output$drivers$lai > 1.0)
 tmp = which(validation_water_output$drivers$GPP > 0.1 & spa_transpiration > 0.1 & validation_water_output$mean_gpp > 0.1 & validation_water_output$mean_transpiration > 0.1 & validation_water_output$drivers$lai > 0.1)
 acm_wue = validation_water_output$mean_gpp / validation_water_output$mean_transpiration
 spa_wue = validation_water_output$drivers$GPP / spa_transpiration
@@ -469,7 +469,7 @@ print(paste("       ACM T/ET   = ",round(sum(validation_water_output$mean_transp
 print(paste("       ACM S/ET   = ",round(sum(validation_water_output$mean_soilevaporation)/sum(acm_et),digits=2),sep=""))
 print(paste("       ACM W/ET   = ",round(sum(validation_water_output$mean_wetcanopyevap)/sum(acm_et),digits=2),sep=""))
 
-print("Independent validation (fluxnet2015): ")
+print("ACM - Independent validation (fluxnet2015): ")
 nos_years = 15
 steps_per_year = ceiling(dim(fluxnet_validation_output$observation_wue)[2]/nos_years)
 nos_sites = dim(fluxnet_validation_output$observation_wue)[1]
@@ -504,12 +504,12 @@ for (i in seq(1, dim(fluxnet_validation_output$observation_wue)[1])) {
         ET_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
         ET_rmse[i] = rmse(obs,mod)
     }
-    filter = which(model_GPP[i,] < 0.2 | model_ET[i,] < 0.2 | obs_GPP[i,] < 0.2 | obs_ET[i,] < 0.2 | fluxnet_validation_output$timeseries_lai[i,] < 0.3 | is.na(obs_ET[i,]) | is.na(obs_GPP[i,]) & fluxnet_validation_output$timeseries_precipitation[i,] >= 2.386993e-05)
+    filter = which(model_GPP[i,] < 0.1 | model_ET[i,] < 0.1 | obs_GPP[i,] < 0.1 | obs_ET[i,] < 0.1 | fluxnet_validation_output$timeseries_lai[i,] < 0.1 | is.na(obs_ET[i,]) | is.na(obs_GPP[i,]))
     model_GPP[i,filter] = NA ; model_ET[i,filter] = NA
     obs_GPP[i,filter] = NA ; obs_ET[i,filter] = NA
-    model_annual_gpp[i,] = daily_sum(model_GPP[i,]*model_vpd[i,],steps_per_year,steps_per_year-1) 
+    model_annual_gpp[i,] = daily_sum(model_GPP[i,],steps_per_year,steps_per_year-1) 
     model_annual_ET[i,] = daily_sum(model_ET[i,],steps_per_year,steps_per_year-1) 
-    fluxnet_annual_gpp[i,] = daily_sum(obs_GPP[i,]*obs_vpd[i,],steps_per_year,steps_per_year-1) 
+    fluxnet_annual_gpp[i,] = daily_sum(obs_GPP[i,],steps_per_year,steps_per_year-1) 
     fluxnet_annual_ET[i,] = daily_sum(obs_ET[i,],steps_per_year,steps_per_year-1) 
     if (length(which(is.na(model_annual_gpp[i,]) == FALSE)) > 3) {
         model_WUE[i,] = model_annual_gpp[i,] / model_annual_ET[i,]
@@ -557,12 +557,12 @@ for (i in seq(1, dim(fluxnet_validation_output$observation_wue)[1])) {
         ET_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
         ET_rmse[i] = rmse(obs,mod)
      }
-    filter = which(model_GPP[i,] < 0.2 | model_ET[i,] < 0.2 | obs_GPP[i,] < 0.2 | obs_ET[i,] < 0.2 | fluxnet_validation_output$timeseries_lai[i,] < 0.3 | is.na(obs_ET[i,]) | is.na(obs_GPP[i,]) & fluxnet_validation_output$timeseries_precipitation[i,] >= 2.386993e-05)
+    filter = which(model_GPP[i,] < 0.1 | model_ET[i,] < 0.1 | obs_GPP[i,] < 0.1 | obs_ET[i,] < 0.1 | fluxnet_validation_output$timeseries_lai[i,] < 0.1 | is.na(obs_ET[i,]) | is.na(obs_GPP[i,]))
     model_GPP[i,filter] = NA ; model_ET[i,filter] = NA
     obs_GPP[i,filter] = NA ; obs_ET[i,filter] = NA
-    model_monthly_gpp[i,] = daily_sum(model_GPP[i,]*model_vpd[i,],days_in_period,days_in_period-4) 
+    model_monthly_gpp[i,] = daily_sum(model_GPP[i,],days_in_period,days_in_period-4) 
     model_monthly_ET[i,] = daily_sum(model_ET[i,],days_in_period,days_in_period-4) 
-    fluxnet_monthly_gpp[i,] = daily_sum(obs_GPP[i,]*obs_vpd[i,],days_in_period,days_in_period-4) 
+    fluxnet_monthly_gpp[i,] = daily_sum(obs_GPP[i,],days_in_period,days_in_period-4) 
     fluxnet_monthly_ET[i,] = daily_sum(obs_ET[i,],days_in_period,days_in_period-4) 
     if (length(which(is.na(model_monthly_gpp[i,]) == FALSE)) > 3) {
         model_WUE[i,] = model_monthly_gpp[i,] / model_monthly_ET[i,]
@@ -572,13 +572,13 @@ for (i in seq(1, dim(fluxnet_validation_output$observation_wue)[1])) {
 }
 print(paste("Monthly:Obs IWUE = ",round(mean(obs_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
 print(paste("        ACM IWUE = ",round(mean(model_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
-print(paste("       IWUE R2   = ",round(mean(WUE_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("        WUE R2   = ",round(mean(WUE_r2,na.rm=TRUE),digits=2)," ",sep=""))
 print(paste("        GPP R2   = ",round(mean(GPP_r2,na.rm=TRUE),digits=2)," ",sep=""))
 print(paste("        ET R2    = ",round(mean(ET_r2,na.rm=TRUE),digits=2)," ",sep=""))
 print(paste("        GPP RMSE = ",round(mean(GPP_rmse,na.rm=TRUE),digits=2)," ",sep=""))
 print(paste("        ET RMSE  = ",round(mean(ET_rmse,na.rm=TRUE),digits=2)," ",sep=""))
 
-days_in_period=7
+days_in_period = 7
 steps_per_year = ceiling(dim(fluxnet_validation_output$observation_wue)[2]/nos_years)
 nos_sites = dim(fluxnet_validation_output$observation_wue)[1]
 WUE_r2 = array(NA,dim=c(nos_sites))
@@ -610,12 +610,12 @@ for (i in seq(1, dim(fluxnet_validation_output$observation_wue)[1])) {
 	      ET_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
     	  ET_rmse[i] = rmse(obs,mod)
     }
-    filter = which(model_GPP[i,] < 0.2 | model_ET[i,] < 0.2 | obs_GPP[i,] < 0.2 | obs_ET[i,] < 0.2 | fluxnet_validation_output$timeseries_lai[i,] < 0.3 | is.na(obs_ET[i,]) | is.na(obs_GPP[i,]) & fluxnet_validation_output$timeseries_precipitation[i,] >= 2.386993e-05)
+    filter = which(model_GPP[i,] < 0.1 | model_ET[i,] < 0.1 | obs_GPP[i,] < 0.1 | obs_ET[i,] < 0.1 | fluxnet_validation_output$timeseries_lai[i,] < 0.1 | is.na(obs_ET[i,]) | is.na(obs_GPP[i,]))
     model_GPP[i,filter] = NA ; model_ET[i,filter] = NA
     obs_GPP[i,filter] = NA ; obs_ET[i,filter] = NA
-    model_weekly_gpp[i,] = daily_sum(model_GPP[i,]*model_vpd[i,],days_in_period,days_in_period-1) 
+    model_weekly_gpp[i,] = daily_sum(model_GPP[i,],days_in_period,days_in_period-1) 
     model_weekly_ET[i,] = daily_sum(model_ET[i,],days_in_period,days_in_period-1) 
-    fluxnet_weekly_gpp[i,] = daily_sum(obs_GPP[i,]*obs_vpd[i,],days_in_period,days_in_period-1) 
+    fluxnet_weekly_gpp[i,] = daily_sum(obs_GPP[i,],days_in_period,days_in_period-1) 
     fluxnet_weekly_ET[i,] = daily_sum(obs_ET[i,],days_in_period,days_in_period-1) 
     if (length(which(is.na(model_weekly_gpp[i,]) == FALSE)) > 3) {
 	      model_WUE[i,] = model_weekly_gpp[i,] / model_weekly_ET[i,]
@@ -631,7 +631,7 @@ print(paste("          ET R2 = ",round(mean(ET_r2,na.rm=TRUE),digits=2)," ",sep=
 print(paste("       GPP RMSE = ",round(mean(GPP_rmse,na.rm=TRUE),digits=2)," ",sep=""))
 print(paste("        ET RMSE = ",round(mean(ET_rmse,na.rm=TRUE),digits=2)," ",sep=""))
 
-days_in_period=1
+days_in_period = 1
 steps_per_year = ceiling(dim(fluxnet_validation_output$observation_wue)[2]/nos_years)
 nos_sites = dim(fluxnet_validation_output$observation_wue)[1]
 WUE_r2 = array(NA,dim=c(nos_sites))
@@ -663,12 +663,12 @@ for (i in seq(1, dim(fluxnet_validation_output$observation_wue)[1])) {
         ET_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
         ET_rmse[i] = rmse(obs,mod)
     }
-    filter = which(model_GPP[i,] < 0.2 | model_ET[i,] < 0.2 | obs_GPP[i,] < 0.2 | obs_ET[i,] < 0.2 | fluxnet_validation_output$timeseries_lai[i,] < 0.3 | is.na(obs_ET[i,]) | is.na(obs_GPP[i,]) & fluxnet_validation_output$timeseries_precipitation[i,] >= 2.386993e-05)
+    filter = which(model_GPP[i,] < 0.1 | model_ET[i,] < 0.1 | obs_GPP[i,] < 0.1 | obs_ET[i,] < 0.1 | fluxnet_validation_output$timeseries_lai[i,] < 0.1 | is.na(obs_ET[i,]) | is.na(obs_GPP[i,]))
     model_GPP[i,filter] = NA ; model_ET[i,filter] = NA
     obs_GPP[i,filter] = NA ; obs_ET[i,filter] = NA
-    model_weekly_gpp[i,] = daily_sum(model_GPP[i,]*model_vpd[i,],days_in_period,days_in_period) 
+    model_weekly_gpp[i,] = daily_sum(model_GPP[i,],days_in_period,days_in_period) 
     model_weekly_ET[i,] = daily_sum(model_ET[i,],days_in_period,days_in_period) 
-    fluxnet_weekly_gpp[i,] = daily_sum(obs_GPP[i,]*obs_vpd[i,],days_in_period,days_in_period) 
+    fluxnet_weekly_gpp[i,] = daily_sum(obs_GPP[i,],days_in_period,days_in_period) 
     fluxnet_weekly_ET[i,] = daily_sum(obs_ET[i,],days_in_period,days_in_period) 
     if (length(which(is.na(model_weekly_gpp[i,]) == FALSE)) > 3 & length(which(is.na(fluxnet_weekly_gpp[i,]) == FALSE)) > 3) {
         model_WUE[i,] = model_weekly_gpp[i,] / model_weekly_ET[i,]
@@ -679,13 +679,13 @@ for (i in seq(1, dim(fluxnet_validation_output$observation_wue)[1])) {
 fluxnet_daily_GPP_r2 = GPP_r2
 fluxnet_daily_ET_r2 = ET_r2
 fluxnet_daily_WUE_r2 = WUE_r2
-print(paste("Daily: Obs IWUE = ",round(mean(obs_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
-print(paste("       ACM IWUE = ",round(mean(model_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
-print(paste("        IWUE R2 = ",round(mean(WUE_r2,na.rm=TRUE),digits=2)," ",sep=""))
-print(paste("         GPP R2 = ",round(mean(GPP_r2,na.rm=TRUE),digits=2)," ",sep=""))
-print(paste("          ET R2 = ",round(mean(ET_r2,na.rm=TRUE),digits=2)," ",sep=""))
-print(paste("       GPP RMSE = ",round(mean(GPP_rmse,na.rm=TRUE),digits=2)," ",sep=""))
-print(paste("        ET RMSE = ",round(mean(ET_rmse,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("Daily: Obs WUE = ",round(mean(obs_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
+print(paste("       ACM WUE = ",round(mean(model_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
+print(paste("        WUE R2 = ",round(mean(WUE_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("        GPP R2 = ",round(mean(GPP_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("         ET R2 = ",round(mean(ET_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("      GPP RMSE = ",round(mean(GPP_rmse,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("       ET RMSE = ",round(mean(ET_rmse,na.rm=TRUE),digits=2)," ",sep=""))
 
 print("Daily GPP by IGBP")
 print(aggregate(GPP_r2,by=list(fluxnet_validation_output$IGBP),mean, na.rm=TRUE))
@@ -693,6 +693,232 @@ print("Daily ET by IGBP")
 print(aggregate(ET_r2,by=list(fluxnet_validation_output$IGBP),mean, na.rm=TRUE))
 print("Daily WUE by IGBP")
 print(aggregate(WUE_r2,by=list(fluxnet_validation_output$IGBP),mean, na.rm=TRUE))
+
+print("SPA - Independent validation (fluxnet2015): ")
+nos_years = 15
+steps_per_year = ceiling(dim(spa_fluxnet_validation_output$observation_wue)[2]/nos_years)
+nos_sites = dim(spa_fluxnet_validation_output$observation_wue)[1]
+spa = list(WUE_r2 = WUE_r2)
+spa$WUE_r2 = array(NA,dim=c(nos_sites))
+spa$GPP_r2 = array(NA,dim=c(nos_sites))
+spa$ET_r2 = array(NA,dim=c(nos_sites))
+spa$GPP_rmse = array(NA,dim=c(nos_sites))
+spa$ET_rmse = array(NA,dim=c(nos_sites))
+spa$model_WUE = array(NA,dim=c(nos_sites,nos_years))
+spa$obs_WUE = array(NA,dim=c(nos_sites,nos_years))
+spa$model_annual_gpp = array(NA,dim=c(nos_sites,nos_years))
+spa$model_annual_ET = array(NA,dim=c(nos_sites,nos_years))
+spa$fluxnet_annual_gpp = array(NA,dim=c(nos_sites,nos_years))
+spa$fluxnet_annual_ET = array(NA,dim=c(nos_sites,nos_years))
+spa$model_ET = spa_fluxnet_validation_output$timeseries_transpiration + spa_fluxnet_validation_output$timeseries_soilevaporation + spa_fluxnet_validation_output$timeseries_wetcanopyevap
+spa$model_GPP = spa_fluxnet_validation_output$timeseries_gpp
+spa$obs_GPP = spa_fluxnet_validation_output$observation_gpp
+spa$obs_ET = spa_fluxnet_validation_output$observation_ET
+spa$model_vpd = spa_fluxnet_validation_output$timeseries_vpd
+spa$obs_vpd = spa_fluxnet_validation_output$observed_vpd
+for (i in seq(1, dim(spa_fluxnet_validation_output$observation_wue)[1])) {
+    # these fluxes should be prior to WUE restrictions...
+    tmp = which(is.na(spa$obs_GPP[i,]) == FALSE)
+    mod = daily_mean(spa$model_GPP[i,tmp],steps_per_year,steps_per_year-1) ; obs = daily_mean(spa$obs_GPP[i,tmp],steps_per_year,steps_per_year-1)
+    if (length(which(is.na(obs) == FALSE)) > 3 & length(which(is.na(mod) == FALSE)) > 3) {
+        spa$GPP_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
+        spa$GPP_rmse[i] = rmse(obs,mod)
+    }
+    tmp = which(is.na(spa$obs_ET[i,]) == FALSE)
+    mod = daily_mean(spa$model_ET[i,tmp],steps_per_year,steps_per_year-1) ; obs = daily_mean(spa$obs_ET[i,tmp],steps_per_year,steps_per_year-1)
+    if (length(which(is.na(obs) == FALSE)) > 3 & length(which(is.na(mod) == FALSE)) > 3) {
+        spa$ET_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
+        spa$ET_rmse[i] = rmse(obs,mod)
+    }
+    filter = which(spa$model_GPP[i,] < 0.2 | spa$model_ET[i,] < 0.2 | spa$obs_GPP[i,] < 0.2 | spa$obs_ET[i,] < 0.2 | spa_fluxnet_validation_output$timeseries_lai[i,] < 0.3 | is.na(spa$obs_ET[i,]) | is.na(spa$obs_GPP[i,]) & spa_fluxnet_validation_output$timeseries_precipitation[i,] >= 2.386993e-05)
+    spa$model_GPP[i,filter] = NA ; spa$model_ET[i,filter] = NA
+    spa$obs_GPP[i,filter] = NA ; spa$obs_ET[i,filter] = NA
+    spa$model_annual_gpp[i,] = daily_sum(spa$model_GPP[i,]*spa$model_vpd[i,],steps_per_year,steps_per_year-1) 
+    spa$model_annual_ET[i,] = daily_sum(spa$model_ET[i,],steps_per_year,steps_per_year-1) 
+    spa$fluxnet_annual_gpp[i,] = daily_sum(spa$obs_GPP[i,]*spa$obs_vpd[i,],steps_per_year,steps_per_year-1) 
+    spa$fluxnet_annual_ET[i,] = daily_sum(spa$obs_ET[i,],steps_per_year,steps_per_year-1) 
+    if (length(which(is.na(model_annual_gpp[i,]) == FALSE)) > 3) {
+        spa$model_WUE[i,] = spa$model_annual_gpp[i,] / spa$model_annual_ET[i,]
+        spa$obs_WUE[i,] = spa$fluxnet_annual_gpp[i,] / spa$fluxnet_annual_ET[i,]
+        spa$WUE_r2[i] = summary(lm(spa$obs_WUE[i,] ~ spa$model_WUE[i,]))$adj.r.squared
+    }
+}
+print(paste("Annual:Obs IWUE = ",round(mean(spa$obs_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
+print(paste("       ACM IWUE = ",round(mean(spa$model_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
+print(paste("        IWUE R2 = ",round(mean(spa$WUE_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("         GPP R2 = ",round(mean(spa$GPP_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("          ET R2 = ",round(mean(spa$ET_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("       GPP RMSE = ",round(mean(spa$GPP_rmse,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("        ET RMSE = ",round(mean(spa$ET_rmse,na.rm=TRUE),digits=2)," ",sep=""))
+
+steps_per_year = ceiling(dim(spa_fluxnet_validation_output$observation_wue)[2]/nos_years)
+days_in_period=steps_per_year/12
+nos_sites = dim(spa_fluxnet_validation_output$observation_wue)[1]
+spa$WUE_r2 = array(NA,dim=c(nos_sites))
+spa$GPP_r2 = array(NA,dim=c(nos_sites))
+spa$ET_r2 = array(NA,dim=c(nos_sites))
+spa$GPP_rmse = array(NA,dim=c(nos_sites))
+spa$ET_rmse = array(NA,dim=c(nos_sites))
+spa$model_monthly_gpp = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/days_in_period))))
+spa$model_monthly_ET = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/days_in_period))))
+spa$fluxnet_monthly_gpp = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/days_in_period))))
+spa$fluxnet_monthly_ET = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/days_in_period))))
+spa$model_WUE = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/days_in_period))))
+spa$obs_WUE = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/days_in_period))))
+spa$model_ET = spa_fluxnet_validation_output$timeseries_transpiration + spa_fluxnet_validation_output$timeseries_soilevaporation + spa_fluxnet_validation_output$timeseries_wetcanopyevap
+spa$model_GPP = spa_fluxnet_validation_output$timeseries_gpp
+spa$obs_GPP = spa_fluxnet_validation_output$observation_gpp
+spa$obs_ET = spa_fluxnet_validation_output$observation_ET
+for (i in seq(1, dim(spa_fluxnet_validation_output$observation_wue)[1])) {
+    # these fluxes should be prior to WUE restrictions...
+    tmp = which(is.na(spa$obs_GPP[i,]) == FALSE)
+    mod = daily_mean(spa$model_GPP[i,tmp],days_in_period,days_in_period-4) ; obs = daily_mean(spa$obs_GPP[i,tmp],days_in_period,days_in_period-4)
+    if (length(which(is.na(obs) == FALSE)) > 3 & length(which(is.na(mod) == FALSE)) > 3) {
+        spa$GPP_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
+        spa$GPP_rmse[i] = rmse(obs,mod)
+    }
+    tmp = which(is.na(spa$obs_ET[i,]) == FALSE)
+    mod = daily_mean(spa$model_ET[i,tmp],days_in_period,days_in_period-4) ; obs = daily_mean(spa$obs_ET[i,tmp],days_in_period,days_in_period-4)
+    if (length(which(is.na(obs) == FALSE)) > 3 & length(which(is.na(mod) == FALSE)) > 3) {
+        spa$ET_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
+        spa$ET_rmse[i] = rmse(obs,mod)
+     }
+    filter = which(spa$model_GPP[i,] < 0.2 | spa$model_ET[i,] < 0.2 | spa$obs_GPP[i,] < 0.2 | spa$obs_ET[i,] < 0.2 | spa_fluxnet_validation_output$timeseries_lai[i,] < 0.3 | is.na(spa$obs_ET[i,]) | is.na(spa$obs_GPP[i,]) & spa_fluxnet_validation_output$timeseries_precipitation[i,] >= 2.386993e-05)
+    spa$model_GPP[i,filter] = NA ; spa$model_ET[i,filter] = NA
+    spa$obs_GPP[i,filter] = NA ; spa$obs_ET[i,filter] = NA
+    spa$model_monthly_gpp[i,] = daily_sum(spa$model_GPP[i,]*spa$model_vpd[i,],days_in_period,days_in_period-4) 
+    spa$model_monthly_ET[i,] = daily_sum(spa$model_ET[i,],days_in_period,days_in_period-4) 
+    spa$fluxnet_monthly_gpp[i,] = daily_sum(spa$obs_GPP[i,]*obs_vpd[i,],days_in_period,days_in_period-4) 
+    spa$fluxnet_monthly_ET[i,] = daily_sum(spa$obs_ET[i,],days_in_period,days_in_period-4) 
+    if (length(which(is.na(spa$model_monthly_gpp[i,]) == FALSE)) > 3) {
+        spa$model_WUE[i,] = spa$model_monthly_gpp[i,] / spa$model_monthly_ET[i,]
+        spa$obs_WUE[i,] = spa$fluxnet_monthly_gpp[i,] / spa$fluxnet_monthly_ET[i,]
+        spa$WUE_r2[i] = summary(lm(spa$obs_WUE[i,] ~ spa$model_WUE[i,]))$adj.r.squared
+    }
+}
+print(paste("Monthly:Obs IWUE = ",round(mean(spa$obs_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
+print(paste("        ACM IWUE = ",round(mean(spa$model_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
+print(paste("       IWUE R2   = ",round(mean(spa$WUE_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("        GPP R2   = ",round(mean(spa$GPP_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("        ET R2    = ",round(mean(spa$ET_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("        GPP RMSE = ",round(mean(spa$GPP_rmse,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("        ET RMSE  = ",round(mean(spa$ET_rmse,na.rm=TRUE),digits=2)," ",sep=""))
+
+days_in_period = 7
+steps_per_year = ceiling(dim(spa_fluxnet_validation_output$observation_wue)[2]/nos_years)
+nos_sites = dim(spa_fluxnet_validation_output$observation_wue)[1]
+spa$WUE_r2 = array(NA,dim=c(nos_sites))
+spa$GPP_r2 = array(NA,dim=c(nos_sites))
+spa$ET_r2 = array(NA,dim=c(nos_sites))
+spa$GPP_rmse = array(NA,dim=c(nos_sites))
+spa$ET_rmse = array(NA,dim=c(nos_sites))
+spa$model_weekly_gpp = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/7))))
+spa$model_weekly_ET = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/7))))
+spa$fluxnet_weekly_gpp = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/7))))
+spa$fluxnet_weekly_ET = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/7))))
+spa$model_WUE = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/7))))
+spa$obs_WUE = array(NA,dim=c(nos_sites,ceiling(nos_years*(365.25/7))))
+spa$model_ET = spa_fluxnet_validation_output$timeseries_transpiration + spa_fluxnet_validation_output$timeseries_soilevaporation + spa_fluxnet_validation_output$timeseries_wetcanopyevap
+spa$model_GPP = spa_fluxnet_validation_output$timeseries_gpp
+spa$obs_GPP = spa_fluxnet_validation_output$observation_gpp
+spa$obs_ET = spa_fluxnet_validation_output$observation_ET
+for (i in seq(1, dim(spa_fluxnet_validation_output$observation_wue)[1])) {
+    # these fluxes should be prior to WUE restrictions...
+    tmp = which(is.na(spa$obs_GPP[i,]) == FALSE)
+    mod = daily_mean(spa$model_GPP[i,tmp],days_in_period,days_in_period-1) ; obs = daily_mean(spa$obs_GPP[i,tmp],days_in_period,days_in_period-1)
+    if (length(which(is.na(obs) == FALSE)) > 3 & length(which(is.na(mod) == FALSE)) > 3) {
+	      spa$GPP_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
+	      spa$GPP_rmse[i] = rmse(obs,mod)
+    }
+    tmp = which(is.na(spa$obs_ET[i,]) == FALSE)
+    mod = daily_mean(spa$model_ET[i,tmp],days_in_period,days_in_period-1) ; obs = daily_mean(spa$obs_ET[i,tmp],days_in_period,days_in_period-1)
+    if (length(which(is.na(obs) == FALSE)) > 3 & length(which(is.na(mod) == FALSE)) > 3) {
+	      spa$ET_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
+    	  spa$ET_rmse[i] = rmse(obs,mod)
+    }
+    filter = which(spa$model_GPP[i,] < 0.2 | spa$model_ET[i,] < 0.2 | spa$obs_GPP[i,] < 0.2 | spa$obs_ET[i,] < 0.2 | spa_fluxnet_validation_output$timeseries_lai[i,] < 0.3 | is.na(spa$obs_ET[i,]) | is.na(spa$obs_GPP[i,]) & spa_fluxnet_validation_output$timeseries_precipitation[i,] >= 2.386993e-05)
+    spa$model_GPP[i,filter] = NA ; spa$model_ET[i,filter] = NA
+    spa$obs_GPP[i,filter] = NA ; spa$obs_ET[i,filter] = NA
+    spa$model_weekly_gpp[i,] = daily_sum(spa$model_GPP[i,]*spa$model_vpd[i,],days_in_period,days_in_period-1) 
+    spa$model_weekly_ET[i,] = daily_sum(spa$model_ET[i,],days_in_period,days_in_period-1) 
+    spa$fluxnet_weekly_gpp[i,] = daily_sum(spa$obs_GPP[i,]*spa$obs_vpd[i,],days_in_period,days_in_period-1) 
+    spa$fluxnet_weekly_ET[i,] = daily_sum(spa$obs_ET[i,],days_in_period,days_in_period-1) 
+    if (length(which(is.na(spa$model_weekly_gpp[i,]) == FALSE)) > 3) {
+	      spa$model_WUE[i,] = spa$model_weekly_gpp[i,] / spa$model_weekly_ET[i,]
+	      spa$obs_WUE[i,] = spa$fluxnet_weekly_gpp[i,] / spa$fluxnet_weekly_ET[i,]
+        spa$WUE_r2[i] = summary(lm(spa$obs_WUE[i,] ~ spa$model_WUE[i,]))$adj.r.squared
+    }
+}
+print(paste("Weekly:Obs IWUE = ",round(mean(spa$obs_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
+print(paste("       ACM IWUE = ",round(mean(spa$model_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
+print(paste("        IWUE R2 = ",round(mean(spa$WUE_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("         GPP R2 = ",round(mean(spa$GPP_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("          ET R2 = ",round(mean(spa$ET_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("       GPP RMSE = ",round(mean(spa$GPP_rmse,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("        ET RMSE = ",round(mean(spa$ET_rmse,na.rm=TRUE),digits=2)," ",sep=""))
+
+days_in_period=1
+steps_per_year = ceiling(dim(spa_fluxnet_validation_output$observation_wue)[2]/nos_years)
+nos_sites = dim(spa_fluxnet_validation_output$observation_wue)[1]
+spa$WUE_r2 = array(NA,dim=c(nos_sites))
+spa$GPP_r2 = array(NA,dim=c(nos_sites))
+spa$ET_r2 = array(NA,dim=c(nos_sites))
+spa$GPP_rmse = array(NA,dim=c(nos_sites))
+spa$ET_rmse = array(NA,dim=c(nos_sites))
+spa$model_weekly_gpp = array(NA,dim=c(nos_sites,dim(spa_fluxnet_validation_output$timeseries_soilevaporation)[2]))
+spa$model_weekly_ET = array(NA,dim=c(nos_sites,dim(spa_fluxnet_validation_output$timeseries_soilevaporation)[2]))
+spa$fluxnet_weekly_gpp = array(NA,dim=c(nos_sites,dim(spa_fluxnet_validation_output$timeseries_soilevaporation)[2]))
+spa$fluxnet_weekly_ET = array(NA,dim=c(nos_sites,dim(spa_fluxnet_validation_output$timeseries_soilevaporation)[2]))
+spa$model_WUE = array(NA,dim=c(nos_sites,dim(spa_fluxnet_validation_output$timeseries_soilevaporation)[2]))
+spa$obs_WUE = array(NA,dim=c(nos_sites,dim(spa_fluxnet_validation_output$timeseries_soilevaporation)[2]))
+spa$model_ET = spa_fluxnet_validation_output$timeseries_transpiration + spa_fluxnet_validation_output$timeseries_soilevaporation + spa_fluxnet_validation_output$timeseries_wetcanopyevap
+spa$model_GPP = spa_fluxnet_validation_output$timeseries_gpp
+spa$obs_GPP = spa_fluxnet_validation_output$observation_gpp
+spa$obs_ET = spa_fluxnet_validation_output$observation_ET
+for (i in seq(1, dim(spa_fluxnet_validation_output$observation_wue)[1])) {
+    # these fluxes should be prior to WUE restrictions...
+    tmp = which(is.na(spa$obs_GPP[i,]) == FALSE)
+    mod = daily_mean(spa$model_GPP[i,tmp],days_in_period,days_in_period) ; obs = daily_mean(spa$obs_GPP[i,tmp],days_in_period,days_in_period)
+    if (length(which(is.na(obs) == FALSE)) > 3 & length(which(is.na(mod) == FALSE)) > 3) {
+        spa$GPP_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
+        spa$GPP_rmse[i] = rmse(obs,mod)
+    }
+    tmp = which(is.na(spa$obs_ET[i,]) == FALSE)
+    mod = daily_mean(spa$model_ET[i,tmp],days_in_period,days_in_period) ; obs = daily_mean(spa$obs_ET[i,tmp],days_in_period,days_in_period)
+    if (length(which(is.na(obs) == FALSE)) > 3 & length(which(is.na(mod) == FALSE)) > 3) {
+        spa$ET_r2[i] = summary(lm(obs  ~ mod ))$adj.r.squared
+        spa$ET_rmse[i] = rmse(obs,mod)
+    }
+    filter = which(spa$model_GPP[i,] < 0.2 | spa$model_ET[i,] < 0.2 | spa$obs_GPP[i,] < 0.2 | spa$obs_ET[i,] < 0.2 | spa_fluxnet_validation_output$timeseries_lai[i,] < 0.3 | is.na(spa$obs_ET[i,]) | is.na(spa$obs_GPP[i,]) & spa_fluxnet_validation_output$timeseries_precipitation[i,] >= 2.386993e-05)
+    spa$model_GPP[i,filter] = NA ; spa$model_ET[i,filter] = NA
+    spa$obs_GPP[i,filter] = NA ; spa$obs_ET[i,filter] = NA
+    spa$model_weekly_gpp[i,] = daily_sum(spa$model_GPP[i,]*spa$model_vpd[i,],days_in_period,days_in_period) 
+    spa$model_weekly_ET[i,] = daily_sum(spa$model_ET[i,],days_in_period,days_in_period) 
+    spa$fluxnet_weekly_gpp[i,] = daily_sum(obs_GPP[i,]*obs_vpd[i,],days_in_period,days_in_period) 
+    spa$fluxnet_weekly_ET[i,] = daily_sum(obs_ET[i,],days_in_period,days_in_period) 
+    if (length(which(is.na(spa$model_weekly_gpp[i,]) == FALSE)) > 3 & length(which(is.na(fluxnet_weekly_gpp[i,]) == FALSE)) > 3) {
+        spa$model_WUE[i,] = spa$model_weekly_gpp[i,] / spa$model_weekly_ET[i,]
+        spa$obs_WUE[i,] = spa$fluxnet_weekly_gpp[i,] / spa$fluxnet_weekly_ET[i,]
+        spa$WUE_r2[i] = summary(lm(spa$obs_WUE[i,] ~ spa$model_WUE[i,]))$adj.r.squared
+    }
+}
+spa$fluxnet_daily_GPP_r2 = spa$GPP_r2
+spa$fluxnet_daily_ET_r2 = spa$ET_r2
+spa$fluxnet_daily_WUE_r2 = spa$WUE_r2
+print(paste("Daily: Obs IWUE = ",round(mean(spa$obs_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
+print(paste("       ACM IWUE = ",round(mean(spa$model_WUE,na.rm=TRUE),digits=1)," gC/kgH2O",sep=""))
+print(paste("        IWUE R2 = ",round(mean(spa$WUE_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("         GPP R2 = ",round(mean(spa$GPP_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("          ET R2 = ",round(mean(spa$ET_r2,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("       GPP RMSE = ",round(mean(spa$GPP_rmse,na.rm=TRUE),digits=2)," ",sep=""))
+print(paste("        ET RMSE = ",round(mean(spa$ET_rmse,na.rm=TRUE),digits=2)," ",sep=""))
+
+print("Daily GPP by IGBP")
+print(aggregate(spa$GPP_r2,by=list(spa_fluxnet_validation_output$IGBP),mean, na.rm=TRUE))
+print("Daily ET by IGBP")
+print(aggregate(spa$ET_r2,by=list(spa_fluxnet_validation_output$IGBP),mean, na.rm=TRUE))
+print("Daily WUE by IGBP")
+print(aggregate(spa$WUE_r2,by=list(spa_fluxnet_validation_output$IGBP),mean, na.rm=TRUE))
 
 # print("Global output: ")
 # print(paste("       GPP = ",round(global_output$global_mean_annual_gpp,digits=1)," PgC",sep=""))
@@ -1006,210 +1232,111 @@ points(fluxnet_mean_temperature, fluxnet_mean_rainfall*(365.25*60*60*24), pch=1,
 dev.off()
 
 my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
-fig_height=4000 ; fig_width=4200
-jpeg(file="./FIGURES/Cal_val_paper_figure_2_heat_map_calibration.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+fig_height=5000 ; fig_width=5200
+jpeg(file="./FIGURES/Cal_val_paper_figure_2_heat_map_calibration.jpg", height=fig_height, width=fig_width, res=500, quality=100)
 
-par(mfrow=c(2,2), mar=c(3.9, 4.15, 3.8, 0.4), omi=c(0.5, 0.1, 0.1, 0.1))
+par(mfrow=c(2,2), mar=c(1.8, 1.8, 2.6, 0.8), omi=c(0.5, 0.5, 0.5, 0.2))
 var1 = calibration_output$mean_gpp
 var2 = calibration_output$drivers$GPP
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
-              main="", ylab="SPA", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
+              main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$gpp_rmse,2))), cex=1.2, pos=4)
-text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$gpp_bias,2))), cex=1.2, pos=4)
-text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$gpp_r2,2))), cex=1.2, pos=4)
-mtext("Calibration",side = 3, cex=1.8, padj = -1.7, adj = 1.40)
+a = max(var2,na.rm=TRUE) * 0.04
+text(min(var1,na.rm=TRUE)-a,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$gpp_rmse,2))), cex=1.5, pos=4)
+text(min(var1,na.rm=TRUE)-a,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$gpp_bias,2))), cex=1.5, pos=4)
+text(min(var1,na.rm=TRUE)-a,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$gpp_r2,2))), cex=1.5, pos=4)
+mtext("Calibration",side = 3, cex=2.3, padj = -2.0, adj = 1.4)
 mtext(expression(paste("GPP (gC/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
+mtext("SPA",side = 2, cex=1.6, padj = -2.2, adj = 0.5)
 
 var1 = calibration_output$mean_transpiration
 var2 = (calibration_output$drivers$Evap-calibration_output$drivers$soilevap-calibration_output$drivers$wetevap)
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$transpiration_rmse,2))), cex=1.2, pos=4)
-text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$transpiration_bias,2))), cex=1.2, pos=4)
-text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$transpiration_r2,2))), cex=1.2, pos=4)
+a = max(var2,na.rm=TRUE) * 0.04
+text(min(var1,na.rm=TRUE)-a,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$transpiration_rmse,2))), cex=1.5, pos=4)
+text(min(var1,na.rm=TRUE)-a,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$transpiration_bias,2))), cex=1.5, pos=4)
+text(min(var1,na.rm=TRUE)-a,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$transpiration_r2,2))), cex=1.5, pos=4)
 mtext(expression(paste("Transpiration (kg",H[2],"O/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
 
 var1 = calibration_output$mean_soilevaporation
 var2 = calibration_output$drivers$soilevap
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab="ACM-GPP-ET",
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$soilevaporation_rmse,2))), cex=1.2, pos=4)
-text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$soilevaporation_bias,2))), cex=1.2, pos=4)
-text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$soilevaporation_r2,2))), cex=1.2, pos=4)
+a = max(var2,na.rm=TRUE) * 0.04
+text(min(var1,na.rm=TRUE)-a,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$soilevaporation_rmse,2))), cex=1.5, pos=4)
+text(min(var1,na.rm=TRUE)-a,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$soilevaporation_bias,2))), cex=1.5, pos=4)
+text(min(var1,na.rm=TRUE)-a,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$soilevaporation_r2,2))), cex=1.5, pos=4)
 mtext(expression(paste("Soil evaporation (kg",H[2],"O/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
+mtext("ACM-GPP-ET",side = 1, cex=1.6, padj = 2.4, adj = 0.5)
+mtext("SPA",side = 2, cex=1.6, padj = -2.2, adj = 0.5)
 
 var1 = calibration_output$mean_wetcanopyevap
 var2 = calibration_output$drivers$wetevap
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="ACM-GPP-ET",
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-text(-0.75,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$wetcanopyevap_rmse,2))), cex=1.2, pos=4)
-text(-0.75,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$wetcanopyevap_bias,2))), cex=1.2, pos=4)
-text(-0.75,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$wetcanopyevap_r2,2))), cex=1.2, pos=4)
+a = max(var2,na.rm=TRUE) * 0.04
+text(min(var1,na.rm=TRUE)-a,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$wetcanopyevap_rmse,2))), cex=1.5, pos=4)
+text(min(var1,na.rm=TRUE)-a,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$wetcanopyevap_bias,2))), cex=1.5, pos=4)
+text(min(var1,na.rm=TRUE)-a,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$wetcanopyevap_r2,2))), cex=1.5, pos=4)
 mtext(expression(paste("Wet Canopy evaporation (kg",H[2],"O/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
+mtext("ACM-GPP-ET",side = 1, cex=1.6, padj = 2.4, adj = 0.5)
 
 dev.off()
 
-# my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
-# fig_height=6000 ; fig_width=4000
-# jpeg(file="./FIGURES/Cal_val_paper_figure_2_heat_map.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-# par(mfrow=c(4,3), mar=c(4.4, 4.2, 4.4, 1.0), omi=c(0.2, 0.2, 0.3, 0.40))
-# var1 = calibration_output$mean_gpp
-# var2 = calibration_output$drivers$GPP
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
-#               main="Calibration", ylab="SPA", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$gpp_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$gpp_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$gpp_r2,2))), cex=1.2, pos=4)
-# var1 = validation_nowater_output$mean_gpp
-# var2 = validation_nowater_output$drivers$GPP
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
-#               main="Validation-Fixed Soil Water", ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_nowater_output$gpp_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_nowater_output$gpp_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_nowater_output$gpp_r2,2))), cex=1.2, pos=4)
-# mtext(expression(paste("GPP"," (gC ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = -1.2, adj = 0.5)
-# var1 = validation_water_output$mean_gpp
-# var2 = validation_water_output$drivers$GPP
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
-#               main="Validation-Dynamic Soil Water", ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$gpp_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$gpp_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$gpp_r2,2))), cex=1.2, pos=4)
-# 
-# var1 = calibration_output$mean_transpiration
-# var2 = (calibration_output$drivers$Evap-calibration_output$drivers$soilevap-calibration_output$drivers$wetevap)
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab="",
-#               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$transpiration_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$transpiration_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$transpiration_r2,2))), cex=1.2, pos=4)
-# var1 = validation_nowater_output$mean_transpiration
-# var2 = (validation_nowater_output$drivers$Evap-validation_nowater_output$drivers$soilevap-validation_nowater_output$drivers$wetevap)
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
-#               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_nowater_output$transpiration_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_nowater_output$transpiration_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_nowater_output$transpiration_r2,2))), cex=1.2, pos=4)
-# mtext(expression(paste("Transpiration"," (kgH2O ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = -0.6, adj = 0.5)
-# var1 = validation_water_output$mean_transpiration
-# var2 = (validation_water_output$drivers$Evap-validation_water_output$drivers$soilevap-validation_water_output$drivers$wetevap)
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$transpiration_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$transpiration_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$transpiration_r2,2))), cex=1.2, pos=4)
-# 
-# var1 = calibration_output$mean_soilevaporation
-# var2 = calibration_output$drivers$soilevap
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab="",
-#               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$soilevaporation_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$soilevaporation_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$soilevaporation_r2,2))), cex=1.2, pos=4)
-# var1 = validation_nowater_output$mean_soilevaporation
-# var2 = validation_nowater_output$drivers$soilevap
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
-#               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_nowater_output$soilevaporation_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_nowater_output$soilevaporation_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_nowater_output$soilevaporation_r2,2))), cex=1.2, pos=4)
-# mtext(expression(paste("Soil evaporation"," (kgH2O ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = -0.6, adj = 0.5)
-# var1 = validation_water_output$mean_soilevaporation
-# var2 = validation_water_output$drivers$soilevap
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
-#               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$soilevaporation_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$soilevaporation_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$soilevaporation_r2,2))), cex=1.2, pos=4)
-# 
-# var1 = calibration_output$mean_wetcanopyevap
-# var2 = calibration_output$drivers$wetevap
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="SPA", xlab="ACM-GPP-ET",
-#               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$wetcanopyevap_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$wetcanopyevap_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(calibration_output$wetcanopyevap_r2,2))), cex=1.2, pos=4)
-# var1 = validation_nowater_output$mean_wetcanopyevap
-# var2 = validation_nowater_output$drivers$wetevap
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="ACM-GPP-ET",
-#               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_nowater_output$wetcanopyevap_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_nowater_output$wetcanopyevap_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_nowater_output$wetcanopyevap_r2,2))), cex=1.2, pos=4)
-# mtext(expression(paste("Wet canopy evaporation"," (kgH2O ",m^-2," da",y^-1,")")),side = 3,cex=1.8, padj = -0.6, adj = 0.5)
-# var1 = validation_water_output$mean_wetcanopyevap
-# var2 = validation_water_output$drivers$wetevap
-# smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="ACM-GPP-ET",
-#               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-#               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-# text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$wetcanopyevap_rmse,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$wetcanopyevap_bias,2))), cex=1.2, pos=4)
-# text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$wetcanopyevap_r2,2))), cex=1.2, pos=4)
-# dev.off()
-
 my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
-fig_height=4000 ; fig_width=6000
-jpeg(file="./FIGURES/Cal_val_paper_figure_3_validation.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-par(mfrow=c(2,3), mar=c(4.4, 4.2, 4.4, 1.0), omi=c(0.2, 0.2, 0.3, 0.40))
+fig_height=5000 ; fig_width=7000
+jpeg(file="./FIGURES/Cal_val_paper_figure_3_validation.jpg", height=fig_height, width=fig_width, res=500, quality=100)
+
+par(mfrow=c(2,3), mar=c(3.5, 4.2, 4.4, 1.0), omi=c(0.3, 0.3, 0.5, 0.2))
 var1 = validation_water_output$mean_gpp
 var2 = validation_water_output$drivers$GPP
 smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
-              main=expression(paste("GPP"," (gC ",m^-2," da",y^-1,")")), ylab="SPA", xlab="ACM-GPP-ET",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$gpp_rmse,2))), cex=1.2, pos=4)
-text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$gpp_bias,2))), cex=1.2, pos=4)
-text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$gpp_r2,2))), cex=1.2, pos=4)
+              main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,
+              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10)
+rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
+text(min(var1,na.rm=TRUE),max(var2*0.84),labels=bquote(RMSE == .(round(validation_water_output$gpp_rmse,2))), cex=1.6, pos=4)
+text(min(var1,na.rm=TRUE),max(var2*0.76),labels=bquote(Bias == .(round(validation_water_output$gpp_bias,2))), cex=1.6, pos=4)
+text(min(var1,na.rm=TRUE),max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$gpp_r2,2))), cex=1.6, pos=4)
+mtext(expression(paste("GPP (gC/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
+mtext("SPA",side = 2, cex=1.6, padj = -2.2, adj = 0.5)
 
 var1 = validation_water_output$mean_transpiration
 var2 = (validation_water_output$drivers$Evap-validation_water_output$drivers$soilevap-validation_water_output$drivers$wetevap)
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main=expression(paste("Transpiration"," (kg",H[2],"O ",m^-2," da",y^-1,")")),xlim=range(var1,na.rm=TRUE),ylim=range(var2,na.rm=TRUE), ylab="SPA", xlab="ACM-GPP-ET",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$transpiration_rmse,2))), cex=1.2, pos=4)
-text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$transpiration_bias,2))), cex=1.2, pos=4)
-text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$transpiration_r2,2))), cex=1.2, pos=4)
-mtext("Validation-Dynamic Soil Water",side = 3,cex=1.8, padj = -2.2, adj = 0.5)
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="",xlim=range(var1,na.rm=TRUE),ylim=range(var2,na.rm=TRUE), ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
+text(min(var1,na.rm=TRUE),max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$transpiration_rmse,2))), cex=1.6, pos=4)
+text(min(var1,na.rm=TRUE),max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$transpiration_bias,2))), cex=1.6, pos=4)
+text(min(var1,na.rm=TRUE),max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$transpiration_r2,2))), cex=1.6, pos=4)
+mtext(expression(paste("Transpiration (kg",H[2],"O/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
+mtext("SPA - Validation",side = 3,cex=2.3, padj = -2.2, adj = 0.5)
 
 var1 = validation_water_output$mean_soilevaporation
 var2 = validation_water_output$drivers$soilevap
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main=expression(paste("Soil evaporation"," (kg",H[2],"O ",m^-2," da",y^-1,")")),ylab="SPA", xlab="ACM-GPP-ET",
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="",ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$soilevaporation_rmse,2))), cex=1.2, pos=4)
-text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$soilevaporation_bias,2))), cex=1.2, pos=4)
-text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$soilevaporation_r2,2))), cex=1.2, pos=4)
+rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
+text(min(var1,na.rm=TRUE),max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$soilevaporation_rmse,2))), cex=1.6, pos=4)
+text(min(var1,na.rm=TRUE),max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$soilevaporation_bias,2))), cex=1.6, pos=4)
+text(min(var1,na.rm=TRUE),max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$soilevaporation_r2,2))), cex=1.6, pos=4)
+mtext(expression(paste("Soil evaporation (kg",H[2],"O/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
 
 var1 = validation_water_output$mean_wetcanopyevap
 var2 = validation_water_output$drivers$wetevap
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main=expression(paste("Wet canopy evaporation"," (kg",H[2],"O ",m^-2," da",y^-1,")")), ylab="SPA", xlab="ACM-GPP-ET",
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$wetcanopyevap_rmse,2))), cex=1.2, pos=4)
-text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$wetcanopyevap_bias,2))), cex=1.2, pos=4)
-text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$wetcanopyevap_r2,2))), cex=1.2, pos=4)
-
-var1 = validation_water_output$mean_rootwatermm
-var2 = validation_water_output$drivers$SWC
-validation_water_output$rootwatermm_rmse = rmse(var1,var2)
-validation_water_output$rootwatermm_bias = mean(var1-var2,na.rm=TRUE)
-validation_water_output$rootwatermm_r2 = summary(lm(var2 ~ var1))$adj.r.squared
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main=expression(paste("Soil moisture"," (0-10cm; kg",H[2],"O ",m^-2," day)")), ylab="SPA", xlab="ACM-GPP-ET",
-              cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,xlim=c(0,55),ylim=c(0,55),
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$rootwatermm_rmse,2))), cex=1.2, pos=4)
-text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$rootwatermm_bias,2))), cex=1.2, pos=4)
-text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$rootwatermm_r2,2))), cex=1.2, pos=4)
+rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
+text(min(var1,na.rm=TRUE),max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$wetcanopyevap_rmse,2))), cex=1.6, pos=4)
+text(min(var1,na.rm=TRUE),max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$wetcanopyevap_bias,2))), cex=1.6, pos=4)
+text(min(var1,na.rm=TRUE),max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$wetcanopyevap_r2,2))), cex=1.6, pos=4)
+mtext("",side = 1, cex=1.6, padj = 2.4, adj = 0.5)
+mtext("SPA",side = 2, cex=1.6, padj = -2.2, adj = 0.5)
+mtext(expression(paste("Wet Canopy evaporation (kg",H[2],"O/",m^2,"/day)")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
 
 var1 = validation_water_output$mean_gpp / validation_water_output$mean_transpiration
 var2 = validation_water_output$drivers$Evap - validation_water_output$drivers$soilevap - validation_water_output$drivers$wetevap
@@ -1219,19 +1346,155 @@ var1 = var1[filter] ; var2 = var2[filter]
 validation_water_output$WUE_rmse = rmse(var1,var2)
 validation_water_output$WUE_bias = mean(var1-var2,na.rm=TRUE)
 validation_water_output$WUE_r2 = summary(lm(var2 ~ var1))$adj.r.squared
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main=expression(paste("WUE"," (gC / kg",H[2],"O )")), ylab="SPA", xlab="ACM-GPP-ET",
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
-expression(paste("WUE"," (gC / kg",H[2],"O )"))
-text(0,max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$WUE_rmse,2))), cex=1.2, pos=4)
-text(0,max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$WUE_bias,2))), cex=1.2, pos=4)
-text(0,max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$WUE_r2,2))), cex=1.2, pos=4)
+rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
+text(min(var1,na.rm=TRUE),max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$WUE_rmse,2))), cex=1.6, pos=4)
+text(min(var1,na.rm=TRUE),max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$WUE_bias,2))), cex=1.6, pos=4)
+text(min(var1,na.rm=TRUE),max(var2*0.92),labels=bquote(R^2 == .(round(validation_water_output$WUE_r2,2))), cex=1.6, pos=4)
+mtext(expression(paste("WUE"," (gC / kg",H[2],"O )")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
+mtext("ACM-GPP-ET",side = 1, cex=1.6, padj = 2.4, adj = 0.5)
+
+var1 = validation_water_output$mean_rootwatermm
+var2 = validation_water_output$drivers$SWC
+validation_water_output$rootwatermm_rmse = rmse(var1,var2)
+validation_water_output$rootwatermm_bias = mean(var1-var2,na.rm=TRUE)
+validation_water_output$rootwatermm_r2 = summary(lm(var2 ~ var1))$adj.r.squared
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+              cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,xlim=c(0,55),ylim=c(0,55),
+              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+# note that the coordinate here are different because of the prescribed axis limits
+rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
+text(0,max(55*0.82),labels=bquote(RMSE == .(round(validation_water_output$rootwatermm_rmse,2))), cex=1.6, pos=4)
+text(0,max(55*0.72),labels=bquote(Bias == .(round(validation_water_output$rootwatermm_bias,2))), cex=1.6, pos=4)
+text(0,max(55*0.92),labels=bquote(R^2 == .(round(validation_water_output$rootwatermm_r2,2))), cex=1.6, pos=4)
+mtext("",side = 1, cex=1.6, padj = 2.4, adj = 0.5)
+mtext(expression(paste("Soil moisture (0-10cm; kg",H[2],"O/",m^2,")")), side=3, cex = 1.6, padj = -0.1, adj = 0.5)
 
 dev.off()
 
 my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
+fig_height=5000 ; fig_width=5000
+jpeg(file="./FIGURES/Cal_val_paper_figure_4_fluxnet.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+par(mfrow=c(2,2), mar=c(2.4, 2.2, 1.8, 2), omi=c(0.4, 0.7, 0.6, 0.2))
+var1 = fluxnet_validation_output$timeseries_gpp
+var2 = fluxnet_validation_output$observation_gpp
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
+              main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,xlim=c(0,16),ylim=c(0,28),
+              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20)
+model1 = lm(as.vector(var2) ~ as.vector(var1))
+abline(model1, col="black", lwd=3) ; abline(0,1,col="red",lwd=3)
+rect(xleft = 0, xright = 6.8,ybottom = 16, ytop = 27, col="white", density = 40, border = NA)
+text(0,28*0.84,labels=bquote(RMSE == .(round(mean(fluxnet_validation_output$gpp_rmse,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(0,28*0.76,labels=bquote(Bias == .(round(mean(fluxnet_validation_output$gpp_bias,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(0,28*0.92,labels=bquote(R^2 == .(round(mean(fluxnet_daily_GPP_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(0,28*0.67,labels=bquote(Coef == .(round(coef(model1)[2],2))), cex=1.6, pos=4)
+text(0,28*0.59,labels=bquote(Intercept == .(round(coef(model1)[2],2))), cex=1.6, pos=4)
+#text(0,max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_validation_output$gpp_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
+mtext(expression(paste("GPP"," (gC ",m^-2," da",y^-1,")")),side = 3,cex=2.0, padj = -0.5)
+mtext(expression(paste("Fluxnet2015")),side = 2,cex=2.0, padj = -2.4, adj = -0.5)
+mtext(expression(paste("ACM-GPP-ET")),side = 1,cex=2.0, padj = 1.8, adj = 1.45)
+var1 = fluxnet_validation_output$timeseries_transpiration+fluxnet_validation_output$timeseries_wetcanopyevap+fluxnet_validation_output$timeseries_soilevaporation
+var2 = fluxnet_validation_output$observation_ET
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+              cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,xlim=c(-0.5,7),ylim=c(-0.5,6.5),
+                transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20)
+model1 = lm(as.vector(var2) ~ as.vector(var1))
+abline(model1, col="black", lwd=3) ; abline(0,1,col="red",lwd=3)
+rect(xleft = -0.5, xright = 2.1,ybottom = 4-0.4, ytop = 6.8-0.4, col="white", density = 40, border = NA)
+text(-0.5,6.5*0.84,labels=bquote(RMSE == .(round(mean(fluxnet_validation_output$ET_rmse,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(-0.5,6.5*0.76,labels=bquote(Bias == .(round(mean(fluxnet_validation_output$ET_bias,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(-0.5,6.5*0.92,labels=bquote(R^2 == .(round(mean(fluxnet_daily_ET_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(-0.5,6.5*0.67,labels=bquote(Coef == .(round(coef(model1)[2],2))), cex=1.6, pos=4)
+text(-0.5,6.5*0.59,labels=bquote(Intercept == .(round(coef(model1)[2],2))), cex=1.6, pos=4)
+mtext(expression(paste("Evapo-transpiration"," (kg",H[2],"O ",m^-2," da",y^-1,")")),side = 3,cex=2.0, padj = -0.5)
+#text(max(var1*0.92,na.rm=TRUE),max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_validation_output$ET_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
+var1 = spa_fluxnet_validation_output$timeseries_gpp
+var2 = spa_fluxnet_validation_output$observation_gpp
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
+              main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,xlim=c(0,16),ylim=c(0,28),
+              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20)
+model1 = lm(as.vector(var2) ~ as.vector(var1))
+abline(model1, col="black", lwd=3) ; abline(0,1,col="red",lwd=3)
+rect(xleft = 0, xright = 6.8,ybottom = 16, ytop = 27, col="white", density = 40, border = NA)
+text(0,28*0.84,labels=bquote(RMSE == .(round(mean(spa_fluxnet_validation_output$gpp_rmse,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(0,28*0.76,labels=bquote(Bias == .(round(mean(spa_fluxnet_validation_output$gpp_bias,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(0,28*0.92,labels=bquote(R^2 == .(round(mean(spa$fluxnet_daily_GPP_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(0,28*0.67,labels=bquote(Coef == .(round(coef(model1)[2],2))), cex=1.6, pos=4)
+text(0,28*0.59,labels=bquote(Intercept == .(round(coef(model1)[2],2))), cex=1.6, pos=4)
+#text(0,max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_validation_output$gpp_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
+#mtext(expression(paste("Fluxnet2015")),side = 2,cex=2.0, padj = -1.5, adj = 0.5)
+mtext(expression(paste("SPA")),side = 1,cex=2.0, padj = 1.8, adj = 1.15)
+var1 = spa_fluxnet_validation_output$timeseries_transpiration+spa_fluxnet_validation_output$timeseries_wetcanopyevap+spa_fluxnet_validation_output$timeseries_soilevaporation
+var2 = spa_fluxnet_validation_output$observation_ET
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+              cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,xlim=c(-0.5,7),ylim=c(-0.5,6.5),
+              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20) 
+model1 = lm(as.vector(var2) ~ as.vector(var1))
+abline(model1, col="black", lwd=3) ; abline(0,1,col="red",lwd=3)
+rect(xleft = -0.5, xright = 2.1,ybottom = 4-0.4, ytop = 6.8-0.4, col="white", density = 40, border = NA)
+text(-0.5,6.5*0.84,labels=bquote(RMSE == .(round(mean(spa_fluxnet_validation_output$ET_rmse,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(-0.5,6.5*0.76,labels=bquote(Bias == .(round(mean(spa_fluxnet_validation_output$ET_bias,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(-0.5,6.5*0.92,labels=bquote(R^2 == .(round(mean(spa$fluxnet_daily_ET_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
+text(-0.5,6.5*0.67,labels=bquote(Coef == .(round(coef(model1)[2],2))), cex=1.6, pos=4)
+text(-0.5,6.5*0.59,labels=bquote(Intercept == .(round(coef(model1)[2],2))), cex=1.6, pos=4)
+#text(max(var1*0.92,na.rm=TRUE),max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_validation_output$ET_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
+
+dev.off()
+
+my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
+fig_height=6000 ; fig_width=4500
+jpeg(file="./FIGURES/Cal_val_paper_figure_5_fluxnet.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+par(mfrow=c(4,3), mar=c(4.8, 4.5, 3.4, 1.8), omi=c(0.4, 0.2, 0.2, 0.2))
+hist(fluxnet_validation_output$gpp_r2, main="ACM-GPP-ET", cex.main=2.3, xlab="", ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey") 
+hist(spa_fluxnet_validation_output$gpp_r2, main="SPA",cex.main=2.3, xlab="", ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey") 
+mtext(expression(paste("Site specific GPP ",R^2,"",sep="")),side = 1,cex=2.0, padj = 1.9)
+plot(spa_fluxnet_validation_output$gpp_r2 ~ fluxnet_validation_output$gpp_r2, xlab = "ACM-GPP-ET", ylab="SPA", pch=16, cex.lab = 2.3,cex.axis = 2, cex=2)
+abline(0,1,col="red", lwd=3)
+hist(fluxnet_validation_output$ET_r2, main="", xlab="", ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey") 
+hist(spa_fluxnet_validation_output$ET_r2, main="", xlab="", ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
+mtext(expression(paste("Site specific ET ",R^2,"",sep="")),side = 1,cex=2.0, padj = 1.9)
+plot(spa_fluxnet_validation_output$ET_r2 ~ fluxnet_validation_output$ET_r2, xlab = "ACM-GPP-ET", ylab="SPA", pch=16, cex.lab = 2.3,cex.axis = 2, cex=2)
+abline(0,1,col="red", lwd=3)
+hist(fluxnet_validation_output$gpp_rmse, main="", xlab="", ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
+hist(spa_fluxnet_validation_output$gpp_rmse, main="", xlab="", ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
+mtext(expression(paste("Site specific GPP RMSE (gC/",m^2,"/day)",sep="")),side = 1,cex=2.0, padj = 1.9)
+plot(spa_fluxnet_validation_output$gpp_rmse ~ fluxnet_validation_output$gpp_rmse, xlab = "ACM-GPP-ET", ylab="SPA", pch=16, cex.lab = 2.3,cex.axis = 2, cex=2)
+abline(0,1,col="red", lwd=3)
+hist(fluxnet_validation_output$ET_rmse, main="", xlab="", ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
+hist(spa_fluxnet_validation_output$ET_rmse, main="", xlab="", ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
+mtext(expression(paste("Site specific ET RMSE (kg",H[2],"O/",m^2,"/day)",sep="")),side = 1,cex=2.0, padj = 1.9)
+plot(spa_fluxnet_validation_output$ET_rmse ~ fluxnet_validation_output$ET_rmse, xlab = "ACM-GPP-ET", ylab="SPA", pch=16, cex.lab = 2.3,cex.axis = 2, cex=2)
+abline(0,1,col="red", lwd=3)
+dev.off()
+
+# I reorder the groups order : I change the order of the factor data$names
+fluxnet_validation_output$IGBP=factor(fluxnet_validation_output$IGBP , levels=levels(fluxnet_validation_output$IGBP)[c(3,8,6,5,7,1,13)])
+fig_height=5000 ; fig_width=9000
+jpeg(file="./FIGURES/Cal_val_paper_figure_6_fluxnet_IGBP.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+par(mfrow=c(2,2), mar=c(2,4,2,1),omi=c(0.6,0.6,0.4,0.2))
+boxplot(fluxnet_daily_GPP_r2~fluxnet_validation_output$IGBP, main="", xlab="", ylab="",cex.axis = 2.3, cex=2.3, lwd=2, pch=16, range = 0, ylim=c(0,1))
+mtext(expression(paste("GPP (",R^2,")",sep="")),side = 2,cex=2.3, padj = -1.6)
+mtext("ACM-GPP-ET",side = 3,cex=2.3, padj = -0.5)
+abline(mean(GPP_r2,na.rm=TRUE),0,col="grey", lwd=3)
+boxplot(spa$fluxnet_daily_GPP_r2~fluxnet_validation_output$IGBP, main="", xlab="", ylab="", cex.lab = 2.3,cex.axis = 2.3, cex=2.3, cex.main=2.3, lwd=2, pch=16, range = 0, ylim=c(0,1))
+mtext("SPA",side = 3,cex=2.3, padj = -0.5)
+abline(mean(spa$GPP_r2,na.rm=TRUE),0,col="grey", lwd=3)
+boxplot(fluxnet_daily_ET_r2~fluxnet_validation_output$IGBP, main="", xlab="", ylab="", cex.lab = 2.3,cex.axis = 2.3, cex=2.3, cex.main=2.3, lwd=2, pch=16, range = 0, ylim=c(0,1)) 
+mtext(expression(paste("ET (",R^2,")",sep="")),side = 2,cex=2.3, padj = -1.6)
+mtext("Vegetation Type",side = 1,cex=2.3, adj = 1.25, padj = 2.2)
+abline(mean(ET_r2,na.rm=TRUE),0,col="grey", lwd=3)
+boxplot(spa$fluxnet_daily_ET_r2~fluxnet_validation_output$IGBP, main="", xlab="", ylab="", cex.lab = 2.3,cex.axis = 2.3, cex=2.3, cex.main=2.3, lwd=2, pch=16, range = 0, ylim=c(0,1)) 
+abline(mean(spa$ET_r2,na.rm=TRUE),0,col="grey", lwd=3)
+dev.off()
+
+###
+## Calibration Figures
+
+my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
 fig_height=4000 ; fig_width=6000
-jpeg(file="./FIGURES/Cal_val_paper_figure_4_emergent.jpg", height=fig_height, width=fig_width, res=400, quality=100)
+jpeg(file="./FIGURES/Cal_val_paper_emergent.jpg", height=fig_height, width=fig_width, res=400, quality=100)
 par(mfrow=c(2,3), mar=c(3.8, 4.6, 1.0, 1.0), omi=c(0.2, 0.2, 0.3, 0.40))
 var2 = validation_water_output$drivers$Evap - validation_water_output$drivers$soilevap - validation_water_output$drivers$wetevap
 filter = which(validation_water_output$mean_gpp > 0.5 & validation_water_output$mean_transpiration > 0.5 & validation_water_output$drivers$GPP > 0.5 & var2 > 0.5)
@@ -1270,51 +1533,6 @@ smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab=exp
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) 
 
 dev.off()
-
-my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
-fig_height=6000 ; fig_width=4500
-jpeg(file="./FIGURES/Cal_val_paper_figure_5_heat_map.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-par(mfrow=c(3,2), mar=c(4.4, 4.2, 3.4, 2), omi=c(0.2, 0.2, 0.2, 0.40))
-var1 = fluxnet_validation_output$timeseries_gpp
-var2 = fluxnet_validation_output$observation_gpp
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
-              main=expression(paste("GPP"," (gC ",m^-2," da",y^-1,")")), ylab="", xlab="",cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20) ; abline(0,1,col="red",lwd=3)
-text(0,max(var2*0.82,na.rm=TRUE),labels=bquote(RMSE == .(round(mean(fluxnet_validation_output$gpp_rmse,na.rm=TRUE),2))), cex=1.5, pos=4)
-text(0,max(var2*0.72,na.rm=TRUE),labels=bquote(Bias == .(round(mean(fluxnet_validation_output$gpp_bias,na.rm=TRUE),2))), cex=1.5, pos=4)
-text(0,max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_daily_GPP_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
-#text(0,max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_validation_output$gpp_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
-mtext(expression(paste("Fluxnet2015")),side = 2,cex=2.0, padj = -1.5, adj = 0.5)
-mtext(expression(paste("ACM-GPP-ET")),side = 1,cex=2.0, padj = 1.75, adj = 1.7)
-var1 = fluxnet_validation_output$timeseries_transpiration+fluxnet_validation_output$timeseries_wetcanopyevap+fluxnet_validation_output$timeseries_soilevaporation
-var2 = fluxnet_validation_output$observation_ET
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main=expression(paste("Evapo-transpiration"," (kg",H[2],"O ",m^-2," da",y^-1,")")), ylab="", xlab="",
-              cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20) ; abline(0,1,col="red",lwd=3)
-text(max(var1*0,na.rm=TRUE),max(var2*0.82,na.rm=TRUE),labels=bquote(RMSE == .(round(mean(fluxnet_validation_output$ET_rmse,na.rm=TRUE),2))), cex=1.5, pos=4)
-text(max(var1*0,na.rm=TRUE),max(var2*0.72,na.rm=TRUE),labels=bquote(Bias == .(round(mean(fluxnet_validation_output$ET_bias,na.rm=TRUE),2))), cex=1.5, pos=4)
-text(max(var1*0,na.rm=TRUE),max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_daily_ET_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
-#text(max(var1*0.92,na.rm=TRUE),max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_validation_output$ET_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
-
-hist(fluxnet_validation_output$gpp_r2, main="", xlab=expression(paste("Site specific GPP ",R^2,"",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey") 
-hist(fluxnet_validation_output$ET_r2, main="", xlab=expression(paste("Site specific ET ",R^2,"",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey") 
-hist(fluxnet_validation_output$gpp_rmse, main="", xlab=expression(paste("Site specific GPP RMSE (gC/",m^2,"/day)",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
-hist(fluxnet_validation_output$ET_rmse, main="", xlab=expression(paste("Site specific ET RMSE (kg",H[2],"O/",m^2,"/day)",sep="")), ylab="", cex.lab = 2.3,cex.axis = 2, cex=2, col="grey")
-dev.off()
-
-fig_height=4000 ; fig_width=7000
-# I reorder the groups order : I change the order of the factor data$names
-fluxnet_validation_output$IGBP=factor(fluxnet_validation_output$IGBP , levels=levels(fluxnet_validation_output$IGBP)[c(3,8,6,5,7,1,13,2,9,10)])
-jpeg(file="./FIGURES/Boxplot_fluxnet_statistics_by_IGBP.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-par(mfrow=c(2,1), mar=c(5,6,3,1))
-boxplot(fluxnet_daily_GPP_r2~fluxnet_validation_output$IGBP, main="GPP", xlab="", ylab=expression(paste(R^2,"",sep="")), cex.lab = 2.3,cex.axis = 2.3, cex=2.3, cex.main=2.3, lwd=2, pch=16, range = 0)
-abline(mean(GPP_r2,na.rm=TRUE),0,col="grey", lwd=3)
-boxplot(fluxnet_daily_ET_r2~fluxnet_validation_output$IGBP, main="ET", xlab="Vegetation Type", ylab=expression(paste(R^2,"",sep="")), cex.lab = 2.3,cex.axis = 2.3, cex=2.3, cex.main=2.3, lwd=2, pch=16, range = 0) 
-abline(mean(ET_r2,na.rm=TRUE),0,col="grey", lwd=3)
-dev.off()
-
-###
-## Calibration Figures
 
 fig_height=4000 ; fig_width=7200
 jpeg(file="./FIGURES/calibration_XY_flux_components.jpg", height=fig_height, width=fig_width, res=400, quality=100)

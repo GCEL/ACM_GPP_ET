@@ -13,7 +13,7 @@ system("mv ./src/acm_gpp_et.so .")
 # set to the cardamom working directory for the moment
 setwd("/home/lsmallma/WORK/GREENHOUSE/models/CARDAMOM/")
 ## Load needed libraries and internal functions
-source("./cardamom_functions/load_all_cardamom_functions.r")
+source("./R_functions/load_all_cardamom_functions.r")
 # define file name for PROJECT file we will be borrowing from
 PROJECTfile=paste("./CARDAMOM_OUTPUTS/DALECN_GSI_BUCKET_MHMCMC/global_1x1_new_acm/infofile.RData",sep="")
 load(PROJECTfile)

@@ -70,7 +70,7 @@ library(RColorBrewer)
 # set to the working directory that this script should be called from
 setwd("/home/lsmallma/WORK/GREENHOUSE/models/ACM_GPP_ET/") ; wkdir = getwd()
 # compile the shared object containing ACM_GPP and ACM_ET
-system("gfortran ./src/ACM_GPP_ET.f90 ./src/ACM_GPP_ET_R_interface.f90 -o ./src/acm_gpp_et.so -fPIC -shared")
+system("gfortran -pg ./src/ACM_GPP_ET.f90 ./src/ACM_GPP_ET_R_interface.f90 -o ./src/acm_gpp_et.so -fPIC -shared")
 system("mv ./src/acm_gpp_et.so .")
 
 ###
@@ -100,7 +100,7 @@ mean_WUE = array(NA, dim=c(dim(drivers)[1]))
 mean_wSWP = array(NA, dim=c(dim(drivers)[1]))
 mean_ci = array(NA, dim=c(dim(drivers)[1]))
 mean_lwp = array(NA, dim=c(dim(drivers)[1]))
-
+START = Sys.time()
 # Loop through each site now
 for (i in seq(1, length(simulated_pixels))){
 
@@ -166,7 +166,8 @@ for (i in seq(1, length(simulated_pixels))){
 
 
 } # site loop
-
+FINISH = Sys.time()
+print(paste("time taken ",FINISH-START,sep=""))
 ###
 ## Remove the first day of each site to avoid spin up errors (particularly SPA)
 ## i.e. select day 2 onwards
