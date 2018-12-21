@@ -1204,6 +1204,18 @@ for (n in seq(1,length(latitude_fluxnet))) {
 longitude_fluxnet = longitude_fluxnet + 180
 latitude_fluxnet = latitude_fluxnet + 90
 
+fudgeit <- function(){
+  # function to plot a legend to the smoothScatter plot
+  xm <- get('xm', envir = parent.frame(1))
+  ym <- get('ym', envir = parent.frame(1))
+  z  <- get('dens', envir = parent.frame(1))
+  colramp <- get('colramp', parent.frame(1))
+  fields::image.plot(xm,ym,z, col = colramp(256), legend.only = T, add =F)
+}
+
+#par(mar = c(5,4,4,5) + .1)
+#smoothScatter(x, nrpoints = 0, postPlotHook = fudgeit)
+
 fig_height=4000 ; fig_width=7200
 jpeg(file="./FIGURES/Cal_val_paper_figure_1.jpg", height=fig_height, width=fig_width, res=400, quality=100)
 # Mean status of biophysical inputs
@@ -1238,7 +1250,7 @@ jpeg(file="./FIGURES/Cal_val_paper_figure_2_heat_map_calibration.jpg", height=fi
 par(mfrow=c(2,2), mar=c(1.8, 1.8, 2.6, 0.8)+0.1, omi=c(0.5, 0.5, 0.5, 0.2))
 var1 = calibration_output$mean_gpp
 var2 = calibration_output$drivers$GPP
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,postPlotHook = fudgeit,
               main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
 a = max(var2,na.rm=TRUE) * 0.04
@@ -1294,7 +1306,7 @@ jpeg(file="./FIGURES/Cal_val_paper_figure_3_validation.jpg", height=fig_height, 
 par(mfrow=c(2,3), mar=c(3.5, 4.2, 4.4, 1.0)+0.1, omi=c(0.3, 0.3, 0.5, 0.2))
 var1 = validation_water_output$mean_gpp
 var2 = validation_water_output$drivers$GPP
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,postPlotHook = fudgeit,
               main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10)
 abline(0,1,col="red",lwd=3)
@@ -1381,7 +1393,7 @@ jpeg(file="./FIGURES/Cal_val_paper_figure_4_fluxnet.jpg", height=fig_height, wid
 par(mfrow=c(2,2), mar=c(2.4, 2.2, 1.8, 2)+0.1, omi=c(0.4, 0.7, 0.6, 0.2))
 var1 = fluxnet_validation_output$timeseries_gpp
 var2 = fluxnet_validation_output$observation_gpp
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
+smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,postPlotHook = fudgeit,
               main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,xlim=c(0,16),ylim=c(0,28),
               transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20)
 model1 = lm(as.vector(var2) ~ as.vector(var1))
