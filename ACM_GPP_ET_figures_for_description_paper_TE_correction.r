@@ -159,7 +159,7 @@ print(paste("    WUE R2   = ",round(mean(SPA_WUE_r2,na.rm=TRUE),digits=3)," ",se
 print(paste("    WUE RMSE = ",round(mean(SPA_WUE_rmse,na.rm=TRUE),digits=3)," kgH2O/m2/day",sep=""))
 print(paste("    WUE BIAS = ",round(mean(SPA_WUE_bias,na.rm=TRUE),digits=3)," kgH2O/m2/day",sep=""))
 
-my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
+my_colours=colorRampPalette(c("white","grey",rep(rev(brewer.pal(11,"Spectral")),each=3)))
 # #fig_height=6000 ; fig_width=4000
 # #jpeg(file="./FIGURES/Cal_val_paper_figure_3_heat_map.jpg", height=fig_height, width=fig_width, res=400, quality=100)
 # par(mfrow=c(4,2), mar=c(4.4, 4.2, 3.4, 2), omi=c(0.2, 0.2, 0.2, 0.40))
@@ -1204,18 +1204,6 @@ for (n in seq(1,length(latitude_fluxnet))) {
 longitude_fluxnet = longitude_fluxnet + 180
 latitude_fluxnet = latitude_fluxnet + 90
 
-fudgeit <- function(){
-  # function to plot a legend to the smoothScatter plot
-  xm <- get('xm', envir = parent.frame(1))
-  ym <- get('ym', envir = parent.frame(1))
-  z  <- get('dens', envir = parent.frame(1))
-  colramp <- get('colramp', parent.frame(1))
-  fields::image.plot(xm,ym,z, col = colramp(256), legend.only = T, add =F)
-}
-
-#par(mar = c(5,4,4,5) + .1)
-#smoothScatter(x, nrpoints = 0, postPlotHook = fudgeit)
-
 fig_height=4000 ; fig_width=7200
 jpeg(file="./FIGURES/Cal_val_paper_figure_1.jpg", height=fig_height, width=fig_width, res=400, quality=100)
 # Mean status of biophysical inputs
@@ -1236,23 +1224,34 @@ var1 = as.vector(global_output$mean_temperature)
 var2 = as.vector(global_output$mean_precipitation*(365.25*60*60*24))
 smoothScatter(var1,var2, ylim=c(0,5000), 
               pch=16, cex.axis=1.6, cex.lab=1.6, cex.main=1.6,nrpoints=0,colramp=my_colours,  
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.015,diff(range(var2,na.rm=TRUE))*0.0025),nbin=128*10,
-              ylab="Mean precipitation (kgH2O/m/yr)", xlab="Mean air temperature (Celcuis)")
+              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.015,diff(range(var2,na.rm=TRUE))*0.0025),nbin=128*10,ylab=expression(paste("Mean precipitation (kg",H[2],"O/",m^2,"/yr)")), xlab="Mean air temperature (Celcuis)")
 points(site_mean_temperature, site_mean_rainfall*(365.25*60*60*24), pch=16, col="black",cex=1.25)
 points(fluxnet_mean_temperature, fluxnet_mean_rainfall*(365.25*60*60*24), pch=16, col="white",cex=1.25)
 points(fluxnet_mean_temperature, fluxnet_mean_rainfall*(365.25*60*60*24), pch=1, col="black",cex=1.25)
 dev.off()
 
-my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
+fudgeit <- function(){
+  # function to plot a legend to the smoothScatter plot
+  xm <- get('xm', envir = parent.frame(1))
+  ym <- get('ym', envir = parent.frame(1))
+  z  <- get('dens', envir = parent.frame(1))
+  colramp <- get('colramp', parent.frame(1))
+  fields::image.plot(xm,ym,z, col = colramp(255), legend.only = T, legend.line = 2,
+                     axis.args = list(hadj = 0.4), horizontal = FALSE,
+                     legend.cex = 1.2, legend.lab="Relative Density", add = F,
+                     smallplot = c(.83,.85,0.12,0.85))
+} # end function fudgeit
+
+my_colours=colorRampPalette(c("white",rep(rev(brewer.pal(11,"Spectral")),each=3)))
 fig_height=5000 ; fig_width=5200
 jpeg(file="./FIGURES/Cal_val_paper_figure_2_heat_map_calibration.jpg", height=fig_height, width=fig_width, res=500, quality=100)
 
-par(mfrow=c(2,2), mar=c(1.8, 1.8, 2.6, 0.8)+0.1, omi=c(0.5, 0.5, 0.5, 0.2))
+par(mfrow=c(2,2), mar=c(1.8, 1.8, 2.6, 0.8), omi=c(0.5, 0.5, 0.5, 0.2))
 var1 = calibration_output$mean_gpp
 var2 = calibration_output$drivers$GPP
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,postPlotHook = fudgeit,
+smoothScatter(var1,var2, nrpoints = 100, colramp = my_colours, postPlotHook = fudgeit,
               main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+              transformation = function(x) ((x-min(x))/diff(range(x)))) ; abline(0,1,col="red",lwd=3)
 a = max(var2,na.rm=TRUE) * 0.04
 text(min(var1,na.rm=TRUE)-a,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$gpp_rmse,2))), cex=1.5, pos=4)
 text(min(var1,na.rm=TRUE)-a,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$gpp_bias,2))), cex=1.5, pos=4)
@@ -1263,9 +1262,9 @@ mtext("SPA",side = 2, cex=1.6, padj = -2.2, adj = 0.5)
 
 var1 = calibration_output$mean_transpiration
 var2 = (calibration_output$drivers$Evap-calibration_output$drivers$soilevap-calibration_output$drivers$wetevap)
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+smoothScatter(var1,var2, nrpoints = 100, colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+              transformation = function(x) ((x-min(x))/diff(range(x)))) ; abline(0,1,col="red",lwd=3)
 a = max(var2,na.rm=TRUE) * 0.04
 text(min(var1,na.rm=TRUE)-a,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$transpiration_rmse,2))), cex=1.5, pos=4)
 text(min(var1,na.rm=TRUE)-a,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$transpiration_bias,2))), cex=1.5, pos=4)
@@ -1274,9 +1273,9 @@ mtext(expression(paste("Transpiration (kg",H[2],"O/",m^2,"/day)")), side=3, cex 
 
 var1 = calibration_output$mean_soilevaporation
 var2 = calibration_output$drivers$soilevap
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+              transformation = function(x) ((x-min(x))/diff(range(x)))) ; abline(0,1,col="red",lwd=3)
 a = max(var2,na.rm=TRUE) * 0.04
 text(min(var1,na.rm=TRUE)-a,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$soilevaporation_rmse,2))), cex=1.5, pos=4)
 text(min(var1,na.rm=TRUE)-a,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$soilevaporation_bias,2))), cex=1.5, pos=4)
@@ -1287,9 +1286,9 @@ mtext("SPA",side = 2, cex=1.6, padj = -2.2, adj = 0.5)
 
 var1 = calibration_output$mean_wetcanopyevap
 var2 = calibration_output$drivers$wetevap
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.6,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+              transformation = function(x) ((x-min(x))/diff(range(x)))) ; abline(0,1,col="red",lwd=3)
 a = max(var2,na.rm=TRUE) * 0.04
 text(min(var1,na.rm=TRUE)-a,max(var2*0.82),labels=bquote(RMSE == .(round(calibration_output$wetcanopyevap_rmse,2))), cex=1.5, pos=4)
 text(min(var1,na.rm=TRUE)-a,max(var2*0.72),labels=bquote(Bias == .(round(calibration_output$wetcanopyevap_bias,2))), cex=1.5, pos=4)
@@ -1299,16 +1298,28 @@ mtext("ACM-GPP-ET",side = 1, cex=1.6, padj = 2.4, adj = 0.5)
 
 dev.off()
 
-my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
+fudgeit <- function(){
+  # function to plot a legend to the smoothScatter plot
+  xm <- get('xm', envir = parent.frame(1))
+  ym <- get('ym', envir = parent.frame(1))
+  z  <- get('dens', envir = parent.frame(1))
+  colramp <- get('colramp', parent.frame(1))
+  fields::image.plot(xm,ym,z, col = colramp(255), legend.only = T, legend.line = 2,
+                     axis.args = list(hadj = 0.5), horizontal = FALSE,
+                     legend.cex = 1.2, legend.lab="Relative Density", add = F,
+                     smallplot = c(.83,.85,0.15,0.82))
+} # end function fudgeit
+
+my_colours=colorRampPalette(c("white",rep(rev(brewer.pal(11,"Spectral")),each=3)))
 fig_height=5000 ; fig_width=7000
 jpeg(file="./FIGURES/Cal_val_paper_figure_3_validation.jpg", height=fig_height, width=fig_width, res=500, quality=100)
 
-par(mfrow=c(2,3), mar=c(3.5, 4.2, 4.4, 1.0)+0.1, omi=c(0.3, 0.3, 0.5, 0.2))
+par(mfrow=c(2,3), mar=c(3.5, 4.2, 4.4, 1.0), omi=c(0.3, 0.3, 0.5, 0.2))
 var1 = validation_water_output$mean_gpp
 var2 = validation_water_output$drivers$GPP
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,postPlotHook = fudgeit,
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,postPlotHook = fudgeit,
               main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10)
+              transformation = function(x) ((x-min(x))/diff(range(x))))
 abline(0,1,col="red",lwd=3)
 rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
 text(min(var1,na.rm=TRUE),max(var2*0.84),labels=bquote(RMSE == .(round(validation_water_output$gpp_rmse,2))), cex=1.6, pos=4)
@@ -1319,7 +1330,7 @@ mtext("SPA",side = 2, cex=1.6, padj = -2.2, adj = 0.5)
 
 var1 = validation_water_output$mean_transpiration
 var2 = (validation_water_output$drivers$Evap-validation_water_output$drivers$soilevap-validation_water_output$drivers$wetevap)
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="",xlim=range(var1,na.rm=TRUE),ylim=range(var2,na.rm=TRUE), ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,main="",xlim=range(var1,na.rm=TRUE),ylim=range(var2,na.rm=TRUE), ylab="", xlab="",cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,transformation = function(x) ((x-min(x))/diff(range(x)))) ; abline(0,1,col="red",lwd=3)
 rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
 text(min(var1,na.rm=TRUE),max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$transpiration_rmse,2))), cex=1.6, pos=4)
 text(min(var1,na.rm=TRUE),max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$transpiration_bias,2))), cex=1.6, pos=4)
@@ -1329,9 +1340,9 @@ mtext("SPA - Validation",side = 3,cex=2.3, padj = -2.2, adj = 0.5)
 
 var1 = validation_water_output$mean_soilevaporation
 var2 = validation_water_output$drivers$soilevap
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="",ylab="", xlab="",
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,main="",ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+              transformation = function(x) ((x-min(x))/diff(range(x)))) ; abline(0,1,col="red",lwd=3)
 rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
 text(min(var1,na.rm=TRUE),max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$soilevaporation_rmse,2))), cex=1.6, pos=4)
 text(min(var1,na.rm=TRUE),max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$soilevaporation_bias,2))), cex=1.6, pos=4)
@@ -1340,9 +1351,9 @@ mtext(expression(paste("Soil evaporation (kg",H[2],"O/",m^2,"/day)")), side=3, c
 
 var1 = validation_water_output$mean_wetcanopyevap
 var2 = validation_water_output$drivers$wetevap
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+              transformation = function(x) ((x-min(x))/diff(range(x)))) ; abline(0,1,col="red",lwd=3)
 rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
 text(min(var1,na.rm=TRUE),max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$wetcanopyevap_rmse,2))), cex=1.6, pos=4)
 text(min(var1,na.rm=TRUE),max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$wetcanopyevap_bias,2))), cex=1.6, pos=4)
@@ -1359,9 +1370,9 @@ var1 = var1[filter] ; var2 = var2[filter]
 validation_water_output$WUE_rmse = rmse(var1,var2)
 validation_water_output$WUE_bias = mean(var1-var2,na.rm=TRUE)
 validation_water_output$WUE_r2 = summary(lm(var2 ~ var1))$adj.r.squared
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+              transformation = function(x) ((x-min(x))/diff(range(x)))) ; abline(0,1,col="red",lwd=3)
 rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
 text(min(var1,na.rm=TRUE),max(var2*0.82),labels=bquote(RMSE == .(round(validation_water_output$WUE_rmse,2))), cex=1.6, pos=4)
 text(min(var1,na.rm=TRUE),max(var2*0.72),labels=bquote(Bias == .(round(validation_water_output$WUE_bias,2))), cex=1.6, pos=4)
@@ -1374,9 +1385,9 @@ var2 = validation_water_output$drivers$SWC
 validation_water_output$rootwatermm_rmse = rmse(var1,var2)
 validation_water_output$rootwatermm_bias = mean(var1-var2,na.rm=TRUE)
 validation_water_output$rootwatermm_r2 = summary(lm(var2 ~ var1))$adj.r.squared
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=1.6,cex.lab=1.6,cex.main=1.7,xlim=c(0,55),ylim=c(0,55),
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0075,diff(range(var2,na.rm=TRUE))*0.0075),nbin=128*10) ; abline(0,1,col="red",lwd=3)
+              transformation = function(x) ((x-min(x))/diff(range(x)))) ; abline(0,1,col="red",lwd=3)
 # note that the coordinate here are different because of the prescribed axis limits
 rect(xleft = min(var1,na.rm=TRUE),xright = max(var1,na.rm=TRUE)*0.3,ybottom = max(var2*(0.72-0.05)), ytop = max(var2*(0.92+0.05)), col="white", density = 40, border = NA)
 text(0,max(55*0.82),labels=bquote(RMSE == .(round(validation_water_output$rootwatermm_rmse,2))), cex=1.6, pos=4)
@@ -1387,15 +1398,26 @@ mtext(expression(paste("Soil moisture (0-10cm; kg",H[2],"O/",m^2,")")), side=3, 
 
 dev.off()
 
-my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
+fudgeit <- function(){
+  # function to plot a legend to the smoothScatter plot
+  xm <- get('xm', envir = parent.frame(1))
+  ym <- get('ym', envir = parent.frame(1))
+  z  <- get('dens', envir = parent.frame(1))
+  colramp <- get('colramp', parent.frame(1))
+  fields::image.plot(xm,ym,z, col = colramp(255), legend.only = T, legend.line = 2,
+                     axis.args = list(hadj = 0.35), horizontal = FALSE,
+                     legend.cex = 1.2, legend.lab="Relative Density", add = F,
+                     smallplot = c(.83,.85,0.14,0.83))
+} # end function fudgeit
+my_colours=colorRampPalette(c("white",rep(rev(brewer.pal(11,"Spectral")),each=3)))
 fig_height=5000 ; fig_width=5000
 jpeg(file="./FIGURES/Cal_val_paper_figure_4_fluxnet.jpg", height=fig_height, width=fig_width, res=400, quality=100)
-par(mfrow=c(2,2), mar=c(2.4, 2.2, 1.8, 2)+0.1, omi=c(0.4, 0.7, 0.6, 0.2))
+par(mfrow=c(2,2), mar=c(2.4, 2.2, 1.8, 2), omi=c(0.4, 0.7, 0.6, 0.2))
 var1 = fluxnet_validation_output$timeseries_gpp
 var2 = fluxnet_validation_output$observation_gpp
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,postPlotHook = fudgeit,
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,
               main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,xlim=c(0,16),ylim=c(0,28),
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20)
+              transformation = function(x) ((x-min(x))/diff(range(x))))
 model1 = lm(as.vector(var2) ~ as.vector(var1))
 abline(model1, col="black", lwd=3) ; abline(0,1,col="red",lwd=3)
 rect(xleft = 0, xright = 6.8,ybottom = 16, ytop = 27, col="white", density = 40, border = NA)
@@ -1410,9 +1432,9 @@ mtext(expression(paste("Fluxnet2015")),side = 2,cex=2.0, padj = -2.4, adj = -0.5
 mtext(expression(paste("ACM-GPP-ET")),side = 1,cex=2.0, padj = 1.8, adj = 1.45)
 var1 = fluxnet_validation_output$timeseries_transpiration+fluxnet_validation_output$timeseries_wetcanopyevap+fluxnet_validation_output$timeseries_soilevaporation
 var2 = fluxnet_validation_output$observation_ET
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,main="", ylab="", xlab="",postPlotHook = fudgeit,
               cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,xlim=c(-0.5,7),ylim=c(-0.5,6.5),
-                transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20)
+                transformation = function(x) ((x-min(x))/diff(range(x))))
 model1 = lm(as.vector(var2) ~ as.vector(var1))
 abline(model1, col="black", lwd=3) ; abline(0,1,col="red",lwd=3)
 rect(xleft = -0.5, xright = 2.1,ybottom = 4-0.4, ytop = 6.8-0.4, col="white", density = 40, border = NA)
@@ -1425,9 +1447,9 @@ mtext(expression(paste("Evapo-transpiration"," (kg",H[2],"O ",m^-2," da",y^-1,")
 #text(max(var1*0.92,na.rm=TRUE),max(var2*0.92,na.rm=TRUE),labels=bquote(R^2 == .(round(mean(fluxnet_validation_output$ET_r2,na.rm=TRUE),2))), cex=1.5, pos=4)
 var1 = spa_fluxnet_validation_output$timeseries_gpp
 var2 = spa_fluxnet_validation_output$observation_gpp
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,
               main="", ylab="", xlab="",cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,xlim=c(0,16),ylim=c(0,28),
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20)
+              transformation = function(x) ((x-min(x))/diff(range(x))))
 model1 = lm(as.vector(var2) ~ as.vector(var1))
 abline(model1, col="black", lwd=3) ; abline(0,1,col="red",lwd=3)
 rect(xleft = 0, xright = 6.8,ybottom = 16, ytop = 27, col="white", density = 40, border = NA)
@@ -1441,9 +1463,9 @@ text(0,28*0.59,labels=bquote(Intercept == .(round(coef(model1)[2],2))), cex=1.6,
 mtext(expression(paste("SPA")),side = 1,cex=2.0, padj = 1.8, adj = 1.15)
 var1 = spa_fluxnet_validation_output$timeseries_transpiration+spa_fluxnet_validation_output$timeseries_wetcanopyevap+spa_fluxnet_validation_output$timeseries_soilevaporation
 var2 = spa_fluxnet_validation_output$observation_ET
-smoothScatter(var1,var2,nrpoints=0,colramp=my_colours,main="", ylab="", xlab="",
+smoothScatter(var1,var2,nrpoints=100,colramp=my_colours,main="", ylab="", xlab="",
               cex=0.5,pch=16,cex.axis=2.0,cex.lab=1.6,cex.main=2.6,xlim=c(-0.5,7),ylim=c(-0.5,6.5),
-              transformation = function(x) x^.25, bandwidth=c(diff(range(var1,na.rm=TRUE))*0.0055,diff(range(var2,na.rm=TRUE))*0.0055),nbin=128*20) 
+              transformation = function(x) ((x-min(x))/diff(range(x))))
 model1 = lm(as.vector(var2) ~ as.vector(var1))
 abline(model1, col="black", lwd=3) ; abline(0,1,col="red",lwd=3)
 rect(xleft = -0.5, xright = 2.1,ybottom = 4-0.4, ytop = 6.8-0.4, col="white", density = 40, border = NA)
@@ -1456,7 +1478,7 @@ text(-0.5,6.5*0.59,labels=bquote(Intercept == .(round(coef(model1)[2],2))), cex=
 
 dev.off()
 
-my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
+my_colours=colorRampPalette(c("white",rep(rev(brewer.pal(11,"Spectral")),each=3)))
 fig_height=6000 ; fig_width=4500
 jpeg(file="./FIGURES/Cal_val_paper_figure_5_fluxnet.jpg", height=fig_height, width=fig_width, res=400, quality=100)
 par(mfrow=c(4,3), mar=c(4.8, 4.5, 3.4, 1.8), omi=c(0.4, 0.2, 0.2, 0.2))
@@ -1505,7 +1527,7 @@ dev.off()
 ###
 ## Calibration Figures
 
-my_colours=colorRampPalette(c("white",rev(brewer.pal(11,"Spectral"))))
+my_colours=colorRampPalette(c("white",rep(rev(brewer.pal(11,"Spectral")),each=3)))
 fig_height=4000 ; fig_width=6000
 jpeg(file="./FIGURES/Cal_val_paper_emergent.jpg", height=fig_height, width=fig_width, res=400, quality=100)
 par(mfrow=c(2,3), mar=c(3.8, 4.6, 1.0, 1.0), omi=c(0.2, 0.2, 0.3, 0.40))

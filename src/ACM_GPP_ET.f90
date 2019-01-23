@@ -2268,7 +2268,7 @@ contains
     soil_conductivity(nos_soil_layers+1) = soil_conductivity(nos_soil_layers)
 
     ! final sanity check for porosity
-    where (porosity <= field_capacity) porosity = field_capacity + 0.01d0
+    where (porosity <= field_capacity) porosity = field_capacity + 0.05d0
 
   end subroutine initialise_soils
   !
@@ -2693,12 +2693,12 @@ contains
     ! local variables..
     double precision ::soil_wp
 
-    ! calculate the soil water potential (MPa)..
-    ! note that some modifications to scaling values have been made compared to
-    ! SPA src to reduce computational cost
-    soil_wp = potA( water_retention_pass ) * xin**potB( water_retention_pass )
-    water_retention_saxton_eqns = -1d0 * soil_wp + 10d0    ! 10 kPa represents air-entry swp
-
+!    ! calculate the soil water potential (kPa)..
+!    soil_WP = -0.001 * potA( water_retention_pass ) * xin**potB( water_retention_pass )
+!    water_retention_saxton_eqns = 1000. * soil_wp + 10.    ! 10 kPa represents air-entry swp
+    ! calculate the soil water potential (kPa)..
+    soil_wp = -potA( water_retention_pass ) * xin**potB( water_retention_pass )
+    water_retention_saxton_eqns = soil_wp + 10d0    ! 10 kPa represents air-entry swp
     return
 
   end function water_retention_saxton_eqns
