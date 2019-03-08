@@ -390,6 +390,7 @@ contains
     ! determine the number of seconds per time step being used
     seconds_per_step = seconds_per_day * deltat(1)
     days_per_step = deltat(1)
+    days_per_step_1 = deltat_1(1)
     mint = met(2,1)  ! minimum temperature (oC)
     maxt = met(3,1)  ! maximum temperature (oC)
     maxt_lag1 = maxt
@@ -1895,181 +1896,207 @@ contains
   !
   subroutine calculate_update_soil_water(ET_leaf,ET_soil,rainfall_in,corrected_ET)
 
-   !
-   ! Function updates the soil water status and layer thickness
-   ! Soil water profile is updated in turn with evaporative losses,
-   ! rainfall infiltration and gravitational drainage
-   ! Root layer thickness is updated based on changes in the rooting depth from
-   ! the previous step
-   !
+    !
+    ! Function updates the soil water status and layer thickness
+    ! Soil water profile is updated in turn with evaporative losses,
+    ! rainfall infiltration and gravitational drainage
+    ! Root layer thickness is updated based on changes in the rooting depth from
+    ! the previous step
+    !
 
-   implicit none
+    implicit none
 
-   ! arguments
-   double precision, intent(in) :: ET_leaf,ET_soil & ! evapotranspiration estimate (kgH2O.m-2.day-1)
-                                      ,rainfall_in   ! rainfall (kgH2O.m-2.day-1)
-   double precision, intent(out) :: corrected_ET     ! water balance corrected evapotranspiration (kgH2O/m2/day)
+    ! arguments
+    double precision, intent(in) :: ET_leaf,ET_soil & ! evapotranspiration estimate (kgH2O.m-2.day-1)
+                                       ,rainfall_in   ! rainfall (kgH2O.m-2.day-1)
+    double precision, intent(out) :: corrected_ET     ! water balance corrected evapotranspiration (kgH2O/m2/day)
 
-   ! local variables
-   integer :: day
-   double precision ::  depth_change, water_change
-   double precision, dimension(nos_root_layers) :: avail_flux, evaporation_losses
+    ! local variables
+    integer :: day
+    double precision :: depth_change, water_change, initial_soilwater, balance
+    double precision, dimension(nos_root_layers) :: avail_flux, evaporation_losses
 
-   ! reset soil water exchanges
-   underflow = dble_zero ; runoff = dble_zero ; corrected_ET = dble_zero
+    ! reset soil water exchanges
+    underflow = 0d0 ; runoff = 0d0 ; corrected_ET = 0d0
+    initial_soilwater = sum(1d3 * soil_waterfrac(1:nos_soil_layers) * layer_thickness(1:nos_soil_layers))
 
-   ! to allow for smooth water balance integration carry this out at daily time step
-   do day = 1, nint(days_per_step)
+    ! to allow for smooth water balance integration carry this out at daily time step
+    do day = 1, nint(days_per_step)
 
-      !!!!!!!!!!
-      ! Evaporative losses
-      !!!!!!!!!!
+       !!!!!!!!!!
+       ! Evaporative losses
+       !!!!!!!!!!
 
-      ! Assume leaf transpiration is drawn from the soil based on the
-      ! update_fraction estimated in calculate_Rtot
-      evaporation_losses = ET_leaf * uptake_fraction
-      ! Assume all soil evaporation comes from the soil surface only
-      evaporation_losses(1) = evaporation_losses(1) + ET_soil
-      ! can not evaporate from soil more than is available (m -> mm)
-!      avail_flux = soil_waterfrac(1:nos_root_layers) * layer_thickness(1:nos_root_layers) * 1d3
-!      where (evaporation_losses > avail_flux) evaporation_losses = avail_flux * 0.999d0
+       ! Assume leaf transpiration is drawn from the soil based on the
+       ! update_fraction estimated in calculate_Rtot
+       evaporation_losses = ET_leaf * uptake_fraction
+       ! Assume all soil evaporation comes from the soil surface only
+       evaporation_losses(1) = evaporation_losses(1) + ET_soil
+       ! can not evaporate from soil more than is available (m -> mm)
+       ! NOTE: This is due to the fact that both soil evaporation and transpiration
+       !       are drawing from the same water supply. Also 0.999 below is to allow for precision error...
+       avail_flux = soil_waterfrac(1:nos_root_layers) * layer_thickness(1:nos_root_layers) * 1d3
+       where (evaporation_losses > avail_flux) evaporation_losses = avail_flux * 0.999d0
+       ! this will update the ET estimate outside of the function
+       ! days_per_step corrections happens outside of the loop below
+       corrected_ET = corrected_ET + sum(evaporation_losses)
 
-      ! this will update the ET estimate outside of the function
-      ! days_per_step corrections happens outside of the loop below
-      corrected_ET = corrected_ET + sum(evaporation_losses)
+       ! pass information to waterloss variable and zero watergain
+       ! convert kg.m-2 (or mm) -> Mg.m-2 (or m)
+       waterloss = 0d0 ; watergain = 0d0
+       waterloss(1:nos_root_layers) = evaporation_losses(1:nos_root_layers)*1d-3
 
-      ! pass information to waterloss variable and zero watergain
-      ! convert kg.m-2 (or mm) -> Mg.m-2 (or m)
-      waterloss = dble_zero ; watergain = dble_zero
-      waterloss(1:nos_root_layers) = evaporation_losses(1:nos_root_layers)*1d-3
-      ! update soil water status with evaporative losses
-      soil_waterfrac(1:nos_soil_layers) = ((soil_waterfrac(1:nos_soil_layers)*layer_thickness(1:nos_soil_layers)) &
-                                           + watergain(1:nos_soil_layers) - waterloss(1:nos_soil_layers)) &
-                                        / layer_thickness(1:nos_soil_layers)
-      ! reset soil water flux variables
-      waterloss = dble_zero ; watergain = dble_zero
+       !!!!!!!!!!
+       ! Gravitational drainage
+       !!!!!!!!!!
 
-      !!!!!!!!!!
-      ! Gravitational drainage
-      !!!!!!!!!!
+       ! determine drainage flux between surface -> sub surface
+       call gravitational_drainage
 
-      ! determine drainage flux between surface -> sub surface and sub surface
-      call gravitational_drainage
+       !!!!!!!!!!
+       ! Rainfall infiltration drainage
+       !!!!!!!!!!
 
-      ! update soil water status with drainage
-!      soil_waterfrac(1:nos_soil_layers) = ((soil_waterfrac(1:nos_soil_layers)*layer_thickness(1:nos_soil_layers)) &
-!                                           + watergain(1:nos_soil_layers) - waterloss(1:nos_soil_layers)) &
-!                                        / layer_thickness(1:nos_soil_layers)
-      ! reset soil water flux variables
-!      waterloss = dble_zero ; watergain = dble_zero
+       ! determine infiltration from rainfall (kgH2O/m2/step),
+       ! if rainfall is probably liquid / soil surface is probably not frozen
+       if (rainfall_in > 0d0) then
+           call infiltrate(rainfall_in)
+       else
+           runoff = runoff + (rainfall_in * days_per_step_1)
+       endif ! is there any rain to infiltrate?
+       ! update soil profiles. Convert fraction into depth specific values (rather than m3/m3) then update fluxes
+       soil_waterfrac(1:nos_soil_layers) = ((soil_waterfrac(1:nos_soil_layers)*layer_thickness(1:nos_soil_layers)) &
+                                         + watergain(1:nos_soil_layers) - waterloss(1:nos_soil_layers)) &
+                                         / layer_thickness(1:nos_soil_layers)
 
-      !!!!!!!!!!
-      ! Rainfall infiltration drainage
-      !!!!!!!!!!
+       ! mass balance check, at this point do not try and adjust evaporation to
+       ! correct for lack of supply. Simply allow for drought in next time step
+!       where (soil_waterfrac <= 0d0)
+!       ! instead...
+!         soil_waterfrac = vsmall
+!       end where
 
-      ! determine infiltration from rainfall (kgH2O/m2/step),
-      ! if rainfall is probably liquid / soil surface is probably not frozen
-      if (rainfall_in > dble_zero) then
-          call infiltrate(rainfall_in)
-      else
-          runoff = runoff + (rainfall_in * days_per_step_1)
-      endif ! is there any rain to infiltrate?
-      ! update soil profiles. Convert fraction into depth specific values (rather than m3/m3) then update fluxes
-      soil_waterfrac(1:nos_soil_layers) = ((soil_waterfrac(1:nos_soil_layers)*layer_thickness(1:nos_soil_layers)) &
-                                           + watergain(1:nos_soil_layers) - waterloss(1:nos_soil_layers)) &
-                                        / layer_thickness(1:nos_soil_layers)
-      ! reset soil water flux variables
-!      waterloss = dble_zero ; watergain = dble_zero
+    end do ! days_per_step
 
-      ! mass balance check, at this point do not try and adjust evaporation to
-      ! correct for lack of supply. Simply allow for drought in next time step
-      ! instead...
-      where (soil_waterfrac <= dble_zero)
-             soil_waterfrac = vsmall
-      end where
+    ! apply time step correction kgH2O/m2/step -> kgH2O/m2/day
+    corrected_ET = corrected_ET * days_per_step_1
+    underflow = underflow * days_per_step_1
+    runoff = runoff * days_per_step_1
 
-   end do ! days_per_step
+    !!!!!!!!!!
+    ! Update soil layer thickness
+    !!!!!!!!!!
 
-   ! apply time step correction kgH2O/m2/step -> kgH2O/m2/day
-   corrected_ET = corrected_ET * days_per_step_1
-   underflow = underflow * days_per_step_1
-   runoff = runoff * days_per_step_1
+    depth_change = (top_soil_depth+mid_soil_depth+min_layer) ; water_change = 0
+    ! if roots extent down into the bucket
+    if (root_reach > depth_change .and. previous_depth <= depth_change) then
 
-   !!!!!!!!!!
-   ! Update soil layer thickness
-   !!!!!!!!!!
+        !!!!!!!!!!
+        ! Soil profile is within the bucket layer (layer 3)
+        !!!!!!!!!!
 
-   depth_change = dble_zero ; water_change = dble_zero
-   ! if roots extent down into the bucket
-   if (root_reach > (top_soil_depth+mid_soil_depth) .or. previous_depth > (top_soil_depth+mid_soil_depth)) then
-      ! how much has root depth extended since last step?
-      depth_change = root_reach - previous_depth
+        if (previous_depth > depth_change) then
+            ! how much has root depth extended since last step?
+            depth_change = root_reach - previous_depth
+        else
+            ! how much has root depth extended since last step?
+            depth_change = root_reach - depth_change
+        endif
 
-      ! if there has been an increase
-      if (depth_change > dble_zero .and. root_reach > sum(layer_thickness(1:2))+min_layer) then
+        ! if there has been an increase
+        if (depth_change > 0.05) then
 
-         ! determine how much water is within the new volume of soil
-         water_change = soil_waterfrac(nos_soil_layers) * depth_change
-         ! now assign that new volume of water to the deep rooting layer
-         soil_waterfrac(nos_root_layers) = ((soil_waterfrac(nos_root_layers) * layer_thickness(nos_root_layers)) &
-                                            + water_change) / (layer_thickness(nos_root_layers)+depth_change)
-         ! explicitly update the soil profile if there has been rooting depth
-         ! changes
-         layer_thickness(1) = top_soil_depth ; layer_thickness(2) = mid_soil_depth
-         layer_thickness(3) = max(min_layer,root_reach-sum(layer_thickness(1:2)))
-         layer_thickness(4) = max_depth - sum(layer_thickness(1:3))
+            ! determine how much water is within the new volume of soil
+            water_change = soil_waterfrac(nos_soil_layers) * depth_change
 
+            ! now assign that new volume of water to the deep rooting layer
+            soil_waterfrac(nos_root_layers) = ((soil_waterfrac(nos_root_layers)*layer_thickness(nos_root_layers))+water_change) &
+                                            / (layer_thickness(nos_root_layers)+depth_change)
 
-      elseif (depth_change < dble_zero .and. root_reach > layer_thickness(1)+min_layer) then
+            ! explicitly update the soil profile if there has been rooting depth
+            ! changes
+            layer_thickness(1) = top_soil_depth ; layer_thickness(2) = mid_soil_depth
+            layer_thickness(3) = root_reach - sum(layer_thickness(1:2))
+            layer_thickness(4) = max_depth - sum(layer_thickness(1:3))
 
-         ! determine how much water is lost from the old volume of soil
-         water_change = soil_waterfrac(nos_root_layers) * abs(depth_change)
-         ! now assign that new volume of water to the deep rooting layer
-         soil_waterfrac(nos_soil_layers) = ((soil_waterfrac(nos_soil_layers) * layer_thickness(nos_soil_layers)) &
-                                            + water_change) / (layer_thickness(nos_soil_layers)+abs(depth_change))
+            ! keep track of the previous rooting depth
+            previous_depth = root_reach
 
-         ! explicitly update the soil profile if there has been rooting depth
-         ! changes
-         layer_thickness(1) = top_soil_depth ; layer_thickness(2) = mid_soil_depth
-         layer_thickness(3) = max(min_layer,root_reach-sum(layer_thickness(1:2)))
-         layer_thickness(4) = max_depth - sum(layer_thickness(1:3))
+        else if (depth_change < -0.05) then
 
-      else
+            ! make positive to ensure easier calculations
+            depth_change = -depth_change
 
-         ! we don't want to do anything, just recycle the previous depth
+            ! determine how much water is lost from the old volume of soil
+            water_change = soil_waterfrac(nos_root_layers) * depth_change
+            ! now assign that new volume of water to the deep rooting layer
+            soil_waterfrac(nos_soil_layers) = ((soil_waterfrac(nos_soil_layers)*layer_thickness(nos_soil_layers))+water_change) &
+                                            / (layer_thickness(nos_soil_layers)+depth_change)
 
-      end if ! depth change
+            ! explicitly update the soil profile if there has been rooting depth
+            ! changes
+            layer_thickness(1) = top_soil_depth ; layer_thickness(2) = mid_soil_depth
+            layer_thickness(3) = root_reach - sum(layer_thickness(1:2))
+            layer_thickness(4) = max_depth - sum(layer_thickness(1:3))
 
-   end if ! root reach beyond top layer
+            ! keep track of the previous rooting depth
+            previous_depth = root_reach
 
-   ! in all cases keep track of the previous rooted depth
-   previous_depth = root_reach
+        else
 
-   ! finally update soil water potential
-   call soil_water_potential
+            ! keep track of the previous rooting depth
+            previous_depth = previous_depth
 
-!   ! sanity check for catastrophic failure
-!   do soil_layer = 1, nos_soil_layers
-!      if (soil_waterfrac(soil_layer) < 0d0 .and. soil_waterfrac(soil_layer) > -0.01d0) then
-!          soil_waterfrac(soil_layer) = 0d0
-!      endif
-!      if (soil_waterfrac(soil_layer) < 0d0 .or. soil_waterfrac(soil_layer) /= soil_waterfrac(soil_layer)) then
-!         print*,'ET',ET,"rainfall",rainfall_in
-!         print*,'evaporation_losses',evaporation_losses
-!         print*,"watergain",watergain
-!         print*,"waterloss",waterloss
-!         print*,'depth_change',depth_change
-!         print*,"soil_waterfrac",soil_waterfrac
-!         print*,"porosity",porosity
-!         print*,"layer_thicknes",layer_thickness
-!         print*,"Uptake fraction",uptake_fraction
-!         print*,"max_depth",max_depth,"root_k",root_k,"root_reach",root_reach
-!         print*,"fail" ; stop
-!      endif
-!   end do
+        end if ! depth change
 
-   ! explicit return needed to ensure that function runs all needed code
-   return
+    else if (root_reach < depth_change .and. previous_depth > depth_change) then
+
+        !!!!!!!!!!
+        ! Model has explicitly contracted the bucket layer
+        !!!!!!!!!!
+
+        ! In this circumstance we want to return the soil profile to it's
+        ! default structure with a minimum sized third layer
+        depth_change = previous_depth - depth_change
+
+        ! determine how much water is lost from the old volume of soil
+        water_change = soil_waterfrac(nos_root_layers) * depth_change
+        ! now assign that new volume of water to the deep rooting layer
+        soil_waterfrac(nos_soil_layers) = ((soil_waterfrac(nos_soil_layers)*layer_thickness(nos_soil_layers))+water_change) &
+                                        / (layer_thickness(nos_soil_layers)+depth_change)
+
+        ! explicitly update the soil profile if there has been rooting depth
+        ! changes
+        layer_thickness(1) = top_soil_depth ; layer_thickness(2) = mid_soil_depth
+        layer_thickness(3) = min_layer
+        layer_thickness(4) = max_depth - sum(layer_thickness(1:3))
+
+        ! keep track of the previous rooting depth
+        previous_depth = min_layer
+
+    else ! root_reach > (top_soil_depth + mid_soil_depth + min_layer)
+
+        ! if we are outside of the range when we need to consider rooting depth changes keep track in case we move into a zone when we do
+        previous_depth = previous_depth
+
+    endif ! root reach beyond top layer
+
+    ! finally update soil water potential
+    call soil_water_potential
+
+    ! check water balance
+    balance = (rainfall_in - corrected_ET - underflow - runoff) * days_per_step
+    balance = balance &
+            - (sum(soil_waterfrac(1:nos_soil_layers) * layer_thickness(1:nos_soil_layers) * 1d3) &
+            - initial_soilwater)
+
+    if (abs(balance) > 1d-6) then
+        print*,"Soil water miss-balance (mm)",balance
+        print*,"Rainfall",rainfall_in,"ET",corrected_ET,"underflow",underflow,"runoff",runoff
+    end if ! abs(balance) > 1d-10
+
+    ! explicit return needed to ensure that function runs all needed code
+    return
 
   end subroutine calculate_update_soil_water
   !
@@ -2077,7 +2104,7 @@ contains
   !
   subroutine infiltrate(rainfall_in)
 
-    ! Takes surface_watermm and distrubutes it among top !
+    ! Takes surface_watermm and distributes it among top !
     ! layers. Assumes total infilatration in timestep.   !
 
     implicit none
@@ -2087,33 +2114,28 @@ contains
 
     ! local argumemts
     integer :: i
-    double precision    :: add   & ! surface water available for infiltration (m)
-                          ,wdiff   ! available space in a given soil layer for water to fill (m)
+    double precision :: add, & ! surface water available for infiltration (m)
+                      wdiff    ! available space in a given soil layer for water to fill (m)
 
     ! convert rainfall water from mm -> m (or kgH2O.m-2.day-1 -> MgH2O.m-2.day-1)
     add = rainfall_in * 1d-3
 
     do i = 1 , nos_soil_layers
-       ! determine the available pore space in current soil layer
-!       wdiff = max(dble_zero,(porosity(i)-soil_waterfrac(i))*layer_thickness(i)-watergain(i)+waterloss(i))
-       wdiff = (porosity(i)-soil_waterfrac(i))*layer_thickness(i)-watergain(i)+waterloss(i)
-
        ! is the input of water greater than available space
        ! if so fill and subtract from input and move on to the next
        ! layer
+       ! determine the available pore space in current soil layer
+       wdiff = ((porosity(i)-soil_waterfrac(i)) &
+             * layer_thickness(i))-watergain(i)+waterloss(i)
+
        if (add > wdiff) then
-          ! if so fill and subtract from input and move on to the next layer
-          watergain(i) = watergain(i) + wdiff
-          add = add - wdiff
+           ! if so fill and subtract from input and move on to the next layer
+           watergain(i) = watergain(i) + wdiff
+           add = add - wdiff
        else
-          ! otherwise infiltate all in the current layer
-          watergain(i) = watergain(i) + add
-          add = dble_zero
-       end if
-       ! if we have added all available water we are done
-       if (add <= dble_zero) then
-           add = dble_zero
-           exit
+           ! otherwise infiltate all in the current layer
+           watergain(i) = watergain(i) + add
+           add = 0d0 ; exit
        end if
 
     end do ! nos_soil_layers
@@ -2135,22 +2157,19 @@ contains
     ! local variables..
     integer :: d, nos_integrate
     double precision  :: tmp1,tmp2,tmp3,dx &
-                        ,liquid & ! liquid water in local soil layer (m3/m3)
-                    ,drainlayer & ! field capacity of local soil layer (m3/m3)
-                         ,unsat & ! unsaturated pore space in soil_layer below the current (m3/m3)
-                        ,change & ! absolute volume of water drainage in current layer (m3)
-                      ,drainage & ! drainage rate of current layer (m/day)
-                   ,local_drain & ! drainage of current layer (m/nos_minutes)
-      ,iceprop(nos_soil_layers)
-
-    ! local parameters
-    integer, parameter :: nos_hours_per_day = 1440, nos_minutes = 360
+                                   ,liquid & ! liquid water in local soil layer (m3/m3)
+                               ,drainlayer & ! field capacity of local soil layer (m3/m3)
+                                    ,unsat & ! unsaturated pore space in soil_layer below the current (m3/m3)
+                                   ,change & ! absolute volume of water drainage in current layer (m3)
+                                 ,drainage & ! drainage rate of current layer (m/day)
+                              ,local_drain & ! drainage of current layer (m/nos_minutes)
+                 ,iceprop(nos_soil_layers)
 
     ! calculate soil ice proportion; at the moment
     ! assume everything liquid
-    iceprop = dble_zero
+    iceprop = 0d0
     ! except the surface layer in the mean daily temperature is < 0oC
-    if (meant < dble_one) iceprop(1) = dble_one
+    if (meant < 1d0) iceprop(1) = 1d0
 
     do soil_layer = 1, nos_soil_layers
 
@@ -2158,43 +2177,32 @@ contains
        drainlayer = field_capacity( soil_layer )
        ! liquid content of the soil layer
        liquid     = soil_waterfrac( soil_layer ) &
-                  * ( dble_one - iceprop( soil_layer ) )
+                  * ( 1d0 - iceprop( soil_layer ) )
 
        ! initial conditions; i.e. is there liquid water and more water than
        ! layer can hold
        if ( liquid > drainlayer ) then
 
-!          ! Trapezium rule for approximating integral of drainage rate
-!          dx = liquid - ((liquid + drainlayer)*0.5d0)
-!          call calculate_soil_conductivity(soil_layer,liquid,tmp1)
-!          call calculate_soil_conductivity(soil_layer,drainlayer,tmp2)
-!          call calculate_soil_conductivity(soil_layer,(liquid+dx),tmp3)
-!          drainage = 0.5d0 * dx * ((tmp1 + tmp2) + 2d0 * tmp3)
-!          drainage = drainage * seconds_per_day
-!          drainage = min(drainage,liquid - drainlayer)
-          d = 1 ; nos_integrate = nos_hours_per_day / nos_minutes
-          drainage = dble_zero ; local_drain = dble_zero
-          do while (d <= nos_integrate .and. liquid > drainlayer)
-              ! estimate drainage rate (m/s)
-              call calculate_soil_conductivity(soil_layer,liquid,local_drain)
-              ! scale to total number of seconds in increment
-              local_drain = local_drain * dble(nos_minutes * 60)
-              local_drain = min(liquid-drainlayer,local_drain)
-              liquid = liquid - local_drain
-              drainage = drainage + local_drain
-              d = d + 1
-          end do ! integrate over time
+           ! Trapezium rule for approximating integral of drainage rate
+           dx = liquid - ((liquid + drainlayer)*0.5d0)
+           call calculate_soil_conductivity(soil_layer,liquid,tmp1)
+           call calculate_soil_conductivity(soil_layer,drainlayer,tmp2)
+           call calculate_soil_conductivity(soil_layer,(liquid+dx),tmp3)
+           drainage = 0.5d0 * dx * ((tmp1 + tmp2) + 2d0 * tmp3)
+           drainage = drainage * seconds_per_day
+           drainage = min(drainage,liquid - drainlayer)
 
-          ! unsaturated volume of layer below (m3 m-2)
-          unsat = max( dble_zero , ( porosity( soil_layer+1 ) - soil_waterfrac( soil_layer+1 ) ) &
+           ! unsaturated volume of layer below (m3 m-2)
+           unsat = max( 0d0 , ( porosity( soil_layer+1 ) - soil_waterfrac( soil_layer+1 ) ) &
                              * layer_thickness( soil_layer+1 ) / layer_thickness( soil_layer ) )
-          ! layer below cannot accept more water than unsat
-          if ( drainage > unsat ) drainage = unsat
-          ! water loss from this layer (m3)
-          change = drainage * layer_thickness(soil_layer)
-          ! update soil layer below with drained liquid
-          watergain( soil_layer + 1 ) = watergain( soil_layer + 1 ) + change
-          waterloss( soil_layer     ) = waterloss( soil_layer     ) + change
+           ! layer below cannot accept more water than unsat
+           if ( drainage > unsat ) drainage = unsat
+           ! water loss from this layer (m3)
+           change = drainage * layer_thickness(soil_layer)
+
+           ! update soil layer below with drained liquid
+           watergain( soil_layer + 1 ) = watergain( soil_layer + 1 ) + change
+           waterloss( soil_layer     ) = waterloss( soil_layer     ) + change
 
        end if ! some liquid water and drainage possible
 
