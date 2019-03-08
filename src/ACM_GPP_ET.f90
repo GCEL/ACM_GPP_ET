@@ -886,7 +886,7 @@ contains
 
     ! local variables
     double precision :: denom, isothermal, deltaTemp, deltaR
-    double precision, parameter :: max_gs = 500d0, &   ! mmolH2O.m-2.s-1
+    double precision, parameter :: max_gs = 3500d0, &  ! mmolH2O.m-2.s-1
                                    min_gs = 0.001d0, & !
                                    tol_gs = 4d0
 
