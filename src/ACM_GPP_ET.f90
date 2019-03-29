@@ -1944,7 +1944,10 @@ contains
        ! pass information to waterloss variable and zero watergain
        ! convert kg.m-2 (or mm) -> Mg.m-2 (or m)
        waterloss = 0d0 ; watergain = 0d0
-       waterloss(1:nos_root_layers) = evaporation_losses(1:nos_root_layers)*1d-3
+       ! adjust water already committed to evaporation
+       ! convert kg.m-2 (or mm) -> Mg.m-2 (or m)
+       soil_waterfrac(1:nos_root_layers) = soil_waterfrac(1:nos_root_layers) &
+                                         + ((-evaporation_losses(1:nos_root_layers)*1d-3) / layer_thickness(1:nos_root_layers))
 
        !!!!!!!!!!
        ! Gravitational drainage
