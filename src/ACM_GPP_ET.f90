@@ -24,7 +24,8 @@ logical :: do_iWUE = .true., & ! Use iWUE or WUE for stomatal optimisation
  do_energy_balance = .false.   ! Calculate steady-state energy balance for GPP~Transpiration
 double precision, parameter :: dble_zero = 0d0    &
                               ,dble_one = 1d0     &
-                              ,vsmall = tiny(0d0)
+                              ,vsmall = tiny(0d0) &
+                              ,vlarge = huge(0d0)
 
 integer, parameter :: nos_root_layers = 3, nos_soil_layers = nos_root_layers + 1
 double precision, parameter :: pi = 3.1415927d0,  &
@@ -1861,6 +1862,9 @@ contains
                tmp = exp(tmp)
                potential_drainage_rate = 0.5d0 * dx * ((tmp(1) + tmp(2)) + 2d0 * tmp(3))
                potential_drainage_rate = potential_drainage_rate * 1440d0
+               ! To protect against un-realistic drainage rates
+               ! due to very high rainfall rates
+               potential_drainage_rate = min(potential_drainage_rate,vlarge)
 
                dz = storage-max_storage
                ! limit based on available water if total demand is greater than excess
