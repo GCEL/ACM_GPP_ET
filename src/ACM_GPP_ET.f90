@@ -320,30 +320,56 @@ contains
     infi = 0d0
 
     ! load ACM-GPP-ET parameters
-    NUE                        = 1.182549d+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
+!    NUE                        = 1.182549d+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
+!                                               ! ,unlimited by CO2, light and
+!                                               ! photoperiod (gC/gN/m2leaf/day)
+!    pn_max_temp                = 5.357174d+01  ! Maximum temperature for photosynthesis (oC)
+!    pn_opt_temp                = 3.137242d+01  ! Optimum temperature for photosynthesis (oC)
+!    pn_kurtosis                = 1.927458d-01  ! Kurtosis of photosynthesis temperature response
+!    e0                         = 5.875662d+00  ! Quantum yield gC/MJ/m2/day PAR
+!    max_lai_lwrad_transmitted  = 7.626683d-01  ! Max fractional reduction of LW from sky transmitted through canopy
+!    lai_half_lwrad_transmitted = 7.160363d-01  ! LAI at which canopy LW transmittance reduction = 50 %
+!    max_lai_nir_reflection     = 4.634860d-01  ! Max fraction of NIR reflected by canopy
+!    lai_half_nir_reflection    = 1.559148d+00  ! LAI at which canopy NIR reflected = 50 %
+!    minlwp                     =-1.996830d+00  ! minimum leaf water potential (MPa)
+!    max_lai_par_reflection     = 1.623013d-01  ! Max fraction of PAR reflected by canopy
+!    lai_half_par_reflection    = 1.114360d+00  ! LAI at which canopy PAR reflected = 50 %
+!    lai_half_lwrad_reflected   = 1.126214d+00  ! LAI at which 50 % LW is reflected back to sky
+!    iWUE                       = 1.602503d-06  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
+!    soil_swrad_absorption      = 6.643079d-01  ! Fraction of SW rad absorbed by soil
+!    max_lai_par_transmitted    = 8.079519d-01  ! Max fractional reduction in PAR transmittance by canopy
+!    lai_half_par_transmitted   = 9.178784d-01  ! LAI at which PAR transmittance reduction = 50 %
+!    max_lai_nir_transmitted    = 8.289803d-01  ! Max fractional reduction in NIR transmittance by canopy
+!    lai_half_nir_transmitted   = 1.961831d+00  ! LAI at which NIR transmittance reduction = 50 %
+!    max_lai_lwrad_release      = 9.852855d-01  ! Max fraction of LW emitted (1-par) from canopy to be released
+!    lai_half_lwrad_release     = 7.535450d-01  ! LAI at which LW emitted from canopy to be released at 50 %
+!    max_lai_lwrad_reflected    = 1.955832d-02  ! LAI at which 50 % LW is reflected back to sky
+
+    ! load ACM-GPP-ET parameters
+    NUE                        = 1.488174d+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
                                                ! ,unlimited by CO2, light and
                                                ! photoperiod (gC/gN/m2leaf/day)
-    pn_max_temp                = 5.357174d+01  ! Maximum temperature for photosynthesis (oC)
-    pn_opt_temp                = 3.137242d+01  ! Optimum temperature for photosynthesis (oC)
-    pn_kurtosis                = 1.927458d-01  ! Kurtosis of photosynthesis temperature response
-    e0                         = 5.875662d+00  ! Quantum yield gC/MJ/m2/day PAR
-    max_lai_lwrad_transmitted  = 7.626683d-01  ! Max fractional reduction of LW from sky transmitted through canopy
-    lai_half_lwrad_transmitted = 7.160363d-01  ! LAI at which canopy LW transmittance reduction = 50 %
-    max_lai_nir_reflection     = 4.634860d-01  ! Max fraction of NIR reflected by canopy
-    lai_half_nir_reflection    = 1.559148d+00  ! LAI at which canopy NIR reflected = 50 %
-    minlwp                     =-1.996830d+00  ! minimum leaf water potential (MPa)
-    max_lai_par_reflection     = 1.623013d-01  ! Max fraction of PAR reflected by canopy
-    lai_half_par_reflection    = 1.114360d+00  ! LAI at which canopy PAR reflected = 50 %
-    lai_half_lwrad_reflected   = 1.126214d+00  ! LAI at which 50 % LW is reflected back to sky
-    iWUE                       = 1.35d-07 !1.602503d-07 !1.602503d-06  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
-    soil_swrad_absorption      = 0.98d0 !6.643079d-01  ! Fraction of SW rad absorbed by soil
-    max_lai_par_transmitted    = 8.079519d-01  ! Max fractional reduction in PAR transmittance by canopy
-    lai_half_par_transmitted   = 9.178784d-01  ! LAI at which PAR transmittance reduction = 50 %
-    max_lai_nir_transmitted    = 8.289803d-01  ! Max fractional reduction in NIR transmittance by canopy
-    lai_half_nir_transmitted   = 1.961831d+00  ! LAI at which NIR transmittance reduction = 50 %
-    max_lai_lwrad_release      = 9.852855d-01  ! Max fraction of LW emitted (1-par) from canopy to be released
-    lai_half_lwrad_release     = 7.535450d-01  ! LAI at which LW emitted from canopy to be released at 50 %
-    max_lai_lwrad_reflected    = 1.955832d-02  ! LAI at which 50 % LW is reflected back to sky
+    pn_max_temp                = 5.265717d+01  ! Maximum temperature for photosynthesis (oC)
+    pn_opt_temp                = 3.371416d+01  ! Optimum temperature for photosynthesis (oC)
+    pn_kurtosis                = 1.268127d-01  ! Kurtosis of photosynthesis temperature response
+    e0                         = 5.309747d+00  ! Quantum yield gC/MJ/m2/day PAR
+    max_lai_lwrad_transmitted  = 8.050470d-01  ! Max fractional reduction of LW from sky transmitted through canopy
+    lai_half_lwrad_transmitted = 1.456089d+00  ! LAI at which canopy LW transmittance reduction = 50 %
+    max_lai_nir_reflection     = 1.346271d-01  ! Max fraction of NIR reflected by canopy
+    lai_half_nir_reflection    = 1.912312d+00  ! LAI at which canopy NIR reflected = 50 %
+    minlwp                     =-2.001368d+00  ! minimum leaf water potential (MPa)
+    max_lai_par_reflection     = 1.000758d-01  ! Max fraction of PAR reflected by canopy
+    lai_half_par_reflection    = 1.458050d+00  ! LAI at which canopy PAR reflected = 50 %
+    lai_half_lwrad_reflected   = 1.414248d+00  ! LAI at which 50 % LW is reflected back to sky
+    iWUE                       = 2.778284d-06  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
+    soil_swrad_absorption      = 9.774252d-01  ! Fraction of SW rad absorbed by soil
+    max_lai_par_transmitted    = 9.979666d-01  ! Max fractional reduction in PAR transmittance by canopy
+    lai_half_par_transmitted   = 2.497417d+00  ! LAI at which PAR transmittance reduction = 50 %
+    max_lai_nir_transmitted    = 6.030922d-01  ! Max fractional reduction in NIR transmittance by canopy
+    lai_half_nir_transmitted   = 1.512760d+00  ! LAI at which NIR transmittance reduction = 50 %
+    max_lai_lwrad_release      = 9.846507d-01  ! Max fraction of LW emitted (1-par) from canopy to be released
+    lai_half_lwrad_release     = 1.987386d-02  ! LAI at which LW emitted from canopy to be released at 50 %
+    max_lai_lwrad_reflected    = 7.812631d-01  ! LAI at which 50 % LW is reflected back to sky
 
     ! load ACM-GPP-ET parameters
 !    NUE                       = pars(5+1)     ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
@@ -1182,12 +1208,12 @@ contains
     double precision, intent(out) :: soilevap ! kgH2O.m-2.day-1
 
     ! local variables
-    double precision :: local_temp     &
-                  ,soil_radiation & ! isothermal net radiation (W/m2)
-                           ,esurf & ! see code below
-                            ,esat & ! soil air space saturation vapour pressure
-                             ,gws & ! water vapour conductance through soil air space (m.s-1)
-                              ,Qc
+    double precision :: local_temp, deltaTemp, deltaR &
+                   ,soil_radiation & ! isothermal net radiation (W/m2)
+                            ,esurf & ! see code below
+                             ,esat & ! soil air space saturation vapour pressure
+                              ,gws & ! water vapour conductance through soil air space (m.s-1)
+                               ,Qc
 
     local_temp = maxt + freeze
 
@@ -1219,14 +1245,22 @@ contains
     ! now difference in vapour pressure between soil and canopy air spaces
     esurf = esurf - air_vapour_pressure
 
+!    ! Calculate soil surface energy balance - note applied to radiation balance
+!    ! only, neglecting direct temperature effects
+!    call update_net_radiation(soil_radiation,maxt,dble_one,dble_one &
+!                             ,gws,soil_conductance,esurf &
+!                             ,deltaTemp,deltaR)
+!    ! update long wave and canopy temperature based on potential canopy
+!    ! surface flux
+!    soil_radiation = soil_radiation + deltaR
+
     ! Estimate potential soil evaporation flux (kgH2O.m-2.day-1)
     soilevap = (slope*soil_radiation) + (air_density_kg*cpair*esurf*soil_conductance)
     soilevap = soilevap / (lambda*(slope+(psych*(1d0+soil_conductance/gws))))
     soilevap = soilevap * dayl_seconds
 
     ! Dew is unlikely to occur (if we had energy balance) if mint > 0
-    ! Sublimation is unlikely to occur (if we had energy balance) if maxt < 0
-    if ((soilevap < 0d0 .and. mint > 1d0) .or. (soilevap > 0d0 .and. maxt < 1d0)) soilevap = 0d0
+    if (soilevap < 0d0 .and. mint > 0d0) soilevap = 0d0
 
   end subroutine calculate_soil_evaporation
   !
@@ -2310,10 +2344,10 @@ contains
        if ( liquid > drainlayer ) then
 
            ! Trapezium rule for approximating integral of drainage rate
-           dx = liquid - ((liquid + drainlayer)*0.5d0)
+           dx = (liquid - drainlayer)*0.5d0
            call calculate_soil_conductivity(soil_layer,liquid,tmp1)
            call calculate_soil_conductivity(soil_layer,drainlayer,tmp2)
-           call calculate_soil_conductivity(soil_layer,(liquid+dx),tmp3)
+           call calculate_soil_conductivity(soil_layer,(liquid-dx),tmp3)
            drainage = 0.5d0 * dx * ((tmp1 + tmp2) + 2d0 * tmp3)
            drainage = drainage * seconds_per_day
            drainage = min(drainage,liquid - drainlayer)
