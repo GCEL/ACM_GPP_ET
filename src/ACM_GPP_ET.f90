@@ -346,30 +346,30 @@ contains
 !    max_lai_lwrad_reflected    = 1.955832d-02  ! LAI at which 50 % LW is reflected back to sky
 
     ! load ACM-GPP-ET parameters
-    NUE                        = 1.488174d+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
+    NUE                        = 1.420113d+01  ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
                                                ! ,unlimited by CO2, light and
                                                ! photoperiod (gC/gN/m2leaf/day)
-    pn_max_temp                = 5.265717d+01  ! Maximum temperature for photosynthesis (oC)
-    pn_opt_temp                = 3.371416d+01  ! Optimum temperature for photosynthesis (oC)
-    pn_kurtosis                = 1.268127d-01  ! Kurtosis of photosynthesis temperature response
-    e0                         = 5.309747d+00  ! Quantum yield gC/MJ/m2/day PAR
-    max_lai_lwrad_transmitted  = 8.050470d-01  ! Max fractional reduction of LW from sky transmitted through canopy
-    lai_half_lwrad_transmitted = 1.456089d+00  ! LAI at which canopy LW transmittance reduction = 50 %
-    max_lai_nir_reflection     = 1.346271d-01  ! Max fraction of NIR reflected by canopy
-    lai_half_nir_reflection    = 1.912312d+00  ! LAI at which canopy NIR reflected = 50 %
-    minlwp                     =-2.001368d+00  ! minimum leaf water potential (MPa)
-    max_lai_par_reflection     = 1.000758d-01  ! Max fraction of PAR reflected by canopy
-    lai_half_par_reflection    = 1.458050d+00  ! LAI at which canopy PAR reflected = 50 %
-    lai_half_lwrad_reflected   = 1.414248d+00  ! LAI at which 50 % LW is reflected back to sky
-    iWUE                       = 2.778284d-06  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
-    soil_swrad_absorption      = 9.774252d-01  ! Fraction of SW rad absorbed by soil
-    max_lai_par_transmitted    = 9.979666d-01  ! Max fractional reduction in PAR transmittance by canopy
-    lai_half_par_transmitted   = 2.497417d+00  ! LAI at which PAR transmittance reduction = 50 %
-    max_lai_nir_transmitted    = 6.030922d-01  ! Max fractional reduction in NIR transmittance by canopy
-    lai_half_nir_transmitted   = 1.512760d+00  ! LAI at which NIR transmittance reduction = 50 %
-    max_lai_lwrad_release      = 9.846507d-01  ! Max fraction of LW emitted (1-par) from canopy to be released
-    lai_half_lwrad_release     = 1.987386d-02  ! LAI at which LW emitted from canopy to be released at 50 %
-    max_lai_lwrad_reflected    = 7.812631d-01  ! LAI at which 50 % LW is reflected back to sky
+    pn_max_temp                = 5.987877d+01  ! Maximum temperature for photosynthesis (oC)
+    pn_opt_temp                = 3.111700d+01  ! Optimum temperature for photosynthesis (oC)
+    pn_kurtosis                = 2.019211d-01  ! Kurtosis of photosynthesis temperature response
+    e0                         = 4.610295d+00  ! Quantum yield gC/MJ/m2/day PAR
+    max_lai_lwrad_transmitted  = 7.711532d-01  ! Max fractional reduction of LW from sky transmitted through canopy
+    lai_half_lwrad_transmitted = 8.474921d-01  ! LAI at which canopy LW transmittance reduction = 50 %
+    max_lai_nir_reflection     = 2.150838d-01  ! Max fraction of NIR reflected by canopy
+    lai_half_nir_reflection    = 1.318877d+00  ! LAI at which canopy NIR reflected = 50 %
+    minlwp                     =-2.006172d+00  ! minimum leaf water potential (MPa)
+    max_lai_par_reflection     = 1.013616d-01  ! Max fraction of PAR reflected by canopy
+    lai_half_par_reflection    = 2.316251d+00  ! LAI at which canopy PAR reflected = 50 %
+    lai_half_lwrad_reflected   = 7.901636d-01  ! LAI at which 50 % LW is reflected back to sky
+    iWUE                       = 2.859360d-06  ! Intrinsic water use efficiency (gC/m2leaf/day/mmolH2Ogs)
+    soil_swrad_absorption      = 5.014939d-01  ! Fraction of SW rad absorbed by soil
+    max_lai_par_transmitted    = 8.180864d-01  ! Max fractional reduction in PAR transmittance by canopy
+    lai_half_par_transmitted   = 1.857699d+00  ! LAI at which PAR transmittance reduction = 50 %
+    max_lai_nir_transmitted    = 8.407198d-01  ! Max fractional reduction in NIR transmittance by canopy
+    lai_half_nir_transmitted   = 2.189931d+00  ! LAI at which NIR transmittance reduction = 50 %
+    max_lai_lwrad_release      = 9.898307d-01  ! Max fraction of LW emitted (1-par) from canopy to be released
+    lai_half_lwrad_release     = 7.650027d-01  ! LAI at which LW emitted from canopy to be released at 50 %
+    max_lai_lwrad_reflected    = 1.064538d-02  ! LAI at which 50 % LW is reflected back to sky
 
     ! load ACM-GPP-ET parameters
 !    NUE                       = pars(5+1)     ! Photosynthetic nitrogen use efficiency at optimum temperature (oC)
