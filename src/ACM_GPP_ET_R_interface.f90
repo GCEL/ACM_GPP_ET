@@ -63,7 +63,11 @@ subroutine racmgppet(output_dim,met,pars,out_var,lat  &
 
      ! reset at the beginning of each iteration
      POOLS = 0d0 ; FLUXES = 0d0
-
+!if (i < 3) then
+!    print*,deltat(1:5)
+!    print*,met(2,1:5)
+!    print*,FLUXES(1:10,2)
+!endif
      ! call the models
      call CARBON_MODEL(1,nodays,met,pars(1:nopars,i),deltat,nodays &
                       ,lat,FLUXES,POOLS,nopars,nomet,nopools,nofluxes)
@@ -90,7 +94,8 @@ subroutine racmgppet(output_dim,met,pars,out_var,lat  &
      out_var(i,1:nodays,11)  = FLUXES(1:nodays,8) ! internal leaf CO2 concentration (umol/mol)
 
   end do ! nos_iter loop
-
+!print*,"iter1",out_var(1,1:10,2)
+!print*,"iter2",out_var(2,1:10,2)
   ! return back to the subroutine then
   return
 

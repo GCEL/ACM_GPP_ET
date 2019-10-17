@@ -126,8 +126,8 @@ for (i in seq(1, length(simulated_pixels))){
      parameters = array(NA, dim=c(nopars,nos_iter))
      parameters[1,] = drivers$avgN[how_many[1]]  # foliar N (gN.m-2)
      parameters[2,] = -9999 # min leaf water potential (MPa)
-     parameters[3,] = 100   # root biomass needed to reach 50 % depth
-     parameters[4,] = 2     # max root depth (m)
+     parameters[3,] = 150   # root biomass needed to reach 50 % depth
+     parameters[4,] = 1.5     # max root depth (m)
 
      # other inputs
      lat = drivers$lat[how_many[1]]
